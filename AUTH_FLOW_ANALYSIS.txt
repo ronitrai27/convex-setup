@@ -1,0 +1,78 @@
+AUTH FLOW ANALYSIS & PRODUCTION RISKS
+=======================================
+Date: Jan 01, 2026
+Topic: Auth Callback & Onboarding Redirection Flow
+
+OVERVIEW
+--------
+The proposed flow is:
+1. User visits application.
+2. If Session exists -> Auto-redirect to `/auth/callback`.
+3. `/auth/callback` handles:
+   - Syncing Clerk user to Convex DB.
+   - Checking `hasCompletedOnboarding`.
+   - Redirecting to `/dashboard` or `/onboard/[userId]`.
+
+This document outlines the strengths, potential risks, and production-grade recommendations for this architecture.
+
+✅ STRONG POINTS (What works well)
+----------------------------------
+1. **Centralized Routing Logic**:
+   By using a dedicated `/auth/callback` route, you avoid complex conditional logic inside your `middleware.ts` or `Home` page. This makes debugging easier.
+
+2. **Data Integrity First**:
+   Your `useStoreUser` hook facilitates a "JIT" (Just-In-Time) user creation. This guarantees that no user can access the internal app (`/dashboard`) without a valid record in your database. This eliminates "User not found" errors in deep nested components.
+
+3. **Separation of Concerns**:
+   - Clerk handles: Identity & Authentication.
+   - Convex handles: User Profile & App State.
+   - The Callback handles: The handshake between them.
+
+⚠️ CRITICAL PRODUCTION RISKS
+----------------------------
+1. **The "Unprotected Route" Loophole**:
+   - **Risk**: A savvy user can manually type `https://yourapp.com/dashboard` in the URL bar. If `/dashboard` does not *independently* verify `hasCompletedOnboarding`, an un-onboarded user could access the app.
+   - **Fix**: You must wrap your protected pages (like Dashboard) with a check that verifies onboarding status, pushing them back to `/onboard` if false. Relying *only* on the callback redirect is not secure.
+
+2. **Redirect Loops**:
+   - **Risk**: If functionality in `/dashboard` (e.g., a layout wrapper) detects "Wait, you are not authenticated" (false positive during loading) and kicks them back to `/`, which kick them to `/auth/callback`, which sends them to `/dashboard`... you get an infinite loop.
+   - **Fix**: Ensure your `isLoading` states are robust. Never redirect *until* you are sure of the state.
+
+3. **Latency & "Spinner Fatigue"**:
+   - **Risk**: Your flow involves: Load App -> Redirect Callback -> mutation (network request) -> Query User (network request) -> Redirect.
+   - **Impact**: This chain can take 2-4 seconds on slow networks.
+   - **Fix**:
+     - Optimistic updates where possible.
+     - Use a skeleton UI instead of a generic spinner on the callback page.
+     - Ensure `useStoreUser` is idempotent and fast.
+
+4. **Mutation Failures**:
+   - **Risk**: If the `storeUser` mutation fails (DB outage, network error), the user is stuck on the loading spinner forever.
+   - **Fix**: Add error handling in `AuthCallback`. If `storeUser` fails, show a "Retry" button or contact support UI.
+
+RECOMMENDATIONS FOR PRODUCTION
+------------------------------
+1. **Implement Middleware Protection**:
+   Use `middleware.ts` to protect `/dashboard` and `/onboard`.
+   - If not logged in -> Rewrite to `/sign-in`.
+   - This prevents unauthenticated access before they even reach your React code.
+
+2. **Global Auth Wrapper (The "Gatekeeper")**:
+   Create a wrapper component (e.g., `AuthGuard`) that wraps your `/dashboard` layout.
+   ```tsx
+   // pseudo-code
+   if (user && !user.hasCompletedOnboarding) return <Redirect to={`/onboard/${user.id}`} />;
+   ```
+   This ensures that even if they skip the callback, they can't use the app.
+
+3. **Session Revalidation**:
+   Since you sync `hasCompletedOnboarding` in the DB, ensure your frontend (Convex Query) subscribes to it. This is already handled well by Convex’s reactive nature.
+
+4. **Edge Cases**:
+   - User deletes account in Clerk but still exists in Convex.
+   - User changes email in Clerk (does your `storeUser` update it?).
+   (Your current `users.ts` handles name updates, but ensure email/avatar changes are also captured on every login).
+
+SUMMARY
+-------
+The architecture is solid for a modern SaaS. The biggest "To-Do" is ensuring that the destination pages (`/dashboard`) self-enforce the rules, rather than relying solely on the `/auth/callback` doorman.
