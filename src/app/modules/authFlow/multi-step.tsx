@@ -17,6 +17,8 @@ import {
   Briefcase,
   Layers,
   Users,
+  GitBranchPlus,
+  LucideUser,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +39,8 @@ import { api } from "../../../../convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Image from "next/image";
+import { RepositoryList } from "./use-repo";
+
 
 export function MultiStepOnboarding() {
   const [currentStep, setCurrentStep] = React.useState(1);
@@ -60,6 +64,10 @@ export function MultiStepOnboarding() {
   // Step 4 State
   const [inviteEmail, setInviteEmail] = React.useState("");
   const [invitedEmails, setInvitedEmails] = React.useState<string[]>([]);
+
+  const [localConnectingId, setLocalConnectingId] = React.useState<
+    number | null
+  >(null);
 
   const handleNext = async () => {
     if (currentStep < 4) {
@@ -136,9 +144,6 @@ export function MultiStepOnboarding() {
 
       <div className="absolute top-14 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[500px] bg-blue-500/40 blur-[200px] rounded-full pointer-events-none opacity-50" />
 
-      {/* <div className="size-10 bg-white rounded-lg flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)] mb-10">
-        <span className="text-black font-black text-2xl leading-none">W</span>
-      </div> */}
       {/* Progress Header */}
       <div className="flex items-center gap-3 mb-12">
         {STEPS.map((step) => (
@@ -182,10 +187,10 @@ export function MultiStepOnboarding() {
                 <div className="space-y-6 relative">
                   <div className="space-y-2">
                     <h2 className="text-2xl font-semibold tracking-tight text-white">
-                      Step 1: Identity
+                      Identity <LucideUser className="w-5 h-5 inline ml-2" />
                     </h2>
                     <p className="text-muted-foreground">
-                      Tell us a bit about yourself to get started.
+                      Hey Dev. Welcome to WeKraft. Let's get started.
                     </p>
                   </div>
 
@@ -255,15 +260,15 @@ export function MultiStepOnboarding() {
                 <div className="space-y-5 relative">
                   <div className="space-y-2">
                     <h2 className="text-2xl text-white font-semibold tracking-tight">
-                      Step 2: Connect
+                      Connect <GitBranchPlus className="w-5 h-5 inline ml-2" />
                     </h2>
                     <p className="text-muted-foreground">
-                      Select a repository to import into your new project.
+                      Select any 1 repository to import into your new project.
                     </p>
                   </div>
 
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <div className="relative flex items-center">
+                    <Search className="absolute left-3 top-2 w-4 h-4 text-muted-foreground" />
                     <Input
                       placeholder="Search repositories..."
                       className="bg-white/5 border-white/10 pl-10 mb-4 focus:ring-1 focus:ring-white/20"
@@ -272,38 +277,11 @@ export function MultiStepOnboarding() {
                     />
                   </div>
 
-                  <div className="space-y-2 max-h-55 overflow-y-auto pr-2 custom-scrollbar">
-                    {[
-                      "v0-ui-kit",
-                      "next-enterprise-starter",
-                      "acme-saas",
-                      "modern-dashboard",
-                    ].map((repo) => (
-                      <button
-                        key={repo}
-                        onClick={() => setSelectedRepo(repo)}
-                        className={cn(
-                          "w-full flex items-center justify-between p-2 rounded-xl border transition-all duration-200 group",
-                          selectedRepo === repo
-                            ? "bg-white text-black border-white"
-                            : "bg-white/5 text-white border-white/5 hover:border-white/20  hover:bg-white/[0.07]"
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          <Github
-                            className={cn(
-                              "w-5 h-5",
-                              selectedRepo === repo
-                                ? "text-black"
-                                : "text-muted-foreground"
-                            )}
-                          />
-                          <span className="font-medium">{repo}</span>
-                        </div>
-                        {selectedRepo === repo && <Check className="w-4 h-4" />}
-                      </button>
-                    ))}
-                  </div>
+                  <RepositoryList
+                    searchQuery={searchQuery}
+                    selectedRepo={selectedRepo}
+                    setSelectedRepo={setSelectedRepo}
+                  />
                 </div>
               )}
 
