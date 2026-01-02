@@ -26,7 +26,7 @@ import { v } from "convex/values";
  *         handler: async (ctx, args) => {
  *            // UPDATE:
  *            await ctx.db.patch(args.id, { name: args.newName });
- *            
+ *
  *            // CREATE:
  *            // await ctx.db.insert("users", { name: "New guy" });
  *         }
@@ -49,7 +49,6 @@ export const store = mutation({
     // This guarantees:
     // ❌ Mutation cannot run without Convex auth
     // ✅ Clerk → Convex token bridge is required
-
 
     console.log("identity from clerk ", identity);
     // Find user by tokenIdentifier
@@ -92,6 +91,9 @@ export const store = mutation({
           ? identity.user_last_sign_in
           : undefined,
       inviteLink: undefined,
+      // DEFAULT PLAN
+      type: "free",
+      limit: 2,
 
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -125,7 +127,6 @@ export const getCurrentUser = query({
     return user ?? null;
   },
 });
-
 
 // =========================================
 // SET GITHUB ACCESS TOKEN
@@ -165,7 +166,9 @@ export const completeOnboarding = mutation({
     const identity = await ctx.auth.getUserIdentity();
 
     if (!identity) {
-      throw new Error("Called completeOnboarding without authentication present");
+      throw new Error(
+        "Called completeOnboarding without authentication present"
+      );
     }
 
     const user = await ctx.db

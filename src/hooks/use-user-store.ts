@@ -30,7 +30,7 @@ export function useStoreUser() {
 
   useEffect(() => {
     if (!isAuthenticated || !isClerkLoaded) return;
-    if (userId) return; // 🔒 already stored
+    if (userId) return; //  already stored
 
     let cancelled = false;
 

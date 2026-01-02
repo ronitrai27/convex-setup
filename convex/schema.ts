@@ -13,6 +13,11 @@ export default defineSchema({
     githubAccessToken: v.optional(v.string()),
     last_sign_in: v.optional(v.number()),
     inviteLink: v.optional(v.string()),
+    // ✅ PLAN TYPE
+    type: v.union(v.literal("free"), v.literal("pro"), v.literal("elite")),
+
+    // ✅ PROJECT LIMIT
+    limit: v.union(v.literal(2), v.literal(5), v.literal(15)),
 
     createdAt: v.number(),
     updatedAt: v.number(),
