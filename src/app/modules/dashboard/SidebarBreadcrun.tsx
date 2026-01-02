@@ -12,11 +12,10 @@ import {
 
 const navigationItems = [
   { title: "Dashboard", url: "/dashboard" },
-  { title: "Repository", url: "/dashboard/repository" },
-  { title: "Reviews", url: "/dashboard/reviews" },
-  { title: "Subscriptions", url: "/dashboard/subscriptions" },
-  { title: "Settings", url: "/dashboard/settings" },
-  { title: "Actions", url: "/dashboard/actions" },
+  { title: "Marketplace", url: "/dashboard/marketplace" },
+  { title: "Notifications", url: "/dashboard/notifications" },
+  { title: "Profile", url: "/dashboard/profile" },
+  { title: "My-Projects", url: "/dashboard/my-projects" },
 ];
 
 export function DashboardBreadcrumbs() {

@@ -26,6 +26,7 @@ import { usePathname } from "next/navigation";
 import {
   Bell,
   Bot,
+  ChevronDown,
   ChevronRight,
   ChevronsLeftRight,
   ChevronsRight,
@@ -60,6 +61,7 @@ import {
   User,
   UserPlus,
   Users,
+  Wallet,
 } from "lucide-react";
 
 import {
@@ -162,7 +164,7 @@ export const AppSidebar = () => {
           </div>
         )}
       </SidebarHeader>
-      <SidebarContent className="flex flex-col px-3 py-3">
+      <SidebarContent className="flex flex-col px-3 py-3 relative overflow-y-scroll scroll-smooth">
         <SidebarMenu className="flex flex-col gap-3">
           <SidebarMenuButton
             asChild
@@ -320,7 +322,7 @@ export const AppSidebar = () => {
               {/* FAVORITES */}
               <SidebarMenuButton
                 asChild
-                data-active={isActive("/dashboard/marketplace")}
+                data-active={isActive("/dashboard/favorites")}
                 className="group relative overflow-hidden"
               >
                 <Link
@@ -344,15 +346,15 @@ export const AppSidebar = () => {
               {/* NOTIFICATIONS */}
               <SidebarMenuButton
                 asChild
-                data-active={isActive("/dashboard/marketplace")}
+                data-active={isActive("/dashboard/notifications")}
                 className="group relative overflow-hidden"
               >
                 <Link
-                  href="/dashboard/marketplace"
+                  href="/dashboard/notifications"
                   className="relative z-10 flex items-center gap-3 px-3 py-2 data-[active=true]:text-white text-muted-foreground"
                 >
-                  <Store className="h-5 w-5" />
-                  <span className="text-base">Marketplace</span>
+                  <Bell className="h-5 w-5" />
+                  <span className="text-base">Notifications</span>
 
                   <span
                     className="
@@ -421,15 +423,15 @@ export const AppSidebar = () => {
               {/* PROFILE */}
               <SidebarMenuButton
                 asChild
-                data-active={isActive("/dashboard/marketplace")}
+                data-active={isActive("/dashboard/profile")}
                 className="group relative overflow-hidden"
               >
                 <Link
-                  href="/dashboard/marketplace"
+                  href="/dashboard/profile"
                   className="relative z-10 flex items-center gap-3 px-3 py-2 data-[active=true]:text-white text-muted-foreground"
                 >
-                  <Store className="h-5 w-5" />
-                  <span className="text-base">Marketplace</span>
+                  <User className="h-5 w-5" />
+                  <span className="text-base">Profile</span>
 
                   <span
                     className="
@@ -445,15 +447,15 @@ export const AppSidebar = () => {
               {/* BILLING */}
               <SidebarMenuButton
                 asChild
-                data-active={isActive("/dashboard/marketplace")}
+                data-active={isActive("/dashboard/billing")}
                 className="group relative overflow-hidden"
               >
                 <Link
-                  href="/dashboard/marketplace"
+                  href="/dashboard/billing"
                   className="relative z-10 flex items-center gap-3 px-3 py-2 data-[active=true]:text-white text-muted-foreground"
                 >
-                  <Store className="h-5 w-5" />
-                  <span className="text-base">Marketplace</span>
+                  <Wallet className="h-5 w-5" />
+                  <span className="text-base">Billing</span>
 
                   <span
                     className="
@@ -467,6 +469,7 @@ export const AppSidebar = () => {
               </SidebarMenuButton>
             </div>
           </div>
+
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="border-t px-2 py-3">
@@ -479,7 +482,7 @@ export const AppSidebar = () => {
                 <p className="font-medium text-foreground">
                   Boost productivity with AI
                 </p>
-                <p className="text-muted-foreground text-xs italic">
+                <p className="text-muted-foreground text-sm italic">
                   Understand projects much faster with Elite.
                 </p>
               </div>
