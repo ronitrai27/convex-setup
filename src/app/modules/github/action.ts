@@ -46,3 +46,58 @@ export const getRepositories = async (
 
   return data;
 };
+
+// ===============================
+// GETTING THE USER CONTRIBUTIONS.
+// ================================
+export async function fetchUserContributions(token: string, username: string) {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
+  const query = `
+    query($username:String!){
+        user(login:$username){
+            contributionsCollection{
+                contributionCalendar{
+                    totalContributions
+                    weeks{
+                        contributionDays{
+                            contributionCount
+                            date
+                            color
+                        }
+                    }
+                }
+            }
+        }
+    }`;
+
+  interface contributiondata {
+    user: {
+      contributionsCollection: {
+        contributionCalendar: {
+          totalContributions: number;
+          weeks: {
+            contributionDays: {
+              contributionCount: number;
+              date: string;
+              color: string;
+            }[];
+          }[];
+        };
+      };
+    };
+  }
+
+  try {
+    const response: any = await octokit.graphql(query, {
+      username: username,
+    });
+
+    return response.user.contributionsCollection.contributionCalendar;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}

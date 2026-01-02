@@ -165,7 +165,7 @@ export const AppSidebar = () => {
         )}
       </SidebarHeader>
       <SidebarContent className="flex flex-col px-3 py-3 relative overflow-y-scroll scroll-smooth">
-        <SidebarMenu className="flex flex-col gap-3">
+        <SidebarMenu className="flex flex-col gap-2.5">
           <SidebarMenuButton
             asChild
             data-active={isActive("/dashboard")}
@@ -221,7 +221,7 @@ export const AppSidebar = () => {
                 data-active={isActive("/dashboard/community")}
                 className="group relative overflow-hidden"
               >
-                <div className="relative z-10 flex items-center gap-3 w-full text-muted-foreground">
+                <div className="relative z-10 flex items-center gap-3 w-full px-1 text-muted-foreground">
                   <Users className="h-5 w-5" />
                   <span className="text-base">Community</span>
                   <ChevronRight className="h-4 w-4 ml-auto" />
@@ -269,9 +269,13 @@ export const AppSidebar = () => {
 
           {/* MY PROJECTS WITH 2 TABS  MY CREATION | Team PROJECT*/}
           <div className="px-1 my-2">
-            <h3 className="mb-2 text-base font-semibold text-muted-foreground capitalize text-center">
-              My Projects
-            </h3>
+            <div className="flex items-center justify-center gap-2">
+              <span className="w-10 h-px bg-muted-foreground/30"></span>
+              <h3 className="mb-2 text-base font-semibold text-muted-foreground capitalize text-center">
+                My Projects
+              </h3>
+              <span className="w-10 h-px bg-muted-foreground/30"></span>
+            </div>
 
             <Tabs defaultValue="my" className="w-full">
               <TabsList className="grid grid-cols-2 h-8 mx-auto w-full">
@@ -284,7 +288,7 @@ export const AppSidebar = () => {
               </TabsList>
 
               {/* FIXED HEIGHT + SCROLL */}
-              <div className="mt-2 h-40 overflow-y-auto rounded-md border bg-sidebar-accent/30">
+              <div className="mt-2 h-[156px] overflow-y-auto rounded-md border bg-sidebar-accent/30">
                 {/* MY CREATIONS */}
                 <TabsContent value="my" className="m-0 p-2">
                   {/* ADDTION PROJECT CTA */}
@@ -314,9 +318,13 @@ export const AppSidebar = () => {
           </div>
           {/* QUICK ACCESS */}
           <div className="">
-            <p className="mb-2 text-center text-base text-muted-foreground">
-              Quick Access
-            </p>
+            <div className="flex items-center justify-center gap-2">
+              <span className="w-10 h-px bg-muted-foreground/30"></span>
+              <h3 className="mb-2 text-base font-semibold text-muted-foreground capitalize text-center">
+                Quick Access
+              </h3>
+              <span className="w-10 h-px bg-muted-foreground/30"></span>
+            </div>
 
             <div className="space-y-3">
               {/* FAVORITES */}
@@ -469,10 +477,9 @@ export const AppSidebar = () => {
               </SidebarMenuButton>
             </div>
           </div>
-
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="border-t px-2 py-3">
+      <SidebarFooter className="border-t px-2 py-2">
         <div className="rounded-md bg-linear-to-br from-blue-600/30 via-indigo-400/30 to-transparent px-3 py-3 space-y-3 ">
           {/* TOP MESSAGE (only if NOT elite) */}
           {user?.type !== "elite" && (
@@ -482,9 +489,9 @@ export const AppSidebar = () => {
                 <p className="font-medium text-foreground">
                   Boost productivity with AI
                 </p>
-                <p className="text-muted-foreground text-sm italic">
+                {/* <p className="text-muted-foreground text-sm italic">
                   Understand projects much faster with Elite.
-                </p>
+                </p> */}
               </div>
             </div>
           )}
