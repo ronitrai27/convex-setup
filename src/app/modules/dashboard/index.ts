@@ -77,7 +77,9 @@ export async function getContributionStats(githubName: string) {
     }
 
     const accessToken = await getGithubAccessToken();
-    const calendar = await fetchUserContributions(accessToken, githubName);
+    console.log("accessToken", accessToken);
+    const calendar = await fetchUserContributions(accessToken, "ronitrai27");
+    // console.log("calendar", calendar);
 
     if (!calendar) {
       return [];
@@ -90,7 +92,7 @@ export async function getContributionStats(githubName: string) {
         level: Math.min(4, Math.floor(day.contributionCount / 3)),
       }))
     );
-
+    console.log("contributions", contributions);
     return {
       contributions,
       totalContributions: calendar.totalContributions,

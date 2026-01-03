@@ -14,17 +14,19 @@ const ContributionGraph = () => {
   const { theme } = useTheme();
   const user = useConvexQuery(api.users.getCurrentUser);
 
+  const userName = user?.githubUsername;
+
   const { data, isLoading } = useQuery<{
     contributions: any[];
     totalContributions: number;
   }>({
     queryKey: ["contribution-graph"],
-    queryFn: () => getContributionStats(user?.githubUsername || "") as any,
+    queryFn: () => getContributionStats(userName || "") as any,
     staleTime: 720 * 60 * 1000, // 12 hour
     refetchOnWindowFocus: false,
   });
 
-  console.log("contribution-data", data);
+  console.log("contribution-data from Client:", data);
 
   if (isLoading) {
     return (
@@ -53,14 +55,14 @@ const ContributionGraph = () => {
           className="scrollbar-hide flex justify-center overflow-x-auto"
           style={{
             width: "100%",
-            transform: "scale(1)",
+            transform: "scale(0.84)",
             transformOrigin: "center",
           }}
         >
           <ActivityCalendar
             data={data?.contributions}
             theme={{
-              light: ["#f9fafb", "#dbeafe", "#93c5fd", "#60a5fa", "#2563eb"],
+              light: ["#e5e7eb", "#dbeafe", "#93c5fd", "#60a5fa", "#2563eb"],
               dark: ["#1f2937", "#1e3a8a", "#1d4ed8", "#2563eb", "#3b82f6"],
             }}
             blockSize={12}

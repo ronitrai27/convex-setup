@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "inngest:dev": "powershell -Command \"Start-Process '.\\bin\\inngest.exe' -ArgumentList 'dev' -NoNewWindow -Wait\"",
     "build": "next build",
     "start": "next start",
     "lint": "biome check",
@@ -24,6 +25,7 @@
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.26",
+    "inngest": "^3.48.1",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.562.0",
     "next": "16.1.1",
@@ -51,6 +53,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "inngest-cli": "^1.15.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -22,6 +22,7 @@ import ContributionGraph from "@/app/modules/dashboard/ContriButionGraph";
 import ContributionGraph2 from "@/app/modules/dashboard/CustomGraph";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const DashboardPage = () => {
   const user = useConvexQuery(api.users.getCurrentUser);
@@ -65,7 +66,7 @@ const DashboardPage = () => {
       {/* ========================= */}
       {/* CARDS */}
       {/* ========================= */}
-      <div className="grid grid-cols-3 gap-10 w-full my-4">
+      <div className="grid grid-cols-3 gap-10 w-full my-5 px-8">
         <Card className="bg-linear-to-br from-accent/90 to-transparent dark:to-black  min-w-[260px]">
           <CardHeader>
             <CardTitle>Commits</CardTitle>
@@ -102,7 +103,7 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
         {/* DEMO FAKE DATA IDK */}
-        <Card className="bg-linear-to-br from-accent/90 to-transparent dark:to-black  min-w-[260px]">
+        <Card className="relative  min-w-[260px] bg-linear-to-br from-blue-600/60 via-indigo-500/30 to-transparent">
           <CardHeader>
             <CardTitle>Demo Fake Data </CardTitle>
           </CardHeader>
@@ -112,8 +113,13 @@ const DashboardPage = () => {
                 <p className="text-2xl font-semibold">27</p>
                 <p className="text-sm text-muted-foreground">Its Fake</p>
               </div>
-              <Separator orientation="vertical" className="mx-2" />
-              <LucideGitBranch className="h-9 w-9" />
+              <Image
+                src="/ca1.png"
+                alt="inteliigence"
+                width={150}
+                height={150}
+                className=" absolute object-contain -bottom-16  -right-5"
+              />
             </div>
           </CardContent>
         </Card>
@@ -146,7 +152,7 @@ const DashboardPage = () => {
             Workspaces
           </Button>
         </div>
-        <Separator className="max-w-[80%] mx-auto my-4" />
+        <Separator className="max-w-[80%] mx-auto my-5" />
 
         {activeTab === "stats" && (
           <div
@@ -158,10 +164,9 @@ const DashboardPage = () => {
             )}
           >
             {/* LEFT */}
-            <Card className="w-full mx-auto bg-linear-to-b from-accent/40 to-transparent dark:to-black">
+            <Card className="w-full flex items-center justify-center mx-auto overflow-x-auto bg-linear-to-b from-accent/40 to-transparent dark:to-black">
               <CardContent>
                 <ContributionGraph />
-                {/* <ContributionGraph2 /> */}
               </CardContent>
             </Card>
 

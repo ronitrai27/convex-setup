@@ -73,28 +73,30 @@ export async function fetchUserContributions(token: string, username: string) {
         }
     }`;
 
-  interface contributiondata {
-    user: {
-      contributionsCollection: {
-        contributionCalendar: {
-          totalContributions: number;
-          weeks: {
-            contributionDays: {
-              contributionCount: number;
-              date: string;
-              color: string;
-            }[];
-          }[];
-        };
-      };
-    };
-  }
+  // interface contributiondata {
+  //   user: {
+  //     contributionsCollection: {
+  //       contributionCalendar: {
+  //         totalContributions: number;
+  //         weeks: {
+  //           contributionDays: {
+  //             contributionCount: number;
+  //             date: string;
+  //             color: string;
+  //           }[];
+  //         }[];
+  //       };
+  //     };
+  //   };
+  // }
 
   try {
     const response: any = await octokit.graphql(query, {
       username: username,
     });
 
+    // console.log("response from graphQL query--", response);
+    // console.log("response.user.contributionsCollection.contributionCalendar", response.user.contributionsCollection.contributionCalendar);
     return response.user.contributionsCollection.contributionCalendar;
   } catch (error) {
     console.error(error);

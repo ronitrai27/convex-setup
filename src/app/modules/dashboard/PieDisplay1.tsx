@@ -58,6 +58,8 @@ export function PieChartVariant1({ stats }: ImpactScoreDisplayProps) {
   };
 
   return (
+    <>
+    <h1 className="text-center text-sm text-muted-foreground mb-2">Account Age: {Math.floor(stats.accountAgeInYears)} years</h1>
     <ChartContainer config={chartConfig} className="h-[200px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
@@ -94,14 +96,14 @@ export function PieChartVariant1({ stats }: ImpactScoreDisplayProps) {
                       <tspan
                         x={viewBox.cx}
                         y={viewBox.cy}
-                        className="fill-foreground text-3xl font-bold"
+                        className="fill-foreground text-3xl font-bold font-sans"
                       >
                         {data.displayScore}
                       </tspan>
                       <tspan
                         x={viewBox.cx}
                         y={(viewBox.cy || 0) + 24}
-                        className="fill-muted-foreground text-xs font-medium"
+                        className="fill-muted-foreground text-sm tracking-tight font-medium"
                       >
                         IMPACT SCORE
                       </tspan>
@@ -114,6 +116,7 @@ export function PieChartVariant1({ stats }: ImpactScoreDisplayProps) {
         </PieChart>
       </ResponsiveContainer>
     </ChartContainer>
+    </>
   );
 }
 
@@ -140,7 +143,7 @@ export function ScoreDetailsDialog({ stats }: ImpactScoreDisplayProps) {
             </DialogTitle>
             <Badge
               variant="outline"
-              className="bg-primary/10 text-primary border-primary/20"
+              className="bg-primary/10 text-primary border-primary/20 text-xs h-8"
             >
               {data.tier}
             </Badge>
@@ -172,7 +175,7 @@ export function ScoreDetailsDialog({ stats }: ImpactScoreDisplayProps) {
 
           <div className="space-y-3">
             <LabelUI className="text-sm font-medium">
-              Activity Distribution
+              Activity Distribution (Scores)
             </LabelUI>
             <div className="grid grid-cols-2 gap-3">
               {Object.entries(data.breakdown).map(([key, value]) => (
@@ -181,7 +184,7 @@ export function ScoreDetailsDialog({ stats }: ImpactScoreDisplayProps) {
                   className="flex items-center justify-between p-3 rounded-lg bg-accent/50 border border-border/50"
                 >
                   <span className="text-sm capitalize text-muted-foreground">
-                    {key}
+                    {key} Score
                   </span>
                   <span className="text-sm font-mono font-bold">{value}</span>
                 </div>
