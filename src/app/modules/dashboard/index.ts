@@ -1,17 +1,16 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { fetchUserContributions } from "../github/action";
+import { fetchUserContributions, getGithubAccessToken } from "../github/action";
 import { Octokit } from "octokit";
-
 
 // =====================================
 // GETTING DASHBOARD STATS (count of all)
 // =====================================
 
 export async function getDahboardStats(
-  accessToken: string, 
-  githubName: string 
+  accessToken: string,
+  githubName: string
 ) {
   try {
     const { userId } = await auth();
@@ -64,5 +63,43 @@ export async function getDahboardStats(
   } catch (error) {
     console.log(error);
     throw new Error("Failed to fetch dashboard stats");
+  }
+}
+
+// ==================================
+// GET HEATMAPS CONTRIBUTION
+// ==================================
+export async function getContributionStats(githubName: string) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const accessToken = await getGithubAccessToken();
+    const calendar = await fetchUserContributions(accessToken, githubName);
+
+    if (!calendar) {
+      return [];
+    }
+
+    const contributions = calendar.weeks.flatMap((week: any) =>
+      week.contributionDays.map((day: any) => ({
+        date: day.date,
+        count: day.contributionCount,
+        level: Math.min(4, Math.floor(day.contributionCount / 3)),
+      }))
+    );
+
+    return {
+      contributions,
+      totalContributions: calendar.totalContributions,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      contributions: [],
+      totalContributions: 0,
+    };
   }
 }

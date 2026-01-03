@@ -5,11 +5,27 @@ import { SignOutButton } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { useQuery as useConvexQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { getDahboardStats } from "../../modules/dashboard";
-import { ImpactScoreDisplay } from "@/app/modules/dashboard/ImpactDisplay";
+import {
+  getContributionStats,
+  getDahboardStats,
+} from "../../modules/dashboard";
+import {
+  PieChartVariant1,
+  ScoreDetailsDialog,
+} from "@/app/modules/dashboard/PieDisplay1";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { LucideGitBranch, LucideGitCommit } from "lucide-react";
+import { useState } from "react";
+import ContributionGraph from "@/app/modules/dashboard/ContriButionGraph";
+import ContributionGraph2 from "@/app/modules/dashboard/CustomGraph";
+import { useSidebar } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 const DashboardPage = () => {
   const user = useConvexQuery(api.users.getCurrentUser);
+  const { open: sidebarOpen, isMobile } = useSidebar();
 
   const {
     data: dashboardStats,
@@ -22,50 +38,164 @@ const DashboardPage = () => {
         user?.githubAccessToken || "",
         user?.githubUsername || ""
       ),
+    staleTime: 10 * 60 * 1000, // 5 min || 10 min
+    refetchOnWindowFocus: false,
     enabled: !!user?.githubAccessToken && !!user?.githubUsername,
   });
 
-   // 🔥 TESTING - Play with these numbers!
-  const testStats = {
-    totalCommits: 4000,
-    totalPRs: 110,
-    totalIssuesClosed: 50,
-    totalReviews: 50,
-    accountAgeInYears: 3,
-  };
+  // 🔥 TESTING - Play with these numbers!
+  // const testStats = {
+  //   totalCommits: 4000,
+  //   totalPRs: 110,
+  //   totalIssuesClosed: 50,
+  //   totalReviews: 50,
+  //   accountAgeInYears: 3,
+  // };
+
+  const [activeTab, setActiveTab] = useState("stats");
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <SignOutButton>
-          <Button>Sign Out</Button>
-        </SignOutButton>
+    <div className="w-full h-full">
+      {/* ========================= */}
+      {/* USER NAME */}
+      {/* ========================= */}
+      <div className="px-4">
+        <h1 className="text-3xl font-semibold ">Welcome {user?.name}</h1>
       </div>
+      {/* ========================= */}
+      {/* CARDS */}
+      {/* ========================= */}
+      <div className="grid grid-cols-3 gap-10 w-full my-4">
+        <Card className="bg-linear-to-br from-accent/90 to-transparent dark:to-black  min-w-[260px]">
+          <CardHeader>
+            <CardTitle>Commits</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <p className="text-2xl font-semibold">
+                  {dashboardStats?.totalCommits}
+                </p>
+                <p className="text-sm text-muted-foreground">Total Commits</p>
+              </div>
+              <Separator orientation="vertical" className="mx-2" />
+              <LucideGitCommit className="h-10 w-10" />
+            </div>
+          </CardContent>
+        </Card>
+        {/* TOTAL PR*/}
+        <Card className="bg-linear-to-br from-accent/90 to-transparent dark:to-black  min-w-[260px]">
+          <CardHeader>
+            <CardTitle>Pull Requests </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <p className="text-2xl font-semibold">
+                  {dashboardStats?.totalPRs}
+                </p>
+                <p className="text-sm text-muted-foreground">Total PRs</p>
+              </div>
+              <Separator orientation="vertical" className="mx-2" />
+              <LucideGitBranch className="h-9 w-9" />
+            </div>
+          </CardContent>
+        </Card>
+        {/* DEMO FAKE DATA IDK */}
+        <Card className="bg-linear-to-br from-accent/90 to-transparent dark:to-black  min-w-[260px]">
+          <CardHeader>
+            <CardTitle>Demo Fake Data </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <p className="text-2xl font-semibold">27</p>
+                <p className="text-sm text-muted-foreground">Its Fake</p>
+              </div>
+              <Separator orientation="vertical" className="mx-2" />
+              <LucideGitBranch className="h-9 w-9" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      {/* ========================= */}
+      {/* TABS FOR STATS || DISCOVER || WORKSPACE */}
+      {/* ========================= */}
+      <div className="py-6 ">
+        {/* Tab Header */}
+        <div className="flex gap-8">
+          <Button
+            size="sm"
+            variant={activeTab === "stats" ? "default" : "outline"}
+            onClick={() => setActiveTab("stats")}
+          >
+            Stats
+          </Button>
+          <Button
+            size="sm"
+            variant={activeTab === "discover" ? "default" : "outline"}
+            onClick={() => setActiveTab("discover")}
+          >
+            Discover
+          </Button>
+          <Button
+            size="sm"
+            variant={activeTab === "workspaces" ? "default" : "outline"}
+            onClick={() => setActiveTab("workspaces")}
+          >
+            Workspaces
+          </Button>
+        </div>
+        <Separator className="max-w-[80%] mx-auto my-4" />
 
-      <div className="">
-        {isLoading && <div>Loading stats...</div>}
-        {error && <div>Error loading stats</div>}
+        {activeTab === "stats" && (
+          <div
+            className={cn(
+              "grid transition-all duration-150 ",
+              sidebarOpen
+                ? "grid-cols-[minmax(0,1fr)_320px] gap-5"
+                : "grid-cols-[minmax(0,1fr)_360px] gap-10"
+            )}
+          >
+            {/* LEFT */}
+            <Card className="w-full mx-auto bg-linear-to-b from-accent/40 to-transparent dark:to-black">
+              <CardContent>
+                <ContributionGraph />
+                {/* <ContributionGraph2 /> */}
+              </CardContent>
+            </Card>
 
-        {!isLoading && !dashboardStats && (
-          <div>
-            No stats available. Make sure you have connected your GitHub
-            account.
+            {/* RIGHT */}
+            <div className="w-full">
+              {dashboardStats ? (
+                <Card className="p-1 bg-linear-to-b from-accent/40 to-transparent dark:to-black">
+                  <CardHeader></CardHeader>
+                  <CardContent>
+                    <PieChartVariant1 stats={dashboardStats} />
+                    <div className="flex items-center justify-center">
+                      <ScoreDetailsDialog stats={dashboardStats} />
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div>Loading...</div>
+              )}
+            </div>
           </div>
         )}
 
-        {dashboardStats && (
-          <>
-            <h1>total commits : {dashboardStats.totalCommits}</h1>
-            <h1>total prs : {dashboardStats.totalPRs}</h1>
-            <h1>total issues closed : {dashboardStats.totalIssuesClosed}</h1>
-            <h1>total reviews : {dashboardStats.totalReviews}</h1>
-            <h1>
-              account age : {Math.floor(dashboardStats.accountAgeInYears)}{" "}
-            </h1>
+        {activeTab === "discover" && (
+          <div className="grid grid-cols-2 gap-6">
+            <div>Discover left content</div>
+            <div>Discover right content</div>
+          </div>
+        )}
 
-            <ImpactScoreDisplay stats={testStats} />
-          </>
+        {activeTab === "workspaces" && (
+          <div className="grid grid-cols-2 gap-6">
+            <div>Workspaces left content</div>
+            <div>Workspaces right content</div>
+          </div>
         )}
       </div>
     </div>
@@ -73,3 +203,30 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
+
+//  <div className="flex justify-between items-center mb-8">
+//         <h1 className="text-3xl font-bold">Dashboard</h1>
+//         <SignOutButton>
+//           <Button variant="outline">Sign Out</Button>
+//         </SignOutButton>
+//       </div>
+
+//       {isLoading && <div className="text-muted-foreground">Loading stats...</div>}
+//       {error && <div className="text-red-500">Error loading stats</div>}
+
+//       {!isLoading && !dashboardStats && (
+//         <div className="text-muted-foreground">
+//           No stats available. Make sure you have connected your GitHub account.
+//         </div>
+//       )}
+
+{
+  /* <div
+            className={cn(
+              "grid gap-5",
+              isSidebarCollapsed
+                ? "grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px]"
+                : "grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px]"
+            )}
+          ></div> */
+}

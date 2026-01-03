@@ -50,6 +50,7 @@ import {
   LucideWandSparkles,
   Mic,
   Moon,
+  Palette,
   Play,
   Plus,
   Settings2,
@@ -81,6 +82,7 @@ import {
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { ThemeButtons } from "./ThemeButton";
 
 // interface UsersType {
 //   _id: Id<"users">;
@@ -123,17 +125,17 @@ export const AppSidebar = () => {
   };
 
   return (
-    <Sidebar>
-      <SidebarHeader className="border-b">
+    <Sidebar collapsible="icon" className="cursor-move">
+      <SidebarHeader className="border-b ">
         <div className="flex items-center justify-between px-2 py-3">
           <div className="w-9 h-9 flex items-center justify-center rounded bg-primary text-primary-foreground">
             <p className="font-extrabold text-xl"> W</p>
           </div>
-          <h1 className="font-bold text-xl">
+          <h1 className="font-bold text-xl group-data-[collapsible=icon]:hidden">
             We<span className="italic">Kraft</span>
           </h1>
           {/* DROPDOWN ICON TO CHOOSE AMON USER CREATED PROJECTS  */}
-          <Button size="icon-sm" variant="outline" className="cursor-pointer">
+          <Button size="icon-sm" variant="outline" className="cursor-pointer group-data-[collapsible=icon]:hidden">
             <ChevronsUpDown className="h-5 w-5" />
           </Button>
         </div>
@@ -141,19 +143,19 @@ export const AppSidebar = () => {
         {user === undefined ? (
           <div className="flex items-center gap-4 my-1 mx-auto border px-6 py-2 bg-sidebar-accent/30 rounded-md w-full">
             <Skeleton className="h-10 w-10 rounded-full" />
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-2 group-data-[collapsible=icon]:hidden">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-3 w-16" />
             </div>
           </div>
         ) : (
-          <div className="flex items-center gap-4 my-0.5 mx-auto border px-6 py-2 bg-sidebar-accent/30 rounded-md">
+          <div className="flex items-center gap-4 my-0.5 mx-auto border px-6 py-2 bg-sidebar-accent/30 rounded-md group-data-[collapsible=icon]:hidden">
             <Avatar className="h-10 w-10">
               <AvatarImage src={user?.imageUrl} />
               <AvatarFallback>UN</AvatarFallback>
             </Avatar>
 
-            <div className="flex flex-col space-y-0.5">
+            <div className="flex flex-col space-y-0.5 group-data-[collapsible=icon]:hidden">
               <h2 className="flex gap-2 text-sm items-center truncate">
                 <Github className="h-4 w-4" /> {user?.githubUsername}
               </h2>
@@ -268,7 +270,7 @@ export const AppSidebar = () => {
           </Popover>
 
           {/* MY PROJECTS WITH 2 TABS  MY CREATION | Team PROJECT*/}
-          <div className="px-1 my-2">
+          <div className="px-1 my-2 group-data-[collapsible=icon]:hidden">
             <div className="flex items-center justify-center gap-2">
               <span className="w-10 h-px bg-muted-foreground/30"></span>
               <h3 className="mb-2 text-base font-semibold text-muted-foreground capitalize text-center">
@@ -318,7 +320,7 @@ export const AppSidebar = () => {
           </div>
           {/* QUICK ACCESS */}
           <div className="">
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-2 group-data-[collapsible=icon]:hidden">
               <span className="w-10 h-px bg-muted-foreground/30"></span>
               <h3 className="mb-2 text-base font-semibold text-muted-foreground capitalize text-center">
                 Quick Access
@@ -452,34 +454,46 @@ export const AppSidebar = () => {
                 </Link>
               </SidebarMenuButton>
 
-              {/* BILLING */}
-              <SidebarMenuButton
-                asChild
-                data-active={isActive("/dashboard/billing")}
-                className="group relative overflow-hidden"
-              >
-                <Link
-                  href="/dashboard/billing"
-                  className="relative z-10 flex items-center gap-3 px-3 py-2 data-[active=true]:text-white text-muted-foreground"
+              {/* THEME SWITCHER */}
+              <Popover>
+                <SidebarMenuButton
+                  asChild
+                  className="group relative overflow-hidden"
                 >
-                  <Wallet className="h-5 w-5" />
-                  <span className="text-base">Billing</span>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="relative z-10 flex w-full items-center gap-3 px-3 py-2 text-muted-foreground data-[active=true]:text-white"
+                    >
+                      <Palette className="h-5 w-5" />
+                      <span className="text-base">Theme</span>
 
-                  <span
-                    className="
-        pointer-events-none absolute inset-0 -z-10
-        opacity-0 transition-opacity
-        group-data-[active=true]:opacity-100
-        bg-linear-to-l from-blue-600/50 via-transparent  to-transparent
-      "
-                  />
-                </Link>
-              </SidebarMenuButton>
+                      {/* Active gradient */}
+                      <span
+                        className="
+            pointer-events-none absolute inset-0 -z-10
+            opacity-0 transition-opacity
+            group-data-[active=true]:opacity-100
+            bg-linear-to-l from-blue-600/50 via-transparent to-transparent
+          "
+                      />
+                    </button>
+                  </PopoverTrigger>
+                </SidebarMenuButton>
+
+                <PopoverContent
+                  align="start"
+                  side="right"
+                  className="w-48 rounded-lg p-2"
+                >
+                  <ThemeButtons />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="border-t px-2 py-2">
+      <SidebarFooter className="border-t px-2 py-2 group-data-[collapsible=icon]:hidden">
         <div className="rounded-md bg-linear-to-br from-blue-600/30 via-indigo-400/30 to-transparent px-3 py-3 space-y-3 ">
           {/* TOP MESSAGE (only if NOT elite) */}
           {user?.type !== "elite" && (

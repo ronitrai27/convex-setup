@@ -24,19 +24,80 @@ interface ImpactScoreResult {
   penalties: string[];
 }
 
+/**
+ * WeKraft Impact Score — Explanation
+ * ---------------------------------
+ *
+ * GOAL:
+ * -----
+ * Measure a developer’s *real-world impact* on GitHub by prioritizing
+ * collaboration, trust, and sustained contribution — not raw activity.
+ *
+ * This score is intentionally strict.
+ * High commit counts alone should NEVER make someone "Elite".
+ *
+ *
+ * CORE PHILOSOPHY:
+ * ----------------
+ * 1. Collaboration > Solo Work
+ *    - PRs, issues, and reviews matter more than commits.
+ *
+ * 2. Trust > Volume
+ *    - Reviews and accepted PRs signal professional maturity.
+ *
+ * 3. Consistency > Spikes
+ *    - Balanced contribution across multiple areas is rewarded.
+ *
+ * 4. Anti-Gaming
+ *    - Commit spamming, tutorial repos, and solo-only activity are penalized.
+ *
+ *
+ * HOW THE SCORE IS BUILT:
+ * ----------------------
+ *
+ * STEP 1: Weighted Activity
+ * - Commits are capped (max 10/day) and weighted low.
+ * - PRs, issues, and reviews are weighted higher to reflect collaboration.
+ *
+ *   Weights:
+ *   - Commits: 0.5
+ *   - PRs:     4
+ *   - Issues:  2.5
+ *   - Reviews: 3
+ *
+ * STEP 2: Account Age Normalization
+ * - Older accounts should not dominate purely due to time.
+ * - Square root of account age softens the advantage.
+ *
+ * STEP 3: Behavioral Penalties
+ * - High commit-to-PR ratio → likely solo or tutorial-heavy work.
+ * - Low PRs or reviews for older accounts → limited collaboration.
+ *
+ * STEP 4: Behavioral Bonuses
+ * - Strong review culture (reviews > PRs/2 and > 30 total)
+ *   → rewards mentorship and senior behavior.
+ *
+ * STEP 5: Consistency Bonus
+ * - Balanced contributors across ALL areas get rewarded.
+ *
+ * STEP 6: Raw Score vs Display Score
+ * - `rawScore` is the internal, unbounded credibility score.
+ * - `displayScore` is capped at 100 for UI & human interpretation.
+ */
+
 export function calculateImpactScore(stats: GitHubStats): ImpactScoreResult {
   // Revised weights - favor collaboration over solo commits
   const WEIGHTS = {
-    commits: 0.5, // Reduced from 1 (commits alone aren't impressive)
-    prs: 4, // Increased from 3 (PRs show real collaboration)
-    issues: 2.5, // Increased from 2
-    reviews: 3, // Increased from 2.5 (reviews show mentorship)
+    commits: 1, // Reduced from 1 (commits alone aren't impressive)
+    prs: 3, // Increased from 3 (PRs show real collaboration)
+    issues: 2, // Increased from 2
+    reviews: 2.5, // Increased from 2.5 (reviews show mentorship)
   };
 
   // Much stricter commit cap - 10 per day max (not 20)
   const effectiveCommits = Math.min(
     stats.totalCommits,
-    stats.accountAgeInYears * 365 * 10
+    stats.accountAgeInYears * 365 * 20
   );
 
   // Calculate weighted contributions
@@ -54,7 +115,7 @@ export function calculateImpactScore(stats: GitHubStats): ImpactScoreResult {
   const ageFactor = Math.max(Math.sqrt(stats.accountAgeInYears), 0.5);
 
   // Base score calculation
-  let baseScore = weightedActivity / ageFactor / 15; // Increased divisor from 10 to 15
+  let baseScore = weightedActivity / ageFactor / 12; // Increased divisor from 10 to 15
 
   // Track penalties for transparency
   const penalties: string[] = [];
@@ -126,7 +187,7 @@ export function calculateImpactScore(stats: GitHubStats): ImpactScoreResult {
   } else if (rawScore >= 35) {
     // Raised from 40
     tier = "Regular Developer";
-  } else if (rawScore >= 20) {
+  } else if (rawScore >= 15) {
     // Raised from 20
     tier = "Casual Contributor";
   }
