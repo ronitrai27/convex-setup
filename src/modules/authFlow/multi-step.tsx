@@ -406,7 +406,7 @@ export function MultiStepOnboarding() {
                             <div 
                                 onClick={() => setIsPublic(true)}
                                 className={cn(
-                                    "cursor-pointer p-3 rounded-xl border flex items-center gap-3 transition-all",
+                                    "cursor-pointer p-2 rounded-xl border flex items-center gap-3 transition-all",
                                     isPublic 
                                         ? "bg-white/10 border-white text-white" 
                                         : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
@@ -424,7 +424,7 @@ export function MultiStepOnboarding() {
                             <div 
                                 onClick={() => setIsPublic(false)}
                                 className={cn(
-                                    "cursor-pointer p-3 rounded-xl border flex items-center gap-3 transition-all",
+                                    "cursor-pointer p-2 rounded-xl border flex items-center gap-3 transition-all",
                                     !isPublic 
                                         ? "bg-white/10 border-white text-white" 
                                         : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"

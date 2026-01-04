@@ -60,6 +60,10 @@ export const create = mutation({
   },
 });
 
+
+// =================================
+// GET PROJECTS
+// =================================
 export const getProjects = query({
   args: {},
   handler: async (ctx) => {
@@ -86,5 +90,25 @@ export const getProjects = query({
       .collect();
 
     return projects;
+  },
+});
+
+export const getProjectById = query({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return null;
+    }
+
+    const project = await ctx.db.get(args.projectId);
+    
+    // Optional: You might want to check if the user is the owner
+    // const user = ... get user ...
+    // if (project.ownerId !== user._id) throw new Error("Unauthorized");
+    
+    return project;
   },
 });
