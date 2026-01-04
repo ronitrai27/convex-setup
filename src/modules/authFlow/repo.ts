@@ -10,7 +10,7 @@
 // }
 
 import { useQuery } from "@tanstack/react-query";
-import { getRepositories } from "@/app/modules/github/action";
+import { getRepositories } from "@/modules/github/action";
 
 interface Repository {
   id: number;
@@ -21,6 +21,9 @@ interface Repository {
   stargazers_count: number;
   language: string | null;
   topics: string[];
+  owner: {
+    login: string;
+  };
 }
 
 export function useRepositories(page: number = 1, perPage: number = 10) {

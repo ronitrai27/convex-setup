@@ -51,8 +51,13 @@ export const getRepositories = async (
 // GETTING THE USER CONTRIBUTIONS.
 // ================================
 export async function fetchUserContributions(token: string, username: string) {
+  console.log("token", token);
+  console.log("username", username);
+  // const newToken = await getGithubAccessToken();
+  // console.log("newToken", newToken);
+   const accessToken = token || (await getGithubAccessToken());
   const octokit = new Octokit({
-    auth: token,
+    auth: accessToken,
   });
 
   const query = `
@@ -73,22 +78,6 @@ export async function fetchUserContributions(token: string, username: string) {
         }
     }`;
 
-  // interface contributiondata {
-  //   user: {
-  //     contributionsCollection: {
-  //       contributionCalendar: {
-  //         totalContributions: number;
-  //         weeks: {
-  //           contributionDays: {
-  //             contributionCount: number;
-  //             date: string;
-  //             color: string;
-  //           }[];
-  //         }[];
-  //       };
-  //     };
-  //   };
-  // }
 
   try {
     const response: any = await octokit.graphql(query, {
@@ -102,4 +91,76 @@ export async function fetchUserContributions(token: string, username: string) {
     console.error(error);
     return null;
   }
+}
+
+
+export async function getUserGithubToken(userId: string) {
+  const client = await clerkClient();
+  const tokens = await client.users.getUserOauthAccessToken(userId, "github");
+  return tokens.data[0]?.token;
+}
+
+// =================================
+// GETTING REPO ALL FILES (TEXT PART)
+// =================================
+
+export async function getRepoFileContents(
+  owner: string,
+  repo: string,
+  accessToken?: string,
+  path: string = ""
+): Promise<{ path: string; content: string }[]> {
+  const token = accessToken || (await getGithubAccessToken());
+  const octokit = new Octokit({ auth: token });
+  const { data } = await octokit.rest.repos.getContent({
+    owner,
+    repo,
+    path,
+  });
+
+  // JUST A CHECK
+  if (!Array.isArray(data)) {
+    if (data.type === "file" && data.content) {
+      return [
+        {
+          path: data.path,
+          content: Buffer.from(data.content, "base64").toString("utf-8"),
+        },
+      ];
+    }
+    return [];
+  }
+
+  let files: { path: string; content: string }[] = [];
+
+  for (const item of data) {
+    if (item.type === "file") {
+      const { data: fileData } = await octokit.rest.repos.getContent({
+        owner,
+        repo,
+        path: item.path,
+      });
+
+      // CHECKING
+      if (
+        !Array.isArray(fileData) &&
+        fileData.type === "file" &&
+        fileData.content
+      ) {
+        // FILTER OUT NON-CODE FILES IF NEEDD (IMAGES ETC)
+        if (!item.path.match(/\.(png|jpg|jpeg|gif|ico|tar|gz|pdf|zip|svg)$/i)) {
+          files.push({
+            path: item.path,
+            content: Buffer.from(fileData.content, "base64").toString("utf-8"),
+          });
+        }
+      }
+    } else if (item.type === "dir") {
+      const subFiles = await getRepoFileContents(owner, repo, accessToken, item.path);
+
+      files = files.concat(subFiles);
+    }
+  }
+
+  return files;
 }

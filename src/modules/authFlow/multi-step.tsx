@@ -19,6 +19,9 @@ import {
   Users,
   GitBranchPlus,
   LucideUser,
+  Lock,
+  Unlock,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,19 +37,23 @@ const STEPS = [
 
 const TAG_OPTIONS = ["AI", "Web3", "ML", "SaaS", "DevTools", "Open Source"];
 
-import { useMutation } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Image from "next/image";
 import { RepositoryList } from "./use-repo";
 
-
 export function MultiStepOnboarding() {
   const [currentStep, setCurrentStep] = React.useState(1);
   const [direction, setDirection] = React.useState(0);
   const completeOnboardingMutation = useMutation(api.users.completeOnboarding);
+  const createProject = useMutation(api.projects.create);
+  const storedRepo = useQuery(api.repos.getRepository);
   const router = useRouter();
+
+  // Loading state for async operations
+  const [isLoading, setIsLoading] = React.useState(false);
 
   // Step 1 State
   const [occupation, setOccupation] = React.useState("");
@@ -60,6 +67,15 @@ export function MultiStepOnboarding() {
   // Step 3 State
   const [projectName, setProjectName] = React.useState("");
   const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
+  const [isPublic, setIsPublic] = React.useState(true);
+  
+  // Auto-fill project name from connected repo
+  React.useEffect(() => {
+    if (storedRepo && !projectName) {
+      setProjectName(storedRepo.name);
+      // Default to private if we could detect it, but for now default to public or whatever logic
+    }
+  }, [storedRepo, projectName]);
 
   // Step 4 State
   const [inviteEmail, setInviteEmail] = React.useState("");
@@ -70,7 +86,50 @@ export function MultiStepOnboarding() {
   >(null);
 
   const handleNext = async () => {
-    if (currentStep < 4) {
+    if (currentStep === 3) {
+      // Validate Tags
+      if (selectedTags.length < 2) {
+        toast.error("Please select at least 2 tags", {
+          description: "Tags help organize and discover your project.",
+        });
+        return;
+      }
+      if (selectedTags.length > 5) {
+         toast.error("Please select at most 5 tags");
+         return;
+      }
+      
+      if (!storedRepo) {
+        toast.error("No repository connected", {
+            description: "Please go back and connect a repository."
+        });
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        await createProject({
+          projectName,
+          description: "", // Optional or add input
+          tags: selectedTags,
+          isPublic,
+          repositoryId: storedRepo._id,
+          repoName: storedRepo.name,
+          repoFullName: storedRepo.fullName,
+          repoOwner: storedRepo.owner,
+          repoUrl: storedRepo.url,
+        });
+        
+        setDirection(1);
+        setCurrentStep((prev) => prev + 1);
+        toast.success("Project details saved!");
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to save project details");
+      } finally {
+        setIsLoading(false);
+      }
+    } else if (currentStep < 4) {
       setDirection(1);
       setCurrentStep((prev) => prev + 1);
     } else {
@@ -139,7 +198,7 @@ export function MultiStepOnboarding() {
         src="/a1.jpg"
         alt="bg-image"
         fill
-        className="absolute w-full h-full object-cover opacity-20"
+        className="absolute w-full h-full object-cover opacity-25"
       />
 
       <div className="absolute top-14 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[500px] bg-blue-500/40 blur-[200px] rounded-full pointer-events-none opacity-50" />
@@ -256,9 +315,10 @@ export function MultiStepOnboarding() {
                 </div>
               )}
 
+              {/* HERE NEED TO ADD A CONNECT BUTTON WITH REPO TO CONNECT AND SYNC */}
               {currentStep === 2 && (
-                <div className="space-y-5 relative">
-                  <div className="space-y-2">
+                <div className="space-y-4 relative">
+                  <div className="space-y-1">
                     <h2 className="text-2xl text-white font-semibold tracking-tight">
                       Connect <GitBranchPlus className="w-5 h-5 inline ml-2" />
                     </h2>
@@ -286,10 +346,10 @@ export function MultiStepOnboarding() {
               )}
 
               {currentStep === 3 && (
-                <div className="space-y-6">
+                <div className="space-y-6 relative">
                   <div className="space-y-2">
                     <h2 className="text-2xl font-semibold tracking-tight">
-                      Step 3: Define
+                     Lets Create Your Project
                     </h2>
                     <p className="text-muted-foreground">
                       Name your project and add relevant category tags.
@@ -315,7 +375,7 @@ export function MultiStepOnboarding() {
 
                     <div className="space-y-3">
                       <Label className="text-xs uppercase tracking-widest text-muted-foreground">
-                        Suggested Tags
+                         Tags <span className="text-[10px] normal-case opacity-50 ml-2">(Min 2, Max 5)</span>
                       </Label>
                       <div className="flex flex-wrap gap-2">
                         {TAG_OPTIONS.map((tag) => (
@@ -333,6 +393,52 @@ export function MultiStepOnboarding() {
                           </button>
                         ))}
                       </div>
+                      {selectedTags.length < 2 && selectedTags.length > 0 && (
+                          <p className="text-[10px] text-red-400">Select at least {2 - selectedTags.length} more tag(s)</p>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-3 pt-2">
+                         <Label className="text-xs uppercase tracking-widest text-muted-foreground">
+                            Visibility
+                         </Label>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div 
+                                onClick={() => setIsPublic(true)}
+                                className={cn(
+                                    "cursor-pointer p-3 rounded-xl border flex items-center gap-3 transition-all",
+                                    isPublic 
+                                        ? "bg-white/10 border-white text-white" 
+                                        : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
+                                )}
+                            >
+                                <div className={cn("p-2 rounded-full", isPublic ? "bg-white text-black" : "bg-white/10")}>
+                                    <Globe className="w-4 h-4" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-medium">Public</span>
+                                    <span className="text-[10px] opacity-70">Everyone can see</span>
+                                </div>
+                            </div>
+
+                            <div 
+                                onClick={() => setIsPublic(false)}
+                                className={cn(
+                                    "cursor-pointer p-3 rounded-xl border flex items-center gap-3 transition-all",
+                                    !isPublic 
+                                        ? "bg-white/10 border-white text-white" 
+                                        : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
+                                )}
+                            >
+                                <div className={cn("p-2 rounded-full", !isPublic ? "bg-white text-black" : "bg-white/10")}>
+                                    <Lock className="w-4 h-4" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-medium">Private</span>
+                                    <span className="text-[10px] opacity-70">Only you can see</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                   </div>
                 </div>
@@ -419,10 +525,12 @@ export function MultiStepOnboarding() {
 
           <Button
             onClick={handleNext}
+            disabled={isLoading}
             className="bg-gray-400 text-xs text-black hover:bg-white/80 font-medium px-8 transition-all active:scale-95 z-10 cursor-pointer"
           >
+            {isLoading && <Loader2 className="w-3 h-3 animate-spin mr-2" />}
             {currentStep === 4 ? "Complete" : "Continue"}
-            {currentStep !== 4 && <ChevronRight className="w-4 h-4 ml-2" />}
+            {currentStep !== 4 && !isLoading && <ChevronRight className="w-4 h-4 ml-2" />}
           </Button>
         </div>
       </div>

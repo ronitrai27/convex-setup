@@ -1,5 +1,5 @@
 import React from "react";
-import { Navbar } from "./modules/web/header";
+import { Navbar } from "../modules/web/header";
 
 const Home = () => {
   return (

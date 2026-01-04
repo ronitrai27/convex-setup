@@ -14,8 +14,8 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { DashboardBreadcrumbs } from "../modules/dashboard/SidebarBreadcrun";
-import { AppSidebar } from "../modules/dashboard/appSidebar";
+import { DashboardBreadcrumbs } from "../../modules/dashboard/SidebarBreadcrun";
+import { AppSidebar } from "../../modules/dashboard/appSidebar";
 
 export default function MainLayout({
   children,

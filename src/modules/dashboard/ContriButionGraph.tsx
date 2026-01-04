@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getContributionStats } from ".";
 import { useQuery as useConvexQuery } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 
 const ContributionGraph = () => {
   const { theme } = useTheme();
@@ -22,8 +22,9 @@ const ContributionGraph = () => {
   }>({
     queryKey: ["contribution-graph"],
     queryFn: () => getContributionStats(userName || "") as any,
+    enabled: !!userName, // 🔥 wait for username
     staleTime: 720 * 60 * 1000, // 12 hour
-    refetchOnWindowFocus: false,
+    // refetchOnWindowFocus: false,
   });
 
   console.log("contribution-data from Client:", data);

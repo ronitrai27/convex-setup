@@ -8,21 +8,23 @@ import { api } from "../../../../convex/_generated/api";
 import {
   getContributionStats,
   getDahboardStats,
-} from "../../modules/dashboard";
+} from "../../../modules/dashboard";
 import {
   PieChartVariant1,
   ScoreDetailsDialog,
-} from "@/app/modules/dashboard/PieDisplay1";
+} from "@/modules/dashboard/PieDisplay1";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { LucideGitBranch, LucideGitCommit } from "lucide-react";
+import { LucideGitBranch, LucideGitCommit, Stars } from "lucide-react";
 import { useState } from "react";
-import ContributionGraph from "@/app/modules/dashboard/ContriButionGraph";
-import ContributionGraph2 from "@/app/modules/dashboard/CustomGraph";
+import ContributionGraph from "@/modules/dashboard/ContriButionGraph";
+import ContributionGraph2 from "@/modules/dashboard/CustomGraph";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
+import { BsStars } from "react-icons/bs";
 
 const DashboardPage = () => {
   const user = useConvexQuery(api.users.getCurrentUser);
@@ -60,8 +62,12 @@ const DashboardPage = () => {
       {/* ========================= */}
       {/* USER NAME */}
       {/* ========================= */}
-      <div className="px-4">
+      <div className="px-4 flex items-center gap-8">
         <h1 className="text-3xl font-semibold ">Welcome {user?.name}</h1>
+
+        {/* <div className="w-10 h-10 bg-linear-to-br from-blue-600/10 via-indigo-400/30 to-white/30 flex items-center justify-center rounded-full shadow-md shadow-blue-600 hover:scale-105 hover:-translate-y-1 transition-all duration-300">
+          <BsStars className="h-6 w-6 animate-pulse duration-500" />{" "}
+        </div> */}
       </div>
       {/* ========================= */}
       {/* CARDS */}
@@ -75,7 +81,7 @@ const DashboardPage = () => {
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <p className="text-2xl font-semibold">
-                  {dashboardStats?.totalCommits}
+                  {dashboardStats?.totalCommits || "..."}
                 </p>
                 <p className="text-sm text-muted-foreground">Total Commits</p>
               </div>
@@ -93,7 +99,7 @@ const DashboardPage = () => {
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <p className="text-2xl font-semibold">
-                  {dashboardStats?.totalPRs}
+                  {dashboardStats?.totalPRs || "..."}
                 </p>
                 <p className="text-sm text-muted-foreground">Total PRs</p>
               </div>
@@ -183,7 +189,9 @@ const DashboardPage = () => {
                   </CardContent>
                 </Card>
               ) : (
-                <div>Loading...</div>
+                <div>
+                  <Skeleton className="w-full h-60" />
+                </div>
               )}
             </div>
           </div>
@@ -203,35 +211,12 @@ const DashboardPage = () => {
           </div>
         )}
       </div>
+
+      <SignOutButton>
+        <Button variant="outline">Sign Out</Button>
+      </SignOutButton>
     </div>
   );
 };
 
 export default DashboardPage;
-
-//  <div className="flex justify-between items-center mb-8">
-//         <h1 className="text-3xl font-bold">Dashboard</h1>
-//         <SignOutButton>
-//           <Button variant="outline">Sign Out</Button>
-//         </SignOutButton>
-//       </div>
-
-//       {isLoading && <div className="text-muted-foreground">Loading stats...</div>}
-//       {error && <div className="text-red-500">Error loading stats</div>}
-
-//       {!isLoading && !dashboardStats && (
-//         <div className="text-muted-foreground">
-//           No stats available. Make sure you have connected your GitHub account.
-//         </div>
-//       )}
-
-{
-  /* <div
-            className={cn(
-              "grid gap-5",
-              isSidebarCollapsed
-                ? "grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px]"
-                : "grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px]"
-            )}
-          ></div> */
-}

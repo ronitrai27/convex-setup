@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { api } from "../../../../../convex/_generated/api";
 import { useStoreUser } from "@/hooks/use-user-store";
 import { Loader2 } from "lucide-react";
-import { getGithubAccessToken } from "@/app/modules/github/action";
+import { getGithubAccessToken } from "@/modules/github/action";
 import { toast } from "sonner";
 
 // Here's a summary of the approach:
