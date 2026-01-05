@@ -93,6 +93,10 @@ export const getProjects = query({
   },
 });
 
+
+// =================================
+// GET PROJECT BY ID
+// =================================
 export const getProjectById = query({
   args: {
     projectId: v.id("projects"),

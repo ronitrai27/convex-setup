@@ -135,9 +135,10 @@ const DashboardPage = () => {
       {/* ========================= */}
       <div className="py-6 ">
         {/* Tab Header */}
-        <div className="flex gap-8">
+        <div className="flex gap-6 px-10">
           <Button
             size="sm"
+            className="px-10"
             variant={activeTab === "stats" ? "default" : "outline"}
             onClick={() => setActiveTab("stats")}
           >
@@ -145,18 +146,19 @@ const DashboardPage = () => {
           </Button>
           <Button
             size="sm"
+            className="px-10"
             variant={activeTab === "discover" ? "default" : "outline"}
             onClick={() => setActiveTab("discover")}
           >
             Discover
           </Button>
-          <Button
+          {/* <Button
             size="sm"
             variant={activeTab === "workspaces" ? "default" : "outline"}
             onClick={() => setActiveTab("workspaces")}
           >
             Workspaces
-          </Button>
+          </Button> */}
         </div>
         <Separator className="max-w-[80%] mx-auto my-5" />
 
@@ -204,12 +206,20 @@ const DashboardPage = () => {
           </div>
         )}
 
-        {activeTab === "workspaces" && (
+        {/* {activeTab === "workspaces" && (
           <div className="grid grid-cols-2 gap-6">
             <div>Workspaces left content</div>
             <div>Workspaces right content</div>
           </div>
-        )}
+        )} */}
+      </div>
+
+      {/* ================================= */}
+      {/* HERE NOW  LEFT SIDE SOMETHING... AND RIGHT SIDE QUICK CHATS */}
+      {/* ================================= */}
+
+      <div className="my-6 flex gap-8">
+        
       </div>
 
       <SignOutButton>
