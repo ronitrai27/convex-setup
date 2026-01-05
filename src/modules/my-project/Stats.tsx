@@ -9,7 +9,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { LucideActivity, LucideCalendar, LucideGitBranch, LucideGitBranchPlus, LucideMerge } from "lucide-react";
+import {
+  LucideActivity,
+  LucideCalendar,
+  LucideGitBranch,
+  LucideGitBranchPlus,
+  LucideHeart,
+  LucideMerge,
+} from "lucide-react";
+
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { Button } from "@/components/ui/button";
+
+const LANGUAGE_COLORS = [
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+];
 
 const StatsTab = ({
   repoName,
@@ -46,6 +64,13 @@ const StatsTab = ({
     refetchOnMount: false,
   });
 
+  const languageChartData =
+    languagesData?.map((lang, index) => ({
+      name: lang.name,
+      value: lang.percentage,
+      fill: LANGUAGE_COLORS[index % LANGUAGE_COLORS.length],
+    })) ?? [];
+
   // Loading state
   if (healthLoading || languagesLoading) {
     return (
@@ -65,14 +90,24 @@ const StatsTab = ({
     );
   }
   return (
-    <div>
+    <div className="space-y-5">
       {/* Health Data Section */}
-      <Card>
+      <Card className="bg-linear-to-br from-accent/70 dark:to-black to-transparent">
         <CardHeader>
           <CardTitle>Project Health</CardTitle>
-          <CardDescription className="text-muted-foreground text-sm">
+          <div className="text-muted-foreground text-sm flex justify-between">
             Project Health Indicator
-          </CardDescription>
+
+            {/* VIEW HEALTH STATUS Dilaog Open */}
+            <Button
+              variant="outline"
+              size="sm"
+              className=" text-xs cursor-pointer "
+              // onClick={() => setOpen(true)}
+            >
+             <LucideHeart className="w-4 h-4 inline mr-1 " /> View Health Status
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="p-4">
@@ -114,41 +149,81 @@ const StatsTab = ({
                 <LucideMerge className="w-4 h-4 inline mr-1 -mt-1" /> PR Merge
                 Rate: {healthData?.prMergeRate}%
               </p>
-              <p className="whitespace-nowrap bg-red-500/25 hover:bg-red-500/50 p-3 rounded-lg px-6 "><LucideGitBranch className="w-4 h-4 inline mr-1 -mt-1"/> Open Issues: {healthData?.openIssuesCount}</p>
-              <p className="whitespace-nowrap bg-blue-500/25 hover:bg-blue-500/50 p-3 rounded-lg px-6"><LucideGitBranchPlus className="w-4 h-4 inline mr-1 -mt-1"/> Closed Issues: {healthData?.closedIssuesCount}</p>
+              <p className="whitespace-nowrap bg-red-500/25 hover:bg-red-500/50 p-3 rounded-lg px-6 ">
+                <LucideGitBranch className="w-4 h-4 inline mr-1 -mt-1" /> Open
+                Issues: {healthData?.openIssuesCount}
+              </p>
+              <p className="whitespace-nowrap bg-blue-500/25 hover:bg-blue-500/50 p-3 rounded-lg px-6">
+                <LucideGitBranchPlus className="w-4 h-4 inline mr-1 -mt-1" />{" "}
+                Closed Issues: {healthData?.closedIssuesCount}
+              </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* <div className="border rounded-lg p-4">
-        <h3 className="text-lg font-semibold mb-4">🗣️ Tech Stack</h3>
-        <div className="space-y-2">
-          {languagesData?.map((lang) => (
-            <div key={lang.name} className="flex justify-between items-center">
-              <span>{lang.name}</span>
-              <span className="font-semibold">{lang.percentage}%</span>
+      <Card className="bg-linear-to-br from-accent/70 dark:to-black to-transparent">
+        <CardHeader>
+          <CardTitle>Project Languages</CardTitle>
+          <CardDescription className="text-muted-foreground text-sm">
+            Language distribution used in this project
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          <div className="flex items-center gap-8">
+            {/* Left side - Pie Chart */}
+            <div className="shrink-0">
+              <ResponsiveContainer width={200} height={200}>
+                <PieChart>
+                  <Pie
+                    data={languageChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {languageChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value: number) => `${value.toFixed(2)}%`}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
-          ))}
-        </div>
-      </div> */}
+
+            {/* Right side - Language list */}
+            <div className="flex-1 space-y-3">
+              {languagesData?.map((lang, index) => (
+                <div
+                  key={lang.name}
+                  className="flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="h-4 w-4 rounded-full shrink-0"
+                      style={{
+                        backgroundColor:
+                          LANGUAGE_COLORS[index % LANGUAGE_COLORS.length],
+                      }}
+                    />
+                    <span className="font-medium">{lang.name}</span>
+                  </div>
+                  <span className="text-muted-foreground font-semibold">
+                    {lang.percentage}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
 export default StatsTab;
-//  <div className="border rounded-lg p-4">
-//         <h3 className="text-lg font-semibold mb-4">📊 Project Health</h3>
-//         <div className="space-y-2">
-//           <p>Open Issues: {healthData?.openIssuesCount}</p>
-//           <p>Closed Issues: {healthData?.closedIssuesCount}</p>
-//   <p>
-//     Last Commit:{" "}
-//     {healthData?.lastCommitDate
-//       ? new Date(healthData.lastCommitDate).toLocaleDateString()
-//       : "N/A"}
-//   </p>
-//           <p>Commits (Last 60 Days): {healthData?.commitsLast60Days}</p>
-//   <p>PR Merge Rate: {healthData?.prMergeRate}%</p>
-//         </div>
-//       </div>

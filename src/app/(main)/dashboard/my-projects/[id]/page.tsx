@@ -25,11 +25,14 @@ import {
   StarIcon,
   Code,
   LucidePen,
+  LucideBrain,
+  LucideChevronsLeftRightEllipsis,
 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import StatsTab from "@/modules/my-project/Stats";
+import Image from "next/image";
 
 const MyProjectId = () => {
   const params = useParams();
@@ -251,6 +254,120 @@ const MyProjectId = () => {
                 </div>
               </div>
             </>
+          )}
+
+          {/* TAB ACTIONS */}
+          {activeTab === "actions" && (
+            <div className="">
+              {/* =========================== */}
+              {/* PROJECT NAME AND CTA  */}
+              {/* =========================== */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-4 mb-5">
+                {/* /PROJECT NAME ONLY */}
+                <div className="space-y-2">
+                  <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/50 truncate max-w-[450px]">
+                    {project.projectName}
+                  </h1>
+                </div>
+                {/* PUBLIC || VIEW REPO  */}
+                <div className="flex items-center gap-3">
+                  {/* VIEW REPO */}
+                  <Link href={project.repoUrl} target="_blank">
+                    <Button
+                      className="gap-2 shadow-lg shadow-primary/20"
+                      size="sm"
+                    >
+                      <Github className="w-4 h-4" /> View On Github
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              {/* ACTIONS 3 AGENTS */}
+              <h2 className="text-lg font-semibold">Agent & Intelligence</h2>
+              <div className="grid grid-cols-3 gap-10 my-6">
+                <Card className="bg-linear-to-br from-blue-500/30 via-indigo-500/5 to-transparent py-3 scale-95 hover:scale-100 transition-all duration-300 cursor-pointer">
+                  <CardHeader>
+                    <CardTitle>
+                      <LucideBrain className="w-4 h-4 inline mr-2" /> Repo
+                      Intelligence Agent
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="">
+                      <div>
+                        <p>Chat with your repository like a senior engineer.</p>
+                        <p className="text-muted-foreground text-sm">
+                          Understands codebase, Explains flows, logic, and
+                          dependencies Visualizes architecture in real time
+                        </p>
+                      </div>
+                      <Image
+                        src="/6.png"
+                        alt="Repo Intelligence Agent"
+                        width={120}
+                        height={120}
+                        className="object-contain mx-auto opacity-70"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+                {/* 2 */}
+                <Card className="bg-linear-to-br from-blue-500/30 via-indigo-500/5 to-transparent py-3 scale-95 hover:scale-100 transition-all duration-300 cursor-pointer">
+                  <CardHeader>
+                    <CardTitle>
+                      <LucideBrain className="w-4 h-4 inline mr-2" />
+                      Architecture & ER Agent
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="">
+                      <div>
+                        <p>Turn code into clear system diagrams.</p>
+                        <p className="text-muted-foreground text-sm">
+                          Generates ER diagrams Creates system & data flow
+                          diagrams Explains relationships visually
+                        </p>
+                      </div>
+                      <Image
+                        src="/5.png"
+                        alt="Repo Intelligence Agent"
+                        width={120}
+                        height={120}
+                        className="object-contain mx-auto opacity-70"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+                {/* 3 */}
+                <Card className="bg-linear-to-br from-blue-500/30 via-indigo-500/5 to-transparent py-3 scale-95 hover:scale-100 transition-all duration-300 cursor-pointer">
+                  <CardHeader>
+                    <CardTitle>
+                      <LucideBrain className="w-4 h-4 inline mr-2" />
+                      Auto Documentation Agent
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="">
+                      <div>
+                        <p>Your repo, always documented.</p>
+                        <p className="text-muted-foreground text-sm">
+                          Auto-generates README & docs Explains APIs & modules
+                          Keeps docs in sync with code
+                        </p>
+                      </div>
+                      <Image
+                        src="/7.png"
+                        alt="Auto Documentation Agent"
+                        width={120}
+                        height={120}
+                        className="object-contain mx-auto opacity-70"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           )}
         </div>
       </div>
