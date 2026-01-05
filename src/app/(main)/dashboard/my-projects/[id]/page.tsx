@@ -286,86 +286,101 @@ const MyProjectId = () => {
               {/* ACTIONS 3 AGENTS */}
               <h2 className="text-lg font-semibold">Agent & Intelligence</h2>
               <div className="grid grid-cols-3 gap-10 my-6">
-                <Card className="bg-linear-to-br from-blue-500/30 via-indigo-500/5 to-transparent py-3 scale-95 hover:scale-100 transition-all duration-300 cursor-pointer">
-                  <CardHeader>
-                    <CardTitle>
-                      <LucideBrain className="w-4 h-4 inline mr-2" /> Repo
-                      Intelligence Agent
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="">
-                      <div>
-                        <p>Chat with your repository like a senior engineer.</p>
-                        <p className="text-muted-foreground text-sm">
-                          Understands codebase, Explains flows, logic, and
-                          dependencies Visualizes architecture in real time
-                        </p>
+                <Link
+                  href={`/dashboard/my-projects/${project._id}/action/chat-agent`}
+                >
+                  <Card className="bg-linear-to-br from-blue-500/30 via-indigo-500/5 to-transparent py-3 scale-95 hover:scale-100 transition-all duration-300 cursor-pointer">
+                    <CardHeader>
+                      <CardTitle>
+                        <LucideBrain className="w-4 h-4 inline mr-2" /> Repo
+                        Intelligence Agent
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="">
+                        <div>
+                          <p>
+                            Chat with your repository like a senior engineer.
+                          </p>
+                          <p className="text-muted-foreground text-sm">
+                            Understands codebase, Explains flows, logic, and
+                            dependencies Visualizes architecture in real time
+                          </p>
+                        </div>
+                        <Image
+                          src="/6.png"
+                          alt="Repo Intelligence Agent"
+                          width={120}
+                          height={120}
+                          className="object-contain mx-auto opacity-70"
+                        />
                       </div>
-                      <Image
-                        src="/6.png"
-                        alt="Repo Intelligence Agent"
-                        width={120}
-                        height={120}
-                        className="object-contain mx-auto opacity-70"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
+
                 {/* 2 */}
-                <Card className="bg-linear-to-br from-blue-500/30 via-indigo-500/5 to-transparent py-3 scale-95 hover:scale-100 transition-all duration-300 cursor-pointer">
-                  <CardHeader>
-                    <CardTitle>
-                      <LucideBrain className="w-4 h-4 inline mr-2" />
-                      Architecture & ER Agent
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="">
-                      <div>
-                        <p>Turn code into clear system diagrams.</p>
-                        <p className="text-muted-foreground text-sm">
-                          Generates ER diagrams Creates system & data flow
-                          diagrams Explains relationships visually
-                        </p>
+                <Link
+                  href={`/dashboard/my-projects/${project._id}/action/er-agent`}
+                >
+                  <Card className="bg-linear-to-br from-blue-500/30 via-indigo-500/5 to-transparent py-3 scale-95 hover:scale-100 transition-all duration-300 cursor-pointer">
+                    <CardHeader>
+                      <CardTitle>
+                        <LucideBrain className="w-4 h-4 inline mr-2" />
+                        Architecture & ER Agent
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="">
+                        <div>
+                          <p>Turn code into clear system diagrams.</p>
+                          <p className="text-muted-foreground text-sm">
+                            Generates ER diagrams Creates system & data flow
+                            diagrams Explains relationships visually
+                          </p>
+                        </div>
+                        <Image
+                          src="/5.png"
+                          alt="Repo Intelligence Agent"
+                          width={120}
+                          height={120}
+                          className="object-contain mx-auto opacity-70"
+                        />
                       </div>
-                      <Image
-                        src="/5.png"
-                        alt="Repo Intelligence Agent"
-                        width={120}
-                        height={120}
-                        className="object-contain mx-auto opacity-70"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
                 {/* 3 */}
-                <Card className="bg-linear-to-br from-blue-500/30 via-indigo-500/5 to-transparent py-3 scale-95 hover:scale-100 transition-all duration-300 cursor-pointer">
-                  <CardHeader>
-                    <CardTitle>
-                      <LucideBrain className="w-4 h-4 inline mr-2" />
-                      Auto Documentation Agent
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="">
-                      <div>
-                        <p>Your repo, always documented.</p>
-                        <p className="text-muted-foreground text-sm">
-                          Auto-generates README & docs Explains APIs & modules
-                          Keeps docs in sync with code
-                        </p>
+                <Link
+                  href={`/dashboard/my-projects/${project._id}/action/doc-agent`}
+                >
+                  <Card className="bg-linear-to-br from-blue-500/30 via-indigo-500/5 to-transparent py-3 scale-95 hover:scale-100 transition-all duration-300 cursor-pointer">
+                    <CardHeader>
+                      <CardTitle>
+                        <LucideBrain className="w-4 h-4 inline mr-2" />
+                        Auto Documentation Agent
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="">
+                        <div>
+                          <p>Your repo, always documented.</p>
+                          <p className="text-muted-foreground text-sm">
+                            Auto-generates README & docs Explains APIs & modules
+                            Keeps docs in sync with code
+                          </p>
+                        </div>
+                        <Image
+                          src="/7.png"
+                          alt="Auto Documentation Agent"
+                          width={120}
+                          height={120}
+                          className="object-contain mx-auto opacity-70"
+                        />
                       </div>
-                      <Image
-                        src="/7.png"
-                        alt="Auto Documentation Agent"
-                        width={120}
-                        height={120}
-                        className="object-contain mx-auto opacity-70"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               </div>
             </div>
           )}

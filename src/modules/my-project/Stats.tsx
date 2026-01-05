@@ -97,7 +97,6 @@ const StatsTab = ({
           <CardTitle>Project Health</CardTitle>
           <div className="text-muted-foreground text-sm flex justify-between">
             Project Health Indicator
-
             {/* VIEW HEALTH STATUS Dilaog Open */}
             <Button
               variant="outline"
@@ -105,7 +104,8 @@ const StatsTab = ({
               className=" text-xs cursor-pointer "
               // onClick={() => setOpen(true)}
             >
-             <LucideHeart className="w-4 h-4 inline mr-1 " /> View Health Status
+              <LucideHeart className="w-4 h-4 inline mr-1 " /> View Health
+              Status
             </Button>
           </div>
         </CardHeader>
@@ -118,8 +118,8 @@ const StatsTab = ({
               <p>{healthData?.commitsLast60Days} Commits / 60 Days</p>
             </div>
 
-            <div className="mt-3 flex gap-0.5 h-20 items-end">
-              {Array.from({ length: 15 }).map((_, i) => {
+            <div className="mt-3 flex gap-0.5 h-20 items-end px-2">
+              {Array.from({ length: 20 }).map((_, i) => {
                 const height = Math.random() * 60 + 40;
                 const isRecent = i >= 9;
                 return (
@@ -128,10 +128,9 @@ const StatsTab = ({
                     className="flex-1 rounded-sm transition-all duration-300 hover:opacity-70"
                     style={{
                       height: `${height}%`,
-                      background: isRecent
-                        ? "linear-gradient(to top, #C17100, #E1A836)"
-                        : "#e5e7eb",
+                      background: isRecent ? "#D5D6D6" : "#D5D6D6",
                     }}
+                    // linear-gradient(to top, #C17100, #E1A836)
                   ></div>
                 );
               })}
