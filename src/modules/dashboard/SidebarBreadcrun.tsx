@@ -16,6 +16,8 @@ const navigationItems = [
   { title: "Notifications", url: "/dashboard/notifications" },
   { title: "Profile", url: "/dashboard/profile" },
   { title: "My-Projects", url: "/dashboard/my-projects" },
+  { title: "ER-Agent", url: "/dashboard/my-projects/:id/action/er-agent" },
+  { title: "Chat-Agent", url: "/dashboard/my-projects/:id/action/chat-agent" },
 ];
 
 export function DashboardBreadcrumbs() {

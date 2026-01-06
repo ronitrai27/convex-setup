@@ -106,7 +106,7 @@ const MyProjectId = () => {
 
   if (project === null) {
     return (
-      <div className="flex flex-col items-center justify-center h-full space-y-4">
+      <div className="flex flex-col items-center justify-center h-full space-y-4 p-6">
         <h2 className="text-2xl font-bold">Project not found</h2>
         <Link href="/dashboard">
           <Button variant="default">Go Back Dashboard</Button>
@@ -116,17 +116,17 @@ const MyProjectId = () => {
   }
 
   return (
-    <div className="w-full h-full animate-in fade-in duration-700 ">
+    <div className="w-full h-full animate-in fade-in duration-700 p-6 2xl:p-10 2xl:py-7">
       {/* Header Section */}
-      <div className="flex flex-col gap-5">
-        {activeTab === "home" && (
+      <div className="flex flex-col gap-4">
+        {/* {activeTab === "home" && (
           <Link
             href="/dashboard"
             className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors w-fit"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Dashboard
           </Link>
-        )}
+        )} */}
         {/* =========================== */}
         {/* TABS */}
         {/* =========================== */}
@@ -426,7 +426,7 @@ const MyProjectId = () => {
                     <CardHeader>
                       <CardTitle>
                         <LucideBrain className="w-4 h-4 inline mr-2" />
-                        Architecture & ER Agent
+                        ER & Schema Agent
                       </CardTitle>
                     </CardHeader>
                     <CardContent>

@@ -153,11 +153,15 @@ export const AppSidebar = () => {
             </PopoverTrigger>
 
             {/* Content */}
-            <PopoverContent side="bottom" align="start" className="w-56 p-2  border-2 ">
+            <PopoverContent
+              side="bottom"
+              align="start"
+              className="w-56 p-2  border-2 "
+            >
               <p className="text-sm text-center font-semibold text-muted-foreground mb-2">
                 Your Projects
               </p>
-              <Separator className="-my-2" /> 
+              <Separator className="-my-2" />
               <div className="flex flex-col gap-1">
                 {projects?.length ? (
                   projects.map((project) => (
@@ -233,28 +237,28 @@ export const AppSidebar = () => {
           </SidebarMenuButton>
 
           {/* MARKETPLACE */}
-          <SidebarMenuButton
-            asChild
-            data-active={isActive("/dashboard/marketplace")}
-            className="group relative overflow-hidden"
-          >
-            <Link
-              href="/dashboard/marketplace"
-              className="relative z-10 flex items-center gap-3 px-3 py-2 data-[active=true]:text-white text-muted-foreground"
+          {/* <SidebarMenuButton
+              asChild
+              data-active={isActive("/dashboard/marketplace")}
+              className="group relative overflow-hidden"
             >
-              <Store className="h-5 w-5" />
-              <span className="text-base">Marketplace</span>
+              <Link
+                href="/dashboard/marketplace"
+                className="relative z-10 flex items-center gap-3 px-3 py-2 data-[active=true]:text-white text-muted-foreground"
+              >
+                <Store className="h-5 w-5" />
+                <span className="text-base">Marketplace</span>
 
-              <span
-                className="
-        pointer-events-none absolute inset-0 -z-10
-        opacity-0 transition-opacity
-        group-data-[active=true]:opacity-100
-        bg-linear-to-l from-blue-600/50 via-transparent  to-transparent
-      "
-              />
-            </Link>
-          </SidebarMenuButton>
+                <span
+                  className="
+          pointer-events-none absolute inset-0 -z-10
+          opacity-0 transition-opacity
+          group-data-[active=true]:opacity-100
+          bg-linear-to-l from-blue-600/50 via-transparent  to-transparent
+        "
+                />
+              </Link>
+            </SidebarMenuButton> */}
 
           {/* Community with hover popover fields */}
           <Popover>
@@ -304,6 +308,59 @@ export const AppSidebar = () => {
                 >
                   <UserPlus className="h-4 w-4" />
                   Find Teammates
+                </Link>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* =========AI ASSISTANT====== */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <SidebarMenuButton
+                data-active={isActive("/dashboard/ai")}
+                className="group relative overflow-hidden"
+              >
+                <div className="relative z-10 flex items-center gap-3 px-1  w-full text-base text-muted-foreground">
+                  <Bot className="h-4 w-4" />
+                  <span>AI Assistant</span>
+                  <ChevronRight className="h-4 w-4 ml-auto" />
+
+                  <span
+                    className="
+              pointer-events-none absolute inset-0 -z-10
+              opacity-0 transition-opacity
+              group-data-[active=true]:opacity-100
+              bg-gradient-to-r from-blue-600/20 via-blue-600/5 to-transparent
+            "
+                  />
+                </div>
+              </SidebarMenuButton>
+            </PopoverTrigger>
+
+            <PopoverContent side="right" className="w-64 p-2">
+              <div className="flex flex-col gap-1">
+                <Link
+                  href="/dashboard/ai/notion"
+                  className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-accent"
+                >
+                  <Link2 className="h-4 w-4" />
+                  Connect to Notion
+                </Link>
+
+                <Link
+                  href="/dashboard/ai/voice"
+                  className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-accent"
+                >
+                  <Mic className="h-4 w-4" />
+                  Ask via Voice
+                </Link>
+
+                <Link
+                  href="/dashboard/ai/project"
+                  className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-accent"
+                >
+                  <FileText className="h-4 w-4" />
+                  Get Project Details
                 </Link>
               </div>
             </PopoverContent>
@@ -444,59 +501,6 @@ export const AppSidebar = () => {
                   />
                 </Link>
               </SidebarMenuButton>
-
-              {/* AI ASSISTANT (POPOVER) */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <SidebarMenuButton
-                    data-active={isActive("/dashboard/ai")}
-                    className="group relative overflow-hidden"
-                  >
-                    <div className="relative z-10 flex items-center gap-3 px-1  w-full text-base text-muted-foreground">
-                      <Bot className="h-4 w-4" />
-                      <span>AI Assistant</span>
-                      <ChevronRight className="h-4 w-4 ml-auto" />
-
-                      <span
-                        className="
-              pointer-events-none absolute inset-0 -z-10
-              opacity-0 transition-opacity
-              group-data-[active=true]:opacity-100
-              bg-gradient-to-r from-blue-600/20 via-blue-600/5 to-transparent
-            "
-                      />
-                    </div>
-                  </SidebarMenuButton>
-                </PopoverTrigger>
-
-                <PopoverContent side="right" className="w-64 p-2">
-                  <div className="flex flex-col gap-1">
-                    <Link
-                      href="/dashboard/ai/notion"
-                      className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-accent"
-                    >
-                      <Link2 className="h-4 w-4" />
-                      Connect to Notion
-                    </Link>
-
-                    <Link
-                      href="/dashboard/ai/voice"
-                      className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-accent"
-                    >
-                      <Mic className="h-4 w-4" />
-                      Ask via Voice
-                    </Link>
-
-                    <Link
-                      href="/dashboard/ai/project"
-                      className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-accent"
-                    >
-                      <FileText className="h-4 w-4" />
-                      Get Project Details
-                    </Link>
-                  </div>
-                </PopoverContent>
-              </Popover>
 
               {/* PROFILE */}
               <SidebarMenuButton
