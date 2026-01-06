@@ -35,6 +35,12 @@ importers:
       '@clerk/themes':
         specifier: ^2.4.46
         version: 2.4.46(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@dagrejs/dagre':
+        specifier: ^1.1.8
+        version: 1.1.8
+      '@google/generative-ai':
+        specifier: ^0.24.1
+        version: 0.24.1
       '@pinecone-database/pinecone':
         specifier: ^6.1.3
         version: 6.1.3
@@ -68,6 +74,9 @@ importers:
       convex:
         specifier: ^1.31.2
         version: 1.31.2(@clerk/clerk-react@5.59.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
+      dagre:
+        specifier: ^0.8.5
+        version: 0.8.5
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -80,6 +89,9 @@ importers:
       framer-motion:
         specifier: ^12.23.26
         version: 12.23.26(@emotion/is-prop-valid@1.2.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      html-to-image:
+        specifier: ^1.11.13
+        version: 1.11.13
       inngest:
         specifier: ^3.48.1
         version: 3.48.1(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(express@5.2.1)(hono@4.11.3)(next@16.1.1(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(typescript@5.9.3)(zod@3.25.76)
@@ -89,6 +101,9 @@ importers:
       lucide-react:
         specifier: ^0.562.0
         version: 0.562.0(react@19.2.3)
+      mermaid:
+        specifier: ^11.12.2
+        version: 11.12.2
       motion:
         specifier: ^12.23.26
         version: 12.23.26(@emotion/is-prop-valid@1.2.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -134,6 +149,9 @@ importers:
       react-spinners:
         specifier: ^0.17.0
         version: 0.17.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      reactflow:
+        specifier: ^11.11.4
+        version: 11.11.4(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       recharts:
         specifier: 2.15.4
         version: 2.15.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -177,6 +195,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.1.18
+      '@types/dagre':
+        specifier: ^0.7.53
+        version: 0.7.53
       '@types/node':
         specifier: ^20
         version: 20.19.27
@@ -673,6 +694,13 @@ packages:
     resolution: {integrity: sha512-RO00JqqmkIoI1o0XCtvudjaLpqEoe8PRDHlLS1r/aNZazUQCO0TT6nZOx1F3X+QJDjqYVY7YmYl3mtO2QVEk1g==}
     engines: {node: '>=18.17.0'}
 
+  '@dagrejs/dagre@1.1.8':
+    resolution: {integrity: sha512-5SEDlndt4W/LaVzPYJW+bSmSEZc9EzTf8rJ20WCKvjS5EAZAN0b+x0Yww7VMT4R3Wootkg+X9bUfUxazYw6Blw==}
+
+  '@dagrejs/graphlib@2.2.4':
+    resolution: {integrity: sha512-mepCf/e9+SKYy1d02/UkvSy6+6MoyXhVxP8lLDfA7BPE1X1d4dR0sZznmbM8/XVJ1GPM+Svnx7Xj6ZweByWUkw==}
+    engines: {node: '>17.0.0'}
+
   '@date-fns/tz@1.4.1':
     resolution: {integrity: sha512-P5LUNhtbj6YfI3iJjw5EL9eUAG6OitD0W3fWQcpQjDRc/QIsL0tRNuO1PcDvPccWL1fSTXXdE1ds+l95DV/OFA==}
 
@@ -1024,6 +1052,10 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
+
+  '@google/generative-ai@0.24.1':
+    resolution: {integrity: sha512-MqO+MLfM6kjxcKoy0p1wRzG3b4ZZXtPI+z2IE26UogS2Cm/XHO+7gGRBh6gcJsOiIVoH93UwKvW4HdgiOZCy9Q==}
+    engines: {node: '>=18.0.0'}
 
   '@grpc/grpc-js@1.14.3':
     resolution: {integrity: sha512-Iq8QQQ/7X3Sac15oB6p0FmUg/klxQvXLeileoqrTRGJYLV+/9tubbr9ipz0GKHjmXVsgFPo/+W+2cA8eNcR+XA==}
@@ -2638,6 +2670,42 @@ packages:
   '@radix-ui/rect@1.1.1':
     resolution: {integrity: sha512-HPwpGIzkl28mWyZqG52jiqDJ12waP11Pa1lGoiyUkIEuMLBP0oeK/C89esbXrxsky5we7dfd8U58nm0SgAWpVw==}
 
+  '@reactflow/background@11.3.14':
+    resolution: {integrity: sha512-Gewd7blEVT5Lh6jqrvOgd4G6Qk17eGKQfsDXgyRSqM+CTwDqRldG2LsWN4sNeno6sbqVIC2fZ+rAUBFA9ZEUDA==}
+    peerDependencies:
+      react: '>=17'
+      react-dom: '>=17'
+
+  '@reactflow/controls@11.2.14':
+    resolution: {integrity: sha512-MiJp5VldFD7FrqaBNIrQ85dxChrG6ivuZ+dcFhPQUwOK3HfYgX2RHdBua+gx+40p5Vw5It3dVNp/my4Z3jF0dw==}
+    peerDependencies:
+      react: '>=17'
+      react-dom: '>=17'
+
+  '@reactflow/core@11.11.4':
+    resolution: {integrity: sha512-H4vODklsjAq3AMq6Np4LE12i1I4Ta9PrDHuBR9GmL8uzTt2l2jh4CiQbEMpvMDcp7xi4be0hgXj+Ysodde/i7Q==}
+    peerDependencies:
+      react: '>=17'
+      react-dom: '>=17'
+
+  '@reactflow/minimap@11.7.14':
+    resolution: {integrity: sha512-mpwLKKrEAofgFJdkhwR5UQ1JYWlcAAL/ZU/bctBkuNTT1yqV+y0buoNVImsRehVYhJwffSWeSHaBR5/GJjlCSQ==}
+    peerDependencies:
+      react: '>=17'
+      react-dom: '>=17'
+
+  '@reactflow/node-resizer@2.2.14':
+    resolution: {integrity: sha512-fwqnks83jUlYr6OHcdFEedumWKChTHRGw/kbCxj0oqBd+ekfs+SIp4ddyNU0pdx96JIm5iNFS0oNrmEiJbbSaA==}
+    peerDependencies:
+      react: '>=17'
+      react-dom: '>=17'
+
+  '@reactflow/node-toolbar@1.3.14':
+    resolution: {integrity: sha512-rbynXQnH/xFNu4P9H+hVqlEUafDCkEoCy0Dg9mG22Sg+rY/0ck6KkrAQrYrTgXusd+cEJOMK0uOOFCK2/5rSGQ==}
+    peerDependencies:
+      react: '>=17'
+      react-dom: '>=17'
+
   '@sec-ant/readable-stream@0.4.1':
     resolution: {integrity: sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg==}
 
@@ -3112,6 +3180,9 @@ packages:
 
   '@types/d3@7.4.3':
     resolution: {integrity: sha512-lZXZ9ckh5R8uiFVt8ogUNf+pIrK4EsWrx2Np75WvF/eTpJ0FMHNhjXk8CKEx/+gpHbNQyJWehbFaTvqmHWB3ww==}
+
+  '@types/dagre@0.7.53':
+    resolution: {integrity: sha512-f4gkWqzPZvYmKhOsDnhq/R8mO4UMcKdxZo+i5SCkOU1wvGeHJeUXGIHeE9pnwGyPMDof1Vx5ZQo4nxpeg2TTVQ==}
 
   '@types/debug@4.1.12':
     resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
@@ -3690,6 +3761,9 @@ packages:
   dagre-d3-es@7.0.13:
     resolution: {integrity: sha512-efEhnxpSuwpYOKRm/L5KbqoZmNNukHa/Flty4Wp62JRvgH2ojwVgPgdYyr4twpieZnyRDdIH7PY2mopX26+j2Q==}
 
+  dagre@0.8.5:
+    resolution: {integrity: sha512-/aTqmnRta7x7MCCpExk7HQL2O4owCT2h8NT//9I1OQ9vt29Pa0BzSAkR5lwFUcQ7491yVi/3CXU9jQ5o0Mn2Sw==}
+
   data-uri-to-buffer@4.0.1:
     resolution: {integrity: sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A==}
     engines: {node: '>= 12'}
@@ -4074,6 +4148,9 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
+  graphlib@2.1.8:
+    resolution: {integrity: sha512-jcLLfkpoVGmH7/InMC/1hIvOPSUh38oJtGhvrOFGzioE1DZ+0YW16RgmOJhHiuWTvGiJQ9Z1Ik43JvkRPRvE+A==}
+
   graphql@16.12.0:
     resolution: {integrity: sha512-DKKrynuQRne0PNpEbzuEdHlYOMksHSUI8Zc9Unei5gTsMNA2/vMpoMz/yKba50pejK56qj98qM0SjYxAKi13gQ==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
@@ -4145,6 +4222,9 @@ packages:
   hono@4.11.3:
     resolution: {integrity: sha512-PmQi306+M/ct/m5s66Hrg+adPnkD5jiO6IjA7WhWw0gSBSo1EcRegwuI1deZ+wd5pzCGynCcn2DprnE4/yEV4w==}
     engines: {node: '>=16.9.0'}
+
+  html-to-image@1.11.13:
+    resolution: {integrity: sha512-cuOPoI7WApyhBElTTb9oqsawRvZ0rHhaHwghRLlTuffoD1B2aDemlCruLeZrUIIdvG7gs9xeELEPm6PhuASqrg==}
 
   html-url-attributes@3.0.1:
     resolution: {integrity: sha512-ol6UPyBWqsrO6EJySPz2O7ZSr856WDrEzM5zMqp+FJJLGMW35cLYmmZnl0vztAZxRUoNZJFTCohfjuIJ8I4QBQ==}
@@ -5208,6 +5288,12 @@ packages:
   react@19.2.3:
     resolution: {integrity: sha512-Ku/hhYbVjOQnXDZFv2+RibmLFGwFdeeKHFcOTlrt7xplBnya5OGn/hIRDsqDiSUcfORsDC7MPxwork8jBwsIWA==}
     engines: {node: '>=0.10.0'}
+
+  reactflow@11.11.4:
+    resolution: {integrity: sha512-70FOtJkUWH3BAOsN+LU9lCrKoKbtOPnz2uq0CV2PLdNSwxTXOhCbsZr50GmZ+Rtw3jx8Uv7/vBFtCGixLfd4Og==}
+    peerDependencies:
+      react: '>=17'
+      react-dom: '>=17'
 
   recast@0.23.11:
     resolution: {integrity: sha512-YTUo+Flmw4ZXiWfQKGcwwc11KnoRAYgzAE2E7mXKCjSviTKShtxBsN6YUUBB2gtaBzKzeKunxhUwNHQuRryhWA==}
@@ -6751,6 +6837,12 @@ snapshots:
       - react
       - react-dom
 
+  '@dagrejs/dagre@1.1.8':
+    dependencies:
+      '@dagrejs/graphlib': 2.2.4
+
+  '@dagrejs/graphlib@2.2.4': {}
+
   '@date-fns/tz@1.4.1': {}
 
   '@dotenvx/dotenvx@1.51.4':
@@ -6959,6 +7051,8 @@ snapshots:
       tabbable: 6.3.0
 
   '@floating-ui/utils@0.2.10': {}
+
+  '@google/generative-ai@0.24.1': {}
 
   '@grpc/grpc-js@1.14.3':
     dependencies:
@@ -8825,6 +8919,84 @@ snapshots:
 
   '@radix-ui/rect@1.1.1': {}
 
+  '@reactflow/background@11.3.14(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      '@reactflow/core': 11.11.4(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      classcat: 5.0.5
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+      zustand: 4.5.7(@types/react@19.2.7)(react@19.2.3)
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+
+  '@reactflow/controls@11.2.14(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      '@reactflow/core': 11.11.4(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      classcat: 5.0.5
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+      zustand: 4.5.7(@types/react@19.2.7)(react@19.2.3)
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+
+  '@reactflow/core@11.11.4(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      '@types/d3': 7.4.3
+      '@types/d3-drag': 3.0.7
+      '@types/d3-selection': 3.0.11
+      '@types/d3-zoom': 3.0.8
+      classcat: 5.0.5
+      d3-drag: 3.0.0
+      d3-selection: 3.0.0
+      d3-zoom: 3.0.0
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+      zustand: 4.5.7(@types/react@19.2.7)(react@19.2.3)
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+
+  '@reactflow/minimap@11.7.14(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      '@reactflow/core': 11.11.4(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@types/d3-selection': 3.0.11
+      '@types/d3-zoom': 3.0.8
+      classcat: 5.0.5
+      d3-selection: 3.0.0
+      d3-zoom: 3.0.0
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+      zustand: 4.5.7(@types/react@19.2.7)(react@19.2.3)
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+
+  '@reactflow/node-resizer@2.2.14(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      '@reactflow/core': 11.11.4(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      classcat: 5.0.5
+      d3-drag: 3.0.0
+      d3-selection: 3.0.0
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+      zustand: 4.5.7(@types/react@19.2.7)(react@19.2.3)
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+
+  '@reactflow/node-toolbar@1.3.14(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      '@reactflow/core': 11.11.4(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      classcat: 5.0.5
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+      zustand: 4.5.7(@types/react@19.2.7)(react@19.2.3)
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+
   '@sec-ant/readable-stream@0.4.1': {}
 
   '@shikijs/core@3.20.0':
@@ -9440,6 +9612,8 @@ snapshots:
       '@types/d3-transition': 3.0.9
       '@types/d3-zoom': 3.0.8
 
+  '@types/dagre@0.7.53': {}
+
   '@types/debug@4.1.12':
     dependencies:
       '@types/ms': 2.1.0
@@ -10015,6 +10189,11 @@ snapshots:
       d3: 7.9.0
       lodash-es: 4.17.22
 
+  dagre@0.8.5:
+    dependencies:
+      graphlib: 2.1.8
+      lodash: 4.17.21
+
   data-uri-to-buffer@4.0.1: {}
 
   date-fns-jalali@4.1.0-0: {}
@@ -10438,6 +10617,10 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
+  graphlib@2.1.8:
+    dependencies:
+      lodash: 4.17.21
+
   graphql@16.12.0: {}
 
   hachure-fill@0.5.2: {}
@@ -10580,6 +10763,8 @@ snapshots:
   headers-polyfill@4.0.3: {}
 
   hono@4.11.3: {}
+
+  html-to-image@1.11.13: {}
 
   html-url-attributes@3.0.1: {}
 
@@ -11867,6 +12052,20 @@ snapshots:
       react-dom: 19.2.3(react@19.2.3)
 
   react@19.2.3: {}
+
+  reactflow@11.11.4(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+    dependencies:
+      '@reactflow/background': 11.3.14(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@reactflow/controls': 11.2.14(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@reactflow/core': 11.11.4(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@reactflow/minimap': 11.7.14(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@reactflow/node-resizer': 2.2.14(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@reactflow/node-toolbar': 1.3.14(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
 
   recast@0.23.11:
     dependencies:
