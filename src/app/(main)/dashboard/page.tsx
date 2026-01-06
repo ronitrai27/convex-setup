@@ -19,7 +19,6 @@ import { Separator } from "@/components/ui/separator";
 import { LucideGitBranch, LucideGitCommit, Stars } from "lucide-react";
 import { useState } from "react";
 import ContributionGraph from "@/modules/dashboard/ContriButionGraph";
-import ContributionGraph2 from "@/modules/dashboard/CustomGraph";
 import { useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import Image from "next/image";

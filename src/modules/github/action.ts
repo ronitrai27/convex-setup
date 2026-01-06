@@ -21,7 +21,7 @@ export async function getGithubAccessToken() {
 
   // Returns an array of tokens
   const accessToken = tokens.data[0]?.token;
-  console.log("accessToken", accessToken);
+  // console.log("accessToken", accessToken);
   return accessToken;
 }
 
@@ -51,8 +51,8 @@ export const getRepositories = async (
 // GETTING THE USER CONTRIBUTIONS.
 // ================================
 export async function fetchUserContributions(token: string, username: string) {
-  console.log("token", token);
-  console.log("username", username);
+  console.log("token for fetching contribution:", token);
+  console.log("username for fetching contribution:", username);
   // const newToken = await getGithubAccessToken();
   // console.log("newToken", newToken);
   const accessToken = token || (await getGithubAccessToken());
@@ -83,8 +83,7 @@ export async function fetchUserContributions(token: string, username: string) {
       username: username,
     });
 
-    // console.log("response from graphQL query--", response);
-    // console.log("response.user.contributionsCollection.contributionCalendar", response.user.contributionsCollection.contributionCalendar);
+    console.log("contribution collected successfully by - github.ts");
     return response.user.contributionsCollection.contributionCalendar;
   } catch (error) {
     console.error(error);
