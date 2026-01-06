@@ -60,6 +60,10 @@ export const create = mutation({
   },
 });
 
+
+// =================================
+// GET PROJECTS
+// =================================
 export const getProjects = query({
   args: {},
   handler: async (ctx) => {
@@ -88,3 +92,66 @@ export const getProjects = query({
     return projects;
   },
 });
+
+
+// =================================
+// GET PROJECT BY ID
+// =================================
+export const getProjectById = query({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return null;
+    }
+
+    const project = await ctx.db.get(args.projectId);
+    
+    // Optional: You might want to check if the user is the owner
+    // const user = ... get user ...
+    // if (project.ownerId !== user._id) throw new Error("Unauthorized");
+    
+    return project;
+  },
+});
+
+export const updateThumbnail = mutation({
+  args: {
+    projectId: v.id("projects"),
+    thumbnailUrl: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier)
+      )
+      .unique();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project) {
+        throw new Error("Project not found");
+    }
+
+    if (project.ownerId !== user._id) {
+        throw new Error("Unauthorized");
+    }
+
+    await ctx.db.patch(args.projectId, {
+      thumbnailUrl: args.thumbnailUrl,
+      updatedAt: Date.now(),
+    });
+  },
+});
+

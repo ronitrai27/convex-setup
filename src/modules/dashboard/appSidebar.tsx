@@ -35,6 +35,7 @@ import {
   CreditCard,
   FileText,
   Folder,
+  FolderCode,
   Gift,
   GitBranch,
   Github,
@@ -43,6 +44,7 @@ import {
   Link2,
   LogOutIcon,
   LucideGitBranch,
+  LucideGithub,
   LucideGrip,
   LucideLayoutDashboard,
   LucideListTodo,
@@ -83,6 +85,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { ThemeButtons } from "./ThemeButton";
+import { Separator } from "@/components/ui/separator";
 
 // interface UsersType {
 //   _id: Id<"users">;
@@ -116,6 +119,8 @@ export const AppSidebar = () => {
     api.users.getCurrentUser
   );
 
+  const projects = useQuery(api.projects.getProjects);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -135,9 +140,44 @@ export const AppSidebar = () => {
             We<span className="italic">Kraft</span>
           </h1>
           {/* DROPDOWN ICON TO CHOOSE AMON USER CREATED PROJECTS  */}
-          <Button size="icon-sm" variant="outline" className="cursor-pointer group-data-[collapsible=icon]:hidden">
-            <ChevronsUpDown className="h-5 w-5" />
-          </Button>
+          <Popover>
+            {/* Trigger */}
+            <PopoverTrigger asChild>
+              <Button
+                size="icon-sm"
+                variant="outline"
+                className="cursor-pointer group-data-[collapsible=icon]:hidden"
+              >
+                <ChevronsUpDown className="h-5 w-5" />
+              </Button>
+            </PopoverTrigger>
+
+            {/* Content */}
+            <PopoverContent side="bottom" align="start" className="w-56 p-2  border-2 ">
+              <p className="text-sm text-center font-semibold text-muted-foreground mb-2">
+                Your Projects
+              </p>
+              <Separator className="-my-2" /> 
+              <div className="flex flex-col gap-1">
+                {projects?.length ? (
+                  projects.map((project) => (
+                    <Link
+                      key={project._id}
+                      href={`/dashboard/my-projects/${project._id}`}
+                      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-xs hover:bg-accent transition"
+                    >
+                      <FolderCode className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{project.projectName}</span>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-xs text-muted-foreground px-2">
+                    No projects found
+                  </p>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
         {/* SHOWING GITHUB CONNECTED ACCOUNT */}
         {user === undefined ? (
@@ -290,16 +330,44 @@ export const AppSidebar = () => {
               </TabsList>
 
               {/* FIXED HEIGHT + SCROLL */}
-              <div className="mt-2 h-[156px] overflow-y-auto rounded-md border bg-sidebar-accent/30">
+              <div className="mt-2 p-1 h-[156px] overflow-y-auto rounded-md border bg-sidebar-accent/30">
                 {/* MY CREATIONS */}
                 <TabsContent value="my" className="m-0 p-2">
-                  {/* ADDTION PROJECT CTA */}
-                  <div className="flex items-center justify-center">
-                    <Button size="sm" variant="outline">
-                      <Plus className="h-4 w-4 mr-1" />
-                      Create Project
-                    </Button>
-                  </div>
+                  {projects && projects.length === 0 ? (
+                    <div className="">
+                      <p>No projects found!</p>
+                      <div className="flex items-center justify-center">
+                        <Button size="sm" variant="outline">
+                          <Plus className="h-4 w-4 mr-1" />
+                          Create Project
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2 ">
+                      {projects?.map((project) => (
+                        <div key={project._id}>
+                          <div className="flex items-center text-xs tracking-tight hover:bg-accent hover:p-1 rounded-md transition-all duration-150">
+                            <Link
+                              className="flex items-center gap-2 truncate w-full max-w-[160px]"
+                              href={`/dashboard/my-projects/${project._id}`}
+                            >
+                              <FolderCode className="h-4 w-4 mr-1" />
+                              <p>{project.projectName}</p>
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs mt-2"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Create Project
+                      </Button>
+                    </div>
+                  )}
                 </TabsContent>
 
                 {/* TEAM PROJECTS */}

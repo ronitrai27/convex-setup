@@ -111,10 +111,11 @@ export async function retrieveContext(
 }
 
 // ==========================================
-// DELETEING THE REPOS VECTORS BY REPO ID
+// DELETEING THE REPOS VECTORS BY REPO NAME
 // ==========================================
 export async function deleteRepoVectors(repoId: string) {
   console.log(`Deleting all vectors for repo: ${repoId}`);
+  // repoID here is fullname like ronitrai27/repo name
   
   try {
     let allVectorIds: string[] = [];

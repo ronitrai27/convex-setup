@@ -72,7 +72,7 @@ export function MultiStepOnboarding() {
   // Auto-fill project name from connected repo
   React.useEffect(() => {
     if (storedRepo && !projectName) {
-      setProjectName(storedRepo.name);
+      // setProjectName(storedRepo.name);
       // Default to private if we could detect it, but for now default to public or whatever logic
     }
   }, [storedRepo, projectName]);
@@ -366,7 +366,7 @@ export function MultiStepOnboarding() {
                       </Label>
                       <Input
                         id="projectName"
-                        placeholder="My Awesome App"
+                        placeholder={storedRepo?.name}
                         className="bg-white/5 border-white/10 focus:ring-1 focus:ring-white/20"
                         value={projectName}
                         onChange={(e) => setProjectName(e.target.value)}
@@ -406,7 +406,7 @@ export function MultiStepOnboarding() {
                             <div 
                                 onClick={() => setIsPublic(true)}
                                 className={cn(
-                                    "cursor-pointer p-3 rounded-xl border flex items-center gap-3 transition-all",
+                                    "cursor-pointer p-2 rounded-xl border flex items-center gap-3 transition-all",
                                     isPublic 
                                         ? "bg-white/10 border-white text-white" 
                                         : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
@@ -424,7 +424,7 @@ export function MultiStepOnboarding() {
                             <div 
                                 onClick={() => setIsPublic(false)}
                                 className={cn(
-                                    "cursor-pointer p-3 rounded-xl border flex items-center gap-3 transition-all",
+                                    "cursor-pointer p-2 rounded-xl border flex items-center gap-3 transition-all",
                                     !isPublic 
                                         ? "bg-white/10 border-white text-white" 
                                         : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
