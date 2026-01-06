@@ -412,11 +412,11 @@ export default function Home() {
   return (
     <>
       <Toaster position="top-right" />
-      <div className="flex h-[calc(100vh-90px)]  overflow-hidden">
+      <div className="flex h-[calc(100vh-60px)]  overflow-hidden">
         {/* Left Panel - AI Assistant */}
         <aside
           className={cn(
-            "border-r border-border flex flex-col bg-card relative shrink-0",
+            "border-r border-border flex flex-col relative shrink-0 p-0 bg-white dark:bg-muted/70",
             isResizing && "select-none"
           )}
           style={{ width: sidebarWidth }}
@@ -430,11 +430,11 @@ export default function Home() {
             onDoubleClick={(e) => e.preventDefault()}
           />
           {/* HEADER */}
-          <div className="p-4 border-b border-border flex items-center justify-between">
+          <div className="border-b border-border py-3 px-6 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold flex items-center gap-2">
-                <Bot className="w-5 h-5" />
-                Schema Assistant
+                <Bot className="w-6 h-6" />
+                ER Agent
               </h2>
               {schema && (
                 <p className="text-xs text-muted-foreground mt-1">
@@ -465,8 +465,8 @@ export default function Home() {
                   <ConversationEmptyState>
                     <div
                       className={cn(
-                        "flex flex-col items-center justify-center text-center bg-muted/20 rounded-lg mx-4 mt-8 border border-border/50 transition-all duration-300",
-                        sidebarWidth < 340 ? "p-4" : "p-8"
+                        "flex flex-col items-center justify-center text-center transition-all duration-300",
+                        sidebarWidth < 340 ? "" : ""
                       )}
                     >
                       <div
@@ -493,77 +493,6 @@ export default function Home() {
                         guesswork.
                       </p>
 
-                      <div
-                        className={cn(
-                          "text-left bg-card border border-border rounded-lg w-full max-w-lg shadow-sm transition-all",
-                          sidebarWidth < 340 ? "p-3" : "p-6"
-                        )}
-                      >
-                        <h3
-                          className={cn(
-                            "font-semibold mb-3 flex items-center gap-2 transition-all",
-                            sidebarWidth < 340 ? "text-xs" : "text-sm"
-                          )}
-                        >
-                          <span className="bg-primary/10 text-primary w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0">
-                            1
-                          </span>
-                          What you can do right now:
-                        </h3>
-                        <ul
-                          className={cn(
-                            "space-y-2 text-muted-foreground ml-2 mb-6 transition-all",
-                            sidebarWidth < 340 ? "text-[10px]" : "text-sm"
-                          )}
-                        >
-                          <li className="flex gap-2">
-                            <span className="text-primary">•</span>
-                            Upload or paste your schema (Prisma, Supabase, SQL,
-                            Mongoose, or custom)
-                          </li>
-                          <li className="flex gap-2">
-                            <span className="text-primary">•</span>
-                            Or describe your database briefly if a schema isn’t
-                            ready
-                          </li>
-                        </ul>
-
-                        <h3
-                          className={cn(
-                            "font-semibold mb-3 flex items-center gap-2 transition-all",
-                            sidebarWidth < 340 ? "text-xs" : "text-sm"
-                          )}
-                        >
-                          <span className="bg-primary/10 text-primary w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0">
-                            2
-                          </span>
-                          I’ll automatically:
-                        </h3>
-                        <ul
-                          className={cn(
-                            "space-y-2 text-muted-foreground ml-2 transition-all",
-                            sidebarWidth < 340 ? "text-[10px]" : "text-sm"
-                          )}
-                        >
-                          <li className="flex gap-2">
-                            <span className="text-primary">•</span> Parse
-                            entities & relationships
-                          </li>
-                          <li className="flex gap-2">
-                            <span className="text-primary">•</span> Detect
-                            constraints and references
-                          </li>
-                          <li className="flex gap-2">
-                            <span className="text-primary">•</span> Generate a
-                            visual ER diagram
-                          </li>
-                          <li className="flex gap-2">
-                            <span className="text-primary">•</span> Highlight
-                            inconsistencies or missing links
-                          </li>
-                        </ul>
-                      </div>
-
                       <p
                         className={cn(
                           "mt-8 font-medium text-muted-foreground animate-pulse transition-all",
@@ -589,13 +518,14 @@ export default function Home() {
                     {messages.map((message) => {
                       if (message.role === "system") return null;
                       return (
-                        <Message key={message.id} from={message.role}>
+                        <Message key={message.id} from={message.role} className="">
                           <MessageContent>
                             {message.parts?.map((part, i) => {
                               switch (part.type) {
                                 case "text":
                                   return (
                                     <MessageResponse
+                                    className=""
                                       key={`${message.id}-${i}`}
                                       // role={message.role as "user" | "assistant"}
                                     >
@@ -631,32 +561,8 @@ export default function Home() {
               </ConversationContent>
               <ConversationScrollButton />
             </Conversation>
-            <div className="p-4 border-t border-border">
-              {/* Suggestions */}
-              {schema && messages.length === 0 && (
-                <Suggestions className="mb-3">
-                  <Suggestion
-                    suggestion="What tables are in my schema?"
-                    onClick={() =>
-                      setChatInput("What tables are in my schema?")
-                    }
-                  />
-                  <Suggestion
-                    suggestion="Show me the relationships"
-                    onClick={() => setChatInput("Show me the relationships")}
-                  />
-                  <Suggestion
-                    suggestion="Explain this schema"
-                    onClick={() => setChatInput("Explain this schema")}
-                  />
-                  <Suggestion
-                    suggestion="Find optimization opportunities"
-                    onClick={() =>
-                      setChatInput("Find optimization opportunities")
-                    }
-                  />
-                </Suggestions>
-              )}
+            <div className="p-3 border-t border-border">
+             
 
               {/* Status Messages */}
               {uploadError && (
@@ -754,9 +660,9 @@ export default function Home() {
         </aside>
 
         {/* Center Panel - ER Diagram */}
-        <main className="flex-1 relative flex flex-col">
+        <main className="flex-1 relative flex flex-col ">
           {/* Header Bar */}
-          <div className="h-14 border-b border-border bg-card px-4 flex items-center justify-between shrink-0">
+          <div className=" border-b border-border  px-5 py-3 flex items-center justify-between shrink-0">
             <div>
               <h1 className="text-lg font-bold">Schema ER Diagram</h1>
               {schema && (
@@ -771,17 +677,18 @@ export default function Home() {
                 onClick={handleExport}
                 disabled={!schema}
                 size="sm"
-                variant="outline"
+                variant="default"
               >
                 <Download className="w-4 h-4 mr-2" />
                 Export PNG
               </Button>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
                 onClick={() => setIsSchemaOpen(!isSchemaOpen)}
+                className="cursor-pointer"
               >
-                <PanelRight className="h-4 w-4" />
+                <PanelRight className="h-5 w-5 " />
               </Button>
             </div>
           </div>
@@ -804,13 +711,13 @@ export default function Home() {
                   style: { strokeWidth: 2, strokeDasharray: "5,5" },
                 }}
               >
-                <Controls position="bottom-left" />
+                {/* <Controls position="bottom-left" />
                 <MiniMap
                   position="bottom-right"
                   nodeStrokeWidth={3}
                   zoomable
                   pannable
-                />
+                /> */}
                 <Background
                   variant={BackgroundVariant.Dots}
                   gap={16}
@@ -831,7 +738,7 @@ export default function Home() {
         {/* Right Panel - Schema Explorer */}
         <aside
           className={cn(
-            "border-l border-border bg-card flex flex-col overflow-hidden transition-all duration-300 animate-collapsible-down ease-in-out",
+            "border-l border-border dark:bg-muted/70 bg-white flex flex-col overflow-hidden transition-all duration-300 animate-collapsible-down ease-in-out",
             isSchemaOpen ? "w-72" : "w-0 border-0"
           )}
         >

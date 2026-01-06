@@ -57,7 +57,7 @@ const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState("stats");
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full p-6 2xl:py-7 2xl:px-10">
       {/* ========================= */}
       {/* USER NAME */}
       {/* ========================= */}
@@ -166,13 +166,13 @@ const DashboardPage = () => {
             className={cn(
               "grid transition-all duration-150 ",
               sidebarOpen
-                ? "grid-cols-[minmax(0,1fr)_320px] gap-5"
-                : "grid-cols-[minmax(0,1fr)_360px] gap-10"
+                ? "grid-cols-[minmax(0,1fr)_320px] gap-5 2xl:gap-10"
+                : "grid-cols-[minmax(0,1fr)_360px] gap-10 2xl:gap-14"
             )}
           >
             {/* LEFT */}
-            <Card className="w-full flex items-center justify-center mx-auto overflow-x-auto bg-linear-to-b from-accent/40 to-transparent dark:to-black">
-              <CardContent>
+            <Card className="p-4 bg-linear-to-b from-accent/40 to-transparent dark:to-black">
+              <CardContent className="pt-6">
                 <ContributionGraph />
               </CardContent>
             </Card>

@@ -53,10 +53,9 @@ const ContributionGraph = () => {
 
       <div className="w-full">
         <div
-          className="scrollbar-hide flex justify-center overflow-x-auto"
+          className="scrollbar-hide flex justify-center overflow-x-auto scale-100 2xl:scale-105"
           style={{
             width: "100%",
-            transform: "scale(0.84)",
             transformOrigin: "center",
           }}
         >
