@@ -53,14 +53,19 @@ const MyProjectId = () => {
 
     console.log("File selected for upload:", file.name, file.size);
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert("File size exceeds 5MB limit");
+    if (file.size > 1 * 1024 * 1024) {
+      alert("File size exceeds 1MB limit");
       return;
     }
 
     setIsUploading(true);
     const formData = new FormData();
     formData.append("file", file);
+    
+    // Pass old URL for deletion
+    if (project?.thumbnailUrl) {
+        formData.append("oldUrl", project.thumbnailUrl);
+    }
 
     try {
       console.log("Sending upload request...");
@@ -202,7 +207,7 @@ const MyProjectId = () => {
               {/* =========================== */}
               {/* AWS + CLOUDFRONT THUMBNAIL FOR THE PROJECT */}
               {/* =========================== */}
-              <div className="w-[1064px] h-[240px] mx-auto bg-primary/10 rounded-lg overflow-hidden mb-10 relative group border border-border">
+              <div className="w-[1080px] h-[260px] mx-auto bg-primary/10 rounded-lg overflow-hidden mb-10 relative group border border-border">
                 {project.thumbnailUrl ? (
                   <Image
                     src={project.thumbnailUrl}
@@ -233,7 +238,7 @@ const MyProjectId = () => {
                         Click to Upload Thumbnail
                       </span>
                       <span className="text-xs text-white/70 mt-1">
-                        1064 x 240 Recommended (Max 5MB)
+                        1080 x 260 Recommended (Max 1MB)
                       </span>
                       <input
                         type="file"
