@@ -20,6 +20,7 @@ import {
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const LANGUAGE_COLORS = [
   "var(--chart-1)",
@@ -74,8 +75,9 @@ const StatsTab = ({
   // Loading state
   if (healthLoading || languagesLoading) {
     return (
-      <div className="p-4">
-        <p>Loading project stats...</p>
+      <div className="p-4 space-y-4">
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-38 w-full" />
       </div>
     );
   }

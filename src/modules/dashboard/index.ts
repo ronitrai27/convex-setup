@@ -92,7 +92,7 @@ export async function getContributionStats(githubName: string) {
         level: Math.min(4, Math.floor(day.contributionCount / 3)),
       }))
     );
-    console.log("contributions", contributions);
+    // console.log("contributions", contributions);
     return {
       contributions,
       totalContributions: calendar.totalContributions,
