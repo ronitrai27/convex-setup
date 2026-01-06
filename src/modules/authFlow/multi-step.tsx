@@ -72,7 +72,7 @@ export function MultiStepOnboarding() {
   // Auto-fill project name from connected repo
   React.useEffect(() => {
     if (storedRepo && !projectName) {
-      setProjectName(storedRepo.name);
+      // setProjectName(storedRepo.name);
       // Default to private if we could detect it, but for now default to public or whatever logic
     }
   }, [storedRepo, projectName]);
@@ -366,7 +366,7 @@ export function MultiStepOnboarding() {
                       </Label>
                       <Input
                         id="projectName"
-                        placeholder="My Awesome App"
+                        placeholder={storedRepo?.name}
                         className="bg-white/5 border-white/10 focus:ring-1 focus:ring-white/20"
                         value={projectName}
                         onChange={(e) => setProjectName(e.target.value)}

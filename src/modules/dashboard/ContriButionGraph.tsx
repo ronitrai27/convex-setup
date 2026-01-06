@@ -23,8 +23,8 @@ const ContributionGraph = () => {
     queryKey: ["contribution-graph"],
     queryFn: () => getContributionStats(userName || "") as any,
     enabled: !!userName, // 🔥 wait for username
-    staleTime: 720 * 60 * 1000, // 12 hour
-    // refetchOnWindowFocus: false,
+    staleTime: 60 * 60 * 1000, // 1 hour
+    refetchOnWindowFocus: true,
   });
 
   console.log("contribution-data from Client:", data);

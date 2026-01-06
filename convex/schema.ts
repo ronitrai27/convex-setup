@@ -79,6 +79,7 @@ export default defineSchema({
     repoFullName: v.string(), // e.g., "ronitrai27/Line-Queue-PR-Agent"
     repoOwner: v.string(),
     repoUrl: v.string(),
+    thumbnailUrl: v.optional(v.string()),
 
     // Project owner (creator)
     ownerId: v.id("users"),

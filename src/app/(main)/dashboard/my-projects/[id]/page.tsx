@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import React, { useState } from "react";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../../../convex/_generated/api";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,6 +27,9 @@ import {
   LucidePen,
   LucideBrain,
   LucideChevronsLeftRightEllipsis,
+  UploadCloud,
+  Loader2,
+  ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -40,6 +43,55 @@ const MyProjectId = () => {
 
   // Fetch project details
   const project = useQuery(api.projects.getProjectById, { projectId });
+  // -----------------
+  const updateThumbnail = useMutation(api.projects.updateThumbnail);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    console.log("File selected for upload:", file.name, file.size);
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size exceeds 5MB limit");
+      return;
+    }
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      console.log("Sending upload request...");
+      const response = await fetch("/api/objects", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed with status: " + response.status);
+      }
+
+      const data = await response.json();
+      console.log("Upload response data:", data);
+      const { url } = data;
+
+      console.log("Updating project thumbnail in DB...");
+      await updateThumbnail({
+        projectId: projectId,
+        thumbnailUrl: url,
+      });
+      console.log("Project thumbnail updated successfully");
+
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("Failed to upload thumbnail");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+  // ----------------------------
 
   const [activeTab, setActiveTab] = useState("home");
   const [homeTab, setHomeTab] = useState("feed");
@@ -150,7 +202,49 @@ const MyProjectId = () => {
               {/* =========================== */}
               {/* AWS + CLOUDFRONT THUMBNAIL FOR THE PROJECT */}
               {/* =========================== */}
-              <div className="w-[1064px] h-[240px] mx-auto bg-primary/10 rounded-lg overflow-hidden mb-10"></div>
+              <div className="w-[1064px] h-[240px] mx-auto bg-primary/10 rounded-lg overflow-hidden mb-10 relative group border border-border">
+                {project.thumbnailUrl ? (
+                  <Image
+                    src={project.thumbnailUrl}
+                    alt="Project Thumbnail"
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                    <ImageIcon className="w-10 h-10 mb-2 opacity-50" />
+                    <p>No thumbnail uploaded</p>
+                  </div>
+                )}
+
+                {/* Overlay for upload */}
+                <div
+                  className={`absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isUploading ? "opacity-100" : ""}`}
+                >
+                  {isUploading ? (
+                    <div className="flex flex-col items-center text-white">
+                      <Loader2 className="w-8 h-8 animate-spin mb-2" />
+                      <p>Uploading...</p>
+                    </div>
+                  ) : (
+                    <label className="cursor-pointer flex flex-col items-center text-white">
+                      <UploadCloud className="w-10 h-10 mb-2" />
+                      <span className="font-semibold">
+                        Click to Upload Thumbnail
+                      </span>
+                      <span className="text-xs text-white/70 mt-1">
+                        1064 x 240 Recommended (Max 5MB)
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleFileChange}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
 
               {/* PARENT CONTAINER LEFT SIDE TABS || RIGHT SIDE PROJECT INFO */}
               <div className="flex">
