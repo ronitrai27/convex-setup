@@ -78,7 +78,8 @@ export async function getContributionStats(githubName: string) {
 
     const accessToken = await getGithubAccessToken();
     console.log("accessToken", accessToken);
-    const calendar = await fetchUserContributions(accessToken, "ronitrai27");
+    // Need to remove ronitrai27
+    const calendar = await fetchUserContributions(accessToken, githubName);
     // console.log("calendar", calendar);
 
     if (!calendar) {

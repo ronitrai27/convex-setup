@@ -30,6 +30,9 @@ import {
   UploadCloud,
   Loader2,
   ImageIcon,
+  LucideFileText,
+  LucideNotebook,
+  LucideSlack,
 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -296,11 +299,7 @@ const MyProjectId = () => {
                     )}
 
                     {/* IN SETTINGS WE WILL CHANGE PROJECT DETAILS TOGGLE LOOKING FOR MEMBERS , TAGS , DESCRIPTION ETC, AND ADD README OR DOC (FUTURE WORK) */}
-                    {homeTab === "setting" && (
-                      <SettingTab
-                      project={project}
-                      />
-                    )}
+                    {homeTab === "setting" && <SettingTab project={project} />}
                     {/* {homeTab === "requests" && <RequestsTab />} */}
                   </div>
                 </div>
@@ -392,15 +391,24 @@ const MyProjectId = () => {
 
               {/* ACTIONS 3 AGENTS */}
               <h2 className="text-lg font-semibold">Agent & Intelligence</h2>
-              <div className="grid grid-cols-3 gap-10 my-6">
+              <p className="text-sm text-muted-foreground">
+                Understand your project better with our AI agents and 3D
+                Visualizations.
+              </p>
+              <div className="grid grid-cols-3 gap-10 my-8">
                 <Link
-                  href={`/dashboard/my-projects/${project._id}/action/chat-agent`}
+                  href={`/dashboard/my-projects/${project._id}/action/codebase-copilot`}
                 >
                   <Card className="bg-linear-to-br from-blue-500/30 via-indigo-500/5 to-transparent py-3 scale-95 hover:scale-100 transition-all duration-300 cursor-pointer">
                     <CardHeader>
-                      <CardTitle>
-                        <LucideBrain className="w-4 h-4 inline mr-2" /> Repo
-                        Intelligence Agent
+                      <CardTitle className="flex items-center justify-between ">
+                        <p>
+                          <LucideBrain className="w-4 h-4 inline mr-2" />
+                          Codebase Copilot
+                        </p>
+                        <div className="py-1 px-3 text-xs text-blue-600 dark:text-white bg-linear-to-br from-blue-300 to-indigo-400/30 rounded-full w-fit">
+                          PRO
+                        </div>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -410,8 +418,8 @@ const MyProjectId = () => {
                             Chat with your repository like a senior engineer.
                           </p>
                           <p className="text-muted-foreground text-sm">
-                            Understands codebase, Explains flows, logic, and
-                            dependencies Visualizes architecture in real time
+                            Understands codebase, logic, and View graphical
+                            representation of codebase.
                           </p>
                         </div>
                         <Image
@@ -428,13 +436,18 @@ const MyProjectId = () => {
 
                 {/* 2 */}
                 <Link
-                  href={`/dashboard/my-projects/${project._id}/action/er-agent`}
+                  href={`/dashboard/my-projects/${project._id}/action/data-model-visualizer`}
                 >
                   <Card className="bg-linear-to-br from-blue-500/30 via-indigo-500/5 to-transparent py-3 scale-95 hover:scale-100 transition-all duration-300 cursor-pointer">
                     <CardHeader>
-                      <CardTitle>
-                        <LucideBrain className="w-4 h-4 inline mr-2" />
-                        ER & Schema Agent
+                      <CardTitle className="flex items-center justify-between ">
+                        <p>
+                          <LucideBrain className="w-4 h-4 inline mr-2" />
+                          Data Model Visualizer
+                        </p>
+                        <div className="py-1 px-3 text-xs text-blue-600 dark:text-white bg-linear-to-br from-blue-300 to-indigo-400/30 rounded-full w-fit">
+                          PRO
+                        </div>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -459,22 +472,27 @@ const MyProjectId = () => {
                 </Link>
                 {/* 3 */}
                 <Link
-                  href={`/dashboard/my-projects/${project._id}/action/doc-agent`}
+                  href={`/dashboard/my-projects/${project._id}/action/architecture-explorer`}
                 >
                   <Card className="bg-linear-to-br from-blue-500/30 via-indigo-500/5 to-transparent py-3 scale-95 hover:scale-100 transition-all duration-300 cursor-pointer">
                     <CardHeader>
-                      <CardTitle>
-                        <LucideBrain className="w-4 h-4 inline mr-2" />
-                        Auto Documentation Agent
+                      <CardTitle className="flex items-center justify-between ">
+                        <p>
+                          <LucideBrain className="w-4 h-4 inline mr-2" />
+                          Architecture Explorer
+                        </p>
+                        <div className="py-1 px-3 text-xs text-blue-600 dark:text-white bg-linear-to-br from-blue-300 to-indigo-400/30 rounded-full w-fit">
+                          PRO
+                        </div>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="">
                         <div>
-                          <p>Your repo, always documented.</p>
+                          <p>Understand your project architecture.</p>
                           <p className="text-muted-foreground text-sm">
-                            Auto-generates README & docs Explains APIs & modules
-                            Keeps docs in sync with code
+                            Generates architecture diagrams. Perfect for
+                            generating Auth Flows, System Flows etc.
                           </p>
                         </div>
                         <Image
@@ -488,6 +506,53 @@ const MyProjectId = () => {
                     </CardContent>
                   </Card>
                 </Link>
+              </div>
+
+              {/* AUTOMATIONS AND INTEGRATIONS */}
+              <div className="mt-10">
+                <h2 className="text-lg font-semibold">
+                  Automations & Integrations
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Automate your project with our AI agents and Conenct your
+                  project with other tools.
+                </p>
+
+                <div className="grid space-y-5 my-6 px-6">
+                  {/* 1 README / DOC */}
+                  <div className="flex items-center bg-muted/70 p-3 rounded-md w-[500px]">
+                    <div className="bg-accent w-10 h-10 rounded-full flex items-center justify-center">
+                      <LucideFileText className="w-4 h-4 inline " />
+                    </div>
+                    <Separator orientation="vertical" className="mx-2 h-4" />
+                    <p className="text-sm">
+                      {" "}
+                      Readme | Documentation Generator.
+                    </p>
+                  </div>
+                  {/* 2 NOTION INTEGRATION */}
+                  <div className="flex items-center bg-muted/70 p-3 rounded-md w-[500px]">
+                    <div className="bg-accent w-10 h-10 rounded-full flex items-center justify-center">
+                      <LucideNotebook className="w-4 h-4 inline " />
+                    </div>
+                    <Separator orientation="vertical" className="mx-2 h-4" />
+                    <p className="text-sm">
+                      {" "}
+                      Notion Integration, streamline your workflow.
+                    </p>
+                  </div>
+                  {/* 3 SLACK INTEGRATION */}
+                  <div className="flex items-center bg-muted/70 p-3 rounded-md w-[500px]">
+                    <div className="bg-accent w-10 h-10 rounded-full flex items-center justify-center">
+                      <LucideSlack className="w-4 h-4 inline " />
+                    </div>
+                    <Separator orientation="vertical" className="mx-2 h-4" />
+                    <p className="text-sm">
+                      {" "}
+                      Slack Integration, streamline your workflow.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           )}

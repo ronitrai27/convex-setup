@@ -479,10 +479,10 @@ const SettingTab = ({ project }: { project: ProjectData }) => {
       {/* Save Action */}
       <div className="flex justify-end sticky bottom-6 z-10">
         <Button
-          size="lg"
+          size="sm"
           onClick={handleSave}
           disabled={isSaving}
-          className="w-full md:w-auto min-w-[150px] shadow-lg hover:shadow-xl transition-all"
+          className="w-full md:w-auto min-w-[150px] shadow-lg hover:shadow-xl transition-all text-xs cursor-pointer"
         >
           {isSaving ? (
             <>
