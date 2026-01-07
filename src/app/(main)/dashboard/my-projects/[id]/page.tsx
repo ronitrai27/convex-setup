@@ -36,6 +36,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import StatsTab from "@/modules/my-project/Stats";
 import Image from "next/image";
+import SettingTab from "@/modules/my-project/settingsTab";
 
 const MyProjectId = () => {
   const params = useParams();
@@ -61,10 +62,10 @@ const MyProjectId = () => {
     setIsUploading(true);
     const formData = new FormData();
     formData.append("file", file);
-    
+
     // Pass old URL for deletion
     if (project?.thumbnailUrl) {
-        formData.append("oldUrl", project.thumbnailUrl);
+      formData.append("oldUrl", project.thumbnailUrl);
     }
 
     try {
@@ -88,7 +89,6 @@ const MyProjectId = () => {
         thumbnailUrl: url,
       });
       console.log("Project thumbnail updated successfully");
-
     } catch (error) {
       console.error("Upload error:", error);
       alert("Failed to upload thumbnail");
@@ -99,7 +99,7 @@ const MyProjectId = () => {
   // ----------------------------
 
   const [activeTab, setActiveTab] = useState("home");
-  const [homeTab, setHomeTab] = useState("feed");
+  const [homeTab, setHomeTab] = useState("stats");
   if (project === undefined) {
     return <ProjectSkeleton />;
   }
@@ -224,7 +224,9 @@ const MyProjectId = () => {
 
                 {/* Overlay for upload */}
                 <div
-                  className={`absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isUploading ? "opacity-100" : ""}`}
+                  className={`absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                    isUploading ? "opacity-100" : ""
+                  }`}
                 >
                   {isUploading ? (
                     <div className="flex flex-col items-center text-white">
@@ -260,18 +262,18 @@ const MyProjectId = () => {
                     <Button
                       size="sm"
                       className="rounded-full px-5 text-[10px]"
-                      variant={homeTab === "feed" ? "default" : "outline"}
-                      onClick={() => setHomeTab("feed")}
-                    >
-                      Feed
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="rounded-full px-5 text-[10px]"
                       variant={homeTab === "stats" ? "default" : "outline"}
                       onClick={() => setHomeTab("stats")}
                     >
                       Stats
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="rounded-full px-5 text-[10px]"
+                      variant={homeTab === "setting" ? "default" : "outline"}
+                      onClick={() => setHomeTab("setting")}
+                    >
+                      Setting
                     </Button>
                     <Button
                       size="sm"
@@ -286,11 +288,17 @@ const MyProjectId = () => {
 
                   {/* TAB CONTENT */}
                   <div className="px-6">
-                    {/* {homeTab === "feed" && <FeedTab />} */}
                     {homeTab === "stats" && (
                       <StatsTab
                         repoName={project.repoName}
                         repoOwner={project.repoOwner}
+                      />
+                    )}
+
+                    {/* IN SETTINGS WE WILL CHANGE PROJECT DETAILS TOGGLE LOOKING FOR MEMBERS , TAGS , DESCRIPTION ETC, AND ADD README OR DOC (FUTURE WORK) */}
+                    {homeTab === "setting" && (
+                      <SettingTab
+                      project={project}
                       />
                     )}
                     {/* {homeTab === "requests" && <RequestsTab />} */}
@@ -316,7 +324,7 @@ const MyProjectId = () => {
                         <Badge
                           key={tag}
                           variant="secondary"
-                          className="px-4 py-1.5 bg-accent/50 hover:bg-accent text-xs"
+                          className="px-4 py-1.5 bg-accent/50 hover:bg-accent text-[10px]"
                         >
                           #{tag}
                         </Badge>

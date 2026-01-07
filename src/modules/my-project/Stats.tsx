@@ -92,7 +92,7 @@ const StatsTab = ({
     );
   }
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Health Data Section */}
       <Card className="bg-linear-to-br from-accent/70 dark:to-black to-transparent">
         <CardHeader>
