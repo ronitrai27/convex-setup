@@ -155,3 +155,67 @@ export const updateThumbnail = mutation({
   },
 });
 
+export const updateProject = mutation({
+  args: {
+    projectId: v.id("projects"),
+    description: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
+    isPublic: v.optional(v.boolean()),
+    lookingForMembers: v.optional(
+      v.array(
+        v.object({
+          role: v.string(),
+          type: v.union(
+            v.literal("casual"),
+            v.literal("part-time"),
+            v.literal("serious")
+          ),
+        })
+      )
+    ),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier)
+      )
+      .unique();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project) {
+      throw new Error("Project not found");
+    }
+
+    if (project.ownerId !== user._id) {
+      throw new Error("Unauthorized");
+    }
+
+    const updates: any = {
+      updatedAt: Date.now(),
+    };
+
+    if (args.description !== undefined) updates.description = args.description;
+    if (args.tags !== undefined) {
+      if (args.tags.length < 2 || args.tags.length > 5) {
+        throw new Error("Please select between 2 and 5 tags.");
+      }
+      updates.tags = args.tags;
+    }
+    if (args.isPublic !== undefined) updates.isPublic = args.isPublic;
+    if (args.lookingForMembers !== undefined)
+      updates.lookingForMembers = args.lookingForMembers;
+
+    await ctx.db.patch(args.projectId, updates);
+  },
+});
+
