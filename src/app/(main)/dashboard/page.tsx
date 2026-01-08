@@ -57,15 +57,11 @@ const DashboardPage = () => {
     // refetch,
   } = useQuery({
     queryKey: ["dashboardStats", user?.githubAccessToken, user?.githubUsername],
-    queryFn: () =>
-      getDahboardStats(
-        user?.githubAccessToken || "",
-        user?.githubUsername || ""
-      ),
+    queryFn: () => getDahboardStats(user?.githubUsername || ""),
     staleTime: 30 * 60 * 1000, // 10 min || 30 min
     gcTime: 30 * 60 * 1000, // 30 min
     refetchOnWindowFocus: false,
-    enabled: !!user?.githubAccessToken && !!user?.githubUsername,
+    enabled: !!user?.githubUsername,
   });
 
   // Query 2 --------------
@@ -75,7 +71,7 @@ const DashboardPage = () => {
     staleTime: 12 * 60 * 60 * 1000, // 12 hr
     gcTime: 12 * 60 * 60 * 1000, // 12 hr
     refetchOnWindowFocus: false,
-    enabled: !!user?.githubAccessToken && !!user?.githubUsername,
+    enabled: !!user?.githubUsername,
   });
 
   const [range, setRange] = useState<"past" | "current">("past");
@@ -111,6 +107,7 @@ const DashboardPage = () => {
       {/* CARDS */}
       {/* ========================= */}
       <div className="grid grid-cols-3 gap-10 w-full my-5 px-8">
+        {/* COMMIT */}
         <Card className="bg-linear-to-br from-accent/90 to-transparent dark:to-black  min-w-[260px]">
           <CardHeader>
             <CardTitle>Commits</CardTitle>
@@ -131,7 +128,10 @@ const DashboardPage = () => {
         {/* TOTAL PR*/}
         <Card className="bg-linear-to-br from-accent/90 to-transparent dark:to-black  min-w-[260px]">
           <CardHeader>
-            <CardTitle>Pull Requests </CardTitle>
+            <CardTitle className="flex items-center justify-between">
+              <p>Pull Requests</p>
+              <p>Merged PRs</p>{" "}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -142,7 +142,12 @@ const DashboardPage = () => {
                 <p className="text-sm text-muted-foreground">Total PRs</p>
               </div>
               <Separator orientation="vertical" className="mx-2" />
-              <LucideGitBranch className="h-9 w-9" />
+              <div className="flex flex-col">
+                <p className="text-2xl font-semibold">
+                  {dashboardStats?.totalMergedPRs || "..."}
+                </p>
+                <p className="text-sm text-muted-foreground">Merged PRs</p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -220,7 +225,7 @@ const DashboardPage = () => {
               {/* RIGHT */}
               <div className="w-full">
                 {dashboardStats ? (
-                  <Card className="p-1 bg-linear-to-b from-accent/40 to-transparent dark:to-black">
+                  <Card className="p-2 bg-linear-to-b from-accent/40 to-transparent dark:to-black">
                     {/* <CardHeader></CardHeader> */}
                     <CardContent>
                       <PieChartVariant1 stats={dashboardStats} />

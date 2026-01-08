@@ -12,6 +12,7 @@ import { api } from "../../../convex/_generated/api";
 
 const ContributionGraph = () => {
   const { theme } = useTheme();
+
   const user = useConvexQuery(api.users.getCurrentUser);
 
   const userName = user?.githubUsername;
@@ -61,10 +62,10 @@ const ContributionGraph = () => {
         >
           <ActivityCalendar
             data={data?.contributions}
-            theme={{
-              light: ["#e5e7eb", "#dbeafe", "#93c5fd", "#60a5fa", "#2563eb"],
-              dark: ["#1f2937", "#1e3a8a", "#1d4ed8", "#2563eb", "#3b82f6"],
-            }}
+            // theme={{
+            //   dark: ["#919191", "#1e3a8a", "#1d4ed8", "#2563eb", "#3b82f6"],
+            // }}
+            colorScheme={theme === "dark" ? "dark" : "light"}
             blockSize={12}
             blockMargin={5}
             fontSize={14}

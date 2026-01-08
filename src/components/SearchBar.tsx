@@ -73,7 +73,7 @@ export function CommunitySearchBar() {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <div className="flex items-center gap-3 rounded-xl  bg-accent/70 dark:bg-accent/50 backdrop-blur-md px-3 py-1 border">
+      <div className="flex items-center gap-3 rounded-xl  bg-accent/10 dark:bg-accent/50 backdrop-blur-md px-3 py-1 border">
         {/* MODE POPOVER */}
         <Popover>
           <PopoverTrigger asChild>
