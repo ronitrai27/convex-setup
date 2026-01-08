@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { api } from "../../../convex/_generated/api";
 import { useStoreUser } from "@/hooks/use-user-store";
 import { Loader2 } from "lucide-react";
-import { RedirectToSignIn } from "@clerk/nextjs";
+import { RedirectToSignIn, UserButton } from "@clerk/nextjs";
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import {
   SidebarInset,
@@ -16,6 +16,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { DashboardBreadcrumbs } from "../../modules/dashboard/SidebarBreadcrun";
 import { AppSidebar } from "../../modules/dashboard/appSidebar";
+import { CommunitySearchBar } from "@/components/SearchBar";
 
 export default function MainLayout({
   children,
@@ -67,10 +68,18 @@ export default function MainLayout({
         <SidebarProvider defaultOpen={true}>
           <AppSidebar />
           <SidebarInset>
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-              <SidebarTrigger className="-ml-1 cursor-pointer hover:scale-105 transition-all duration-200" />
-              <Separator orientation="vertical" className="mx-4 h-full" />
-              <DashboardBreadcrumbs />
+            <header className="flex justify-between h-19 py-1 shrink-0 items-center border-b px-4">
+              <div className="flex items-center gap-2">
+                <SidebarTrigger className="-ml-1 cursor-pointer hover:scale-105 transition-all duration-200" />
+                <Separator orientation="vertical" className="mx-4 h-8" />
+                <DashboardBreadcrumbs />
+              </div>
+              <div>
+                <CommunitySearchBar />
+              </div>
+              <div className="">
+                <UserButton />
+              </div>
             </header>
             <main className="flex-1 overflow-auto">{children}</main>
           </SidebarInset>
