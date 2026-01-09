@@ -150,7 +150,12 @@ const MyProjectId = () => {
               Home
             </Button>
             {/* VISIT WORKSPACE DEDICATED PROJECT SPACE */}
-            <Button size="sm" className="px-10 cursor-pointer"><LucideExternalLink className="w-4 h-4 inline mr-2" /> Visit workspace</Button>
+            <Link href={`/dashboard/my-projects/${project._id}/workspace`}>
+              <Button size="sm" className="px-10 cursor-pointer">
+                <LucideExternalLink className="w-4 h-4 inline mr-2" /> Visit
+                workspace
+              </Button>
+            </Link>
           </div>
 
           {/* TAB HOME */}
