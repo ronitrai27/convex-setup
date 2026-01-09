@@ -202,4 +202,64 @@
 
 
 
+
+  /* Markdown Styles */
+  .prose-sm {
+    font-size: 0.875rem;
+    line-height: 1.5rem;
+  }
+  .prose h1 {
+    font-size: 1.875rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+  }
+  .prose h2 {
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+  .prose h3 {
+    font-size: 1.25rem;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  .prose p {
+    margin-bottom: 1rem;
+  }
+  .prose ul, .prose ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+  }
+  .prose ul {
+    list-style-type: disc;
+  }
+  .prose ol {
+    list-style-type: decimal;
+  }
+  .prose code {
+    background-color: var(--muted);
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-family: var(--font-mono);
+  }
+  .prose pre {
+    background-color: var(--secondary);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+  }
+  .prose a {
+    color: var(--primary);
+    text-decoration: underline;
+  }
+  .prose blockquote {
+    border-left: 4px solid var(--border);
+    padding-left: 1rem;
+    font-style: italic;
+    margin-bottom: 1rem;
+  }
 }

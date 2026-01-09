@@ -69,10 +69,8 @@ export default defineSchema({
     projectName: v.string(),
     description: v.string(),
     tags: v.array(v.string()), // Validation (2-5 tags) should be done in mutations
-
     // Visibility
     isPublic: v.boolean(),
-
     // Linked repository
     repositoryId: v.id("repositories"),
     repoName: v.string(), // Denormalized for quick access
@@ -92,10 +90,9 @@ export default defineSchema({
         })
       )
     ),
-
     // Project owner (creator)
     ownerId: v.id("users"),
-
+    about: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
