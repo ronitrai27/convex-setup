@@ -33,6 +33,7 @@ import {
   LucideFileText,
   LucideNotebook,
   LucideSlack,
+  LucideExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -40,6 +41,7 @@ import { Separator } from "@/components/ui/separator";
 import StatsTab from "@/modules/my-project/Stats";
 import Image from "next/image";
 import SettingTab from "@/modules/my-project/settingsTab";
+import AboutTab from "@/modules/my-project/Abouttab";
 
 const MyProjectId = () => {
   const params = useParams();
@@ -47,6 +49,9 @@ const MyProjectId = () => {
 
   // Fetch project details
   const project = useQuery(api.projects.getProjectById, { projectId });
+  const user = useQuery(api.users.getCurrentUser);
+
+  const isPro = user?.type !== "free";
   // -----------------
   const updateThumbnail = useMutation(api.projects.updateThumbnail);
   const [isUploading, setIsUploading] = useState(false);
@@ -286,6 +291,14 @@ const MyProjectId = () => {
                     >
                       Requests
                     </Button>
+                    <Button
+                      size="sm"
+                      className="rounded-full px-5 text-[10px]"
+                      variant={homeTab === "about" ? "default" : "outline"}
+                      onClick={() => setHomeTab("about")}
+                    >
+                      About
+                    </Button>
                   </div>
                   <Separator className="max-w-[99%] mx-auto my-5" />
 
@@ -299,8 +312,15 @@ const MyProjectId = () => {
                     )}
 
                     {/* IN SETTINGS WE WILL CHANGE PROJECT DETAILS TOGGLE LOOKING FOR MEMBERS , TAGS , DESCRIPTION ETC, AND ADD README OR DOC (FUTURE WORK) */}
-                    {homeTab === "setting" && <SettingTab project={project} />}
+                    {homeTab === "setting" && (
+                      <SettingTab project={project} isPro={isPro} />
+                    )}
+                    {/* THIS IS THE REQUEST TAB WHERE ALL REQUEST WILL BE SHOWN */}
                     {/* {homeTab === "requests" && <RequestsTab />} */}
+                    {/* THIS IS THE ABOUT TAB WHERE EITHER README CONTENT OR GENERATED DOC WILL BE SHOWN! */}
+                    {homeTab === "about" && (
+                      <AboutTab project={project} isPro={isPro} />
+                    )}
                   </div>
                 </div>
                 {/* RIGHT SIDE PROJECT INFO */}
@@ -355,7 +375,27 @@ const MyProjectId = () => {
                         <Code className="w-4 h-4 text-blue-500" /> 100
                       </p>
                     </div>
-                    <Separator className="max-w-[99%] mx-auto my-5" />
+                    <Separator className="max-w-[99%] mx-auto my-2" />
+                    {/* AI PRO PROMOTION !! */}
+                    <div className="bg-linear-to-br from-blue-500/30 to-transparent p-3 rounded-md">
+                      <p className="text-sm font-semibold">
+                        Get Better Public Visibility. Rank your project on
+                        WeKraft
+                      </p>
+                      {isPro ? (
+                        <Button size="sm" className="text-xs cursor-pointer">
+                          <LucideBrain className="w-4 h-4" /> Analyze Project
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="text-xs cursor-pointer  mt-2"
+                        >
+                          <LucideExternalLink className="w-4 h-4" /> Unlock Pro
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

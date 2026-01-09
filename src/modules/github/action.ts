@@ -301,3 +301,30 @@ export const getProjectLanguages = async (owner: string, repo: string) => {
     throw new Error("Failed to fetch project languages");
   }
 };
+
+// ============================================
+// GETTING PROJECT README
+// ============================================
+export const getReadme = async (owner: string, repo: string) => {
+  console.log(`📖 Fetching README for: ${owner}/${repo}`);
+
+  const token = await getGithubAccessToken();
+  const octokit = new Octokit({ auth: token });
+
+  try {
+    const { data } = await octokit.rest.repos.getReadme({
+      owner,
+      repo,
+      mediaType: {
+        format: "raw",
+      },
+    });
+
+    console.log("✅ README fetched successfully");
+    return data as unknown as string;
+  } catch (error) {
+    console.error("❌ Error fetching README:", error);
+    // If README doesn't exist, GitHub API returns 404
+    return null;
+  }
+};

@@ -87,26 +87,7 @@ import { Progress } from "@/components/ui/progress";
 import { ThemeButtons } from "./ThemeButton";
 import { Separator } from "@/components/ui/separator";
 
-// interface UsersType {
-//   _id: Id<"users">;
-//   _creationTime: number;
 
-//   name: string;
-//   tokenIdentifier: string; // Clerk user ID
-//   email: string;
-
-//   imageUrl?: string;
-//   hasCompletedOnboarding: boolean;
-
-//   githubUsername?: string;
-//   githubAccessToken?: string;
-
-//   last_sign_in?: number; // unix timestamp
-//   inviteLink?: string;
-
-//   createdAt: number;
-//   updatedAt: number;
-// }
 
 export const AppSidebar = () => {
   const { theme, setTheme } = useTheme();

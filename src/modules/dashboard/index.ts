@@ -7,20 +7,16 @@ import { Octokit } from "octokit";
 // =====================================
 // GETTING DASHBOARD STATS (count of all)
 // =====================================
-
-export async function getDahboardStats(
-  accessToken: string,
-  githubName: string
-) {
+export async function getDahboardStats(githubName: string) {
   try {
     const { userId } = await auth();
     if (!userId) {
       throw new Error("Not authenticated");
     }
-
+    const accessToken = await getGithubAccessToken();
+    console.log("Getting access Token to display stats on Dashboard");
     const calendar = await fetchUserContributions(accessToken, githubName);
     const totalCommits = calendar?.totalContributions || 0;
-
     const octokit = new Octokit({ auth: accessToken });
 
     // Count PRs from github
@@ -30,12 +26,27 @@ export async function getDahboardStats(
     });
     const totalpr = pr?.total_count || 0;
 
+    // Count MERGED PRs
+    const { data: mergedPR } = await octokit.rest.search.issuesAndPullRequests({
+      q: `author:${githubName} type:pr is:merged`,
+      per_page: 1,
+    });
+    const totalMergedPRs = mergedPR?.total_count || 0;
+
     // Count closed issues
     const { data: issues } = await octokit.rest.search.issuesAndPullRequests({
       q: `author:${githubName} type:issue is:closed`,
       per_page: 1,
     });
     const totalIssuesClosed = issues?.total_count || 0;
+
+    // Count OPEN issues
+    const { data: openIssues } =
+      await octokit.rest.search.issuesAndPullRequests({
+        q: `author:${githubName} type:issue is:open`,
+        per_page: 1,
+      });
+    const totalOpenIssues = openIssues?.total_count || 0;
 
     // Count code review comments
     const { data: reviews } = await octokit.rest.search.issuesAndPullRequests({
@@ -55,7 +66,9 @@ export async function getDahboardStats(
     return {
       totalCommits,
       totalPRs: totalpr,
+      totalMergedPRs, 
       totalIssuesClosed,
+      totalOpenIssues, 
       totalReviews,
       accountAgeInYears,
       accountCreatedAt: user.created_at,
@@ -126,7 +139,7 @@ export async function getMonthlyActivity() {
 
     const { data: user } = await octokit.rest.users.getAuthenticated();
 
-    console.log("Fetching 6 motnhs activity for dashboard...")
+    console.log("Fetching 6 motnhs activity for dashboard...");
     const calendar = await fetchUserContributions(accessToken!, user.login);
 
     if (!calendar) {

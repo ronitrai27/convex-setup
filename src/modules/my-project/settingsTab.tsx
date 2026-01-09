@@ -44,67 +44,24 @@ import {
   LucideSettings2,
   LucideSettings,
   Tag,
+  LucideType,
+  LucideActivity,
+  LucideBriefcase,
+  LucideBrain,
+  LucideInfo,
+  LucideExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-const AVAILABLE_TAGS = [
-  "Productivity",
-  "AI",
-  "Healthcare",
-  "Edutech",
-  "Fintech",
-  "Web3",
-  "Agents",
-  "SaaS",
-  "E-commerce",
-  "Social Media",
-  "Developer Tools",
-  "Open Source",
-  "Machine Learning",
-  "Data Science",
-  "Blockchain",
-  "Crypto",
-  "DeFi",
-  "NFT",
-  "Metaverse",
-  "Gaming",
-  "AR/VR",
-  "Mobile App",
-  "Web App",
-  "Desktop App",
-  "CLI",
-  "API",
-  "Library",
-  "Framework",
-  "CMS",
-  "ERP",
-  "CRM",
-  "Automation",
-  "Cybersecurity",
-  "Privacy",
-  "Identity",
-  "Auth",
-  "Database",
-  "Cloud",
-  "DevOps",
-  "Testing",
-  "Monitoring",
-  "Analytics",
-  "Marketing",
-  "SEO",
-  "Content",
-  "Design",
-  "UX/UI",
-  "Accessibility",
-  "Localization",
-  "Education",
-  "Research",
-  "Environment",
-  "Sustainability",
-  "Non-profit",
-  "Community",
-];
+import { AVAILABLE_TAGS, roles } from "@/components/Universal-static-storage";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import { Separator } from "@/components/ui/separator";
 
 interface LookingForMember {
   role: string;
@@ -120,7 +77,7 @@ interface ProjectData {
   lookingForMembers?: LookingForMember[];
 }
 
-const SettingTab = ({ project }: { project: ProjectData }) => {
+const SettingTab = ({ project, isPro }: { project: ProjectData; isPro: boolean }) => {
   const updateProject = useMutation(api.projects.updateProject);
 
   // Local state for form fields
@@ -144,6 +101,8 @@ const SettingTab = ({ project }: { project: ProjectData }) => {
     "casual" | "part-time" | "serious"
   >("casual");
 
+  const [roleQuery, setRoleQuery] = useState("");
+
   // Handlers
   const handleTagToggle = (tag: string) => {
     if (selectedTags.includes(tag)) {
@@ -166,7 +125,7 @@ const SettingTab = ({ project }: { project: ProjectData }) => {
     setIsAddRoleOpen(false);
     setNewRole("");
     setNewRoleType("casual");
-    toast.success(`Role ${newRole} added! Don't forget to save changes.`);
+    toast.info(`Role ${newRole} added! Don't forget to save changes.`);
   };
 
   const handleRemoveRole = (index: number) => {
@@ -328,10 +287,37 @@ const SettingTab = ({ project }: { project: ProjectData }) => {
       </Card>
 
       <div className={` ${isPublic ? "hidden opacity-0" : "opacity-100 "}`}>
-        <p className="text-center text-lg font-semibold">
-          Kindly make your project public to add roles and types.
+        <p className="text-center text-lg tracking-tight font-semibold">
+          <LucideInfo className="inline w-4 h-4 mr-2" /> Kindly make your
+          project public to allow Others, discover & find Team members
         </p>
       </div>
+
+      {/* ------------------AI BUTTTON ------------------ */}
+      {isPublic && (
+        <div className="bg-accent/40 p-2 rounded-md w-full">
+          <p className="text-sm  text-muted-foreground">
+            <LucideInfo className="inline w-4 h-4 mr-2" /> Make Sure you have
+            Right Tags , description and About & Good project health to
+            maintain Higher ranking on Wekraft
+          </p>
+
+          {isPro ? (
+            <Button size="sm" className="text-xs cursor-pointer mt-2 w-fit mx-auto flex items-center justify-center">
+              <LucideBrain className="w-4 h-4" /> Analyze Project
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="default"
+              className="text-xs cursor-pointer mt-2 w-fit mx-auto flex items-center justify-center"
+            >
+              <LucideExternalLink className="w-4 h-4" /> Unlock Pro
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Team Settings Section */}
       <Card
         className={`${
@@ -355,49 +341,89 @@ const SettingTab = ({ project }: { project: ProjectData }) => {
               </p>
             </div>
 
+            {/* ============================================= */}
             <Dialog open={isAddRoleOpen} onOpenChange={setIsAddRoleOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="gap-2">
-                  <Plus className="w-4 h-4" /> Add Role
+                  <Plus className="w-4 h-4 " /> Add Role
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent className="min-w-[500px] min-h-[350px] p-5">
                 <DialogHeader>
                   <DialogTitle>Add a Role</DialogTitle>
                   <DialogDescription>
                     Specify the role and commitment level you are looking for.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="role" className="text-right">
-                      Role
+                <Separator />
+                <div className="flex flex-col   w-full">
+                  {/* ROLE */}
+                  <div className="flex flex-col gap-2 w-full mb-5">
+                    <Label htmlFor="role">
+                      {" "}
+                      <LucideBriefcase className="w-4 h-4 inline mr-2" /> Role
                     </Label>
-                    <Input
-                      id="role"
-                      placeholder="e.g. Frontend Developer"
-                      value={newRole}
-                      onChange={(e) => setNewRole(e.target.value)}
-                      className="col-span-3"
-                    />
+
+                    <div className="w-full">
+                      <Command>
+                        <CommandInput
+                          placeholder="Search role..."
+                          value={roleQuery}
+                          onValueChange={(value) => setRoleQuery(value)}
+                          className="bg-transparent"
+                        />
+
+                        {roleQuery.length > 0 && (
+                          <>
+                            <CommandEmpty>No role found.</CommandEmpty>
+
+                            <CommandGroup className="max-h-[120px] overflow-y-scroll">
+                              {roles
+                                .filter((role) =>
+                                  role
+                                    .toLowerCase()
+                                    .includes(roleQuery.toLowerCase())
+                                )
+                                .slice(0, 6)
+                                .map((role) => (
+                                  <CommandItem
+                                    key={role}
+                                    value={role}
+                                    onSelect={(value) => {
+                                      setNewRole(value);
+                                      setRoleQuery(value);
+                                    }}
+                                  >
+                                    {role}
+                                  </CommandItem>
+                                ))}
+                            </CommandGroup>
+                          </>
+                        )}
+                      </Command>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="type" className="text-right">
-                      Type
+
+                  {/* TYPE */}
+                  <div className="flex flex-col gap-2 w-full mt-auto">
+                    <Label htmlFor="type">
+                      <LucideActivity className="w-4 h-4 inline mr-2" /> Type
                     </Label>
-                    <div className="col-span-3">
+
+                    <div className="w-full">
                       <Select
                         value={newRoleType}
                         onValueChange={(v: any) => setNewRoleType(v)}
                       >
                         <SelectTrigger id="type">
-                          <SelectValue />
+                          <SelectValue placeholder="Select commitment type" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="casual">
+
+                        <SelectContent className="p-3">
+                          <SelectItem value="casual" className="py-2">
                             Casual (Side Projects / Hobbies)
                           </SelectItem>
-                          <SelectItem value="part-time">
+                          <SelectItem value="part-time" className="py-2">
                             Part-Time (Hackathon / Events)
                           </SelectItem>
                           <SelectItem value="serious">
@@ -408,6 +434,7 @@ const SettingTab = ({ project }: { project: ProjectData }) => {
                     </div>
                   </div>
                 </div>
+
                 <DialogFooter>
                   <Button
                     variant="ghost"

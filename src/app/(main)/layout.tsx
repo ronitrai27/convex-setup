@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { DashboardBreadcrumbs } from "../../modules/dashboard/SidebarBreadcrun";
 import { AppSidebar } from "../../modules/dashboard/appSidebar";
 import { CommunitySearchBar } from "@/components/SearchBar";
+import HeaderProfile from "@/components/HeaderProfile";
 
 export default function MainLayout({
   children,
@@ -78,7 +79,7 @@ export default function MainLayout({
                 <CommunitySearchBar />
               </div>
               <div className="">
-                <UserButton />
+              <HeaderProfile />
               </div>
             </header>
             <main className="flex-1 overflow-auto">{children}</main>
