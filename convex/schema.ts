@@ -93,6 +93,11 @@ export default defineSchema({
     // Project owner (creator)
     ownerId: v.id("users"),
     about: v.optional(v.string()),
+    // new details for the project 
+    projectStars: v.number(), // this is for project , on wekraft platform
+    projectForks: v.number(), // this fork currently dont include github forks ,only wekraft forks.
+    projectUpvotes: v.number(), 
+    // TIME STAMPS----
     createdAt: v.number(),
     updatedAt: v.number(),
   })

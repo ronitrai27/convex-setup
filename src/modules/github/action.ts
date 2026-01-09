@@ -248,6 +248,8 @@ export const getProjectHealthData = async (owner: string, repo: string) => {
       closedIssuesCount,
       lastCommitDate,
       commitsLast60Days,
+      totalPRs,
+      mergedPRs,
       prMergeRate: Math.round(prMergeRate),
     };
   } catch (error) {

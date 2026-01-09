@@ -19,10 +19,12 @@ import { AppSidebar } from "../../modules/dashboard/appSidebar";
 import { CommunitySearchBar } from "@/components/SearchBar";
 import HeaderProfile from "@/components/HeaderProfile";
 
-export default function MainLayout({
+export default function Layout({
   children,
+  // sidebar,
 }: {
   children: React.ReactNode;
+  // sidebar: React.ReactNode;
 }) {
   const { isLoading: isStoreLoading } = useStoreUser();
   const user = useQuery(api.users.getCurrentUser);
@@ -68,6 +70,7 @@ export default function MainLayout({
         {/* {user && !user.hasCompletedOnboarding ? null : children} */}
         <SidebarProvider defaultOpen={true}>
           <AppSidebar />
+             {/* {sidebar} */}
           <SidebarInset>
             <header className="flex justify-between h-19 py-1 shrink-0 items-center border-b px-4">
               <div className="flex items-center gap-2">

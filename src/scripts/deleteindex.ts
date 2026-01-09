@@ -11,7 +11,7 @@ console.log("PINECONE_API_KEY exists:", !!process.env.PINECONE_API_KEY);
 async function main() {
   const { deleteRepoVectors } = await import("@/modules/Pinecone/rag");
   try {
-    await deleteRepoVectors("ronitrai27/Line-Queue-PR-Agent");
+    await deleteRepoVectors("ronitrai27/portfolio-website-rox");
     console.log("✅ Done deleting vectors");
   } catch (error: any) {
     console.error("❌ Error deleting vectors:");
