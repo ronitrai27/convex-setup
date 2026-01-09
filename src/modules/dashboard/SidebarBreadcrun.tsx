@@ -15,15 +15,12 @@ const navigationItems = [
   { title: "Marketplace", url: "/dashboard/marketplace" },
   { title: "Notifications", url: "/dashboard/notifications" },
   { title: "Profile", url: "/dashboard/profile" },
-  { title: "My-Projects", url: "/dashboard/my-projects" },
-  { title: "ER-Agent", url: "/dashboard/my-projects/:id/action/er-agent" },
-  { title: "Chat-Agent", url: "/dashboard/my-projects/:id/action/chat-agent" },
+  { title: "My Projects", url: "/dashboard/my-projects" },
 ];
 
 export function DashboardBreadcrumbs() {
   const pathname = usePathname();
 
-  // Find the deepest matching route
   const activeItem = navigationItems
     .filter(
       (item) => pathname === item.url || pathname.startsWith(item.url + "/")
@@ -33,11 +30,12 @@ export function DashboardBreadcrumbs() {
   if (!activeItem) return null;
 
   const isDashboardOnly = activeItem.url === "/dashboard";
+  const isWorkspace = pathname.includes("/workspace");
 
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {/* Dashboard (root) */}
+        {/* Dashboard */}
         <BreadcrumbItem>
           {isDashboardOnly ? (
             <BreadcrumbPage>Dashboard</BreadcrumbPage>
@@ -46,12 +44,22 @@ export function DashboardBreadcrumbs() {
           )}
         </BreadcrumbItem>
 
-        {/* Child page */}
+        {/* Active section (e.g. My Projects) */}
         {!isDashboardOnly && (
           <>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbPage>{activeItem.title}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </>
+        )}
+
+        {/* Workspace */}
+        {isWorkspace && (
+          <>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Workspace</BreadcrumbPage>
             </BreadcrumbItem>
           </>
         )}

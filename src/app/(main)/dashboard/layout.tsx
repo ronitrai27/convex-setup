@@ -3,7 +3,7 @@
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { api } from "../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { useStoreUser } from "@/hooks/use-user-store";
 import { Loader2 } from "lucide-react";
 import { RedirectToSignIn, UserButton } from "@clerk/nextjs";
@@ -14,17 +14,17 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { DashboardBreadcrumbs } from "../../modules/dashboard/SidebarBreadcrun";
-import { AppSidebar } from "../../modules/dashboard/appSidebar";
+import { DashboardBreadcrumbs } from "../../../modules/dashboard/SidebarBreadcrun";
+import { AppSidebar } from "../../../modules/dashboard/appSidebar";
 import { CommunitySearchBar } from "@/components/SearchBar";
 import HeaderProfile from "@/components/HeaderProfile";
 
 export default function Layout({
   children,
-  // sidebar,
+  sidebar,
 }: {
   children: React.ReactNode;
-  // sidebar: React.ReactNode;
+  sidebar: React.ReactNode;
 }) {
   const { isLoading: isStoreLoading } = useStoreUser();
   const user = useQuery(api.users.getCurrentUser);
@@ -69,8 +69,8 @@ export default function Layout({
         {/* Double check: Ensure we don't flash dashboard content if redirecting */}
         {/* {user && !user.hasCompletedOnboarding ? null : children} */}
         <SidebarProvider defaultOpen={true}>
-          <AppSidebar />
-             {/* {sidebar} */}
+          {/* <AppSidebar /> */}
+             {sidebar}
           <SidebarInset>
             <header className="flex justify-between h-19 py-1 shrink-0 items-center border-b px-4">
               <div className="flex items-center gap-2">
