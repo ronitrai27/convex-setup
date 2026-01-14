@@ -86,6 +86,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { ThemeButtons } from "./ThemeButton";
 import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
 
 
 
@@ -113,10 +114,14 @@ export const AppSidebar = () => {
   return (
     <Sidebar collapsible="icon" className="cursor-move">
       <SidebarHeader className="border-b ">
-        <div className="flex items-center justify-between px-2 py-3">
-          <div className="w-9 h-9 flex items-center justify-center rounded bg-primary text-primary-foreground">
-            <p className="font-extrabold text-xl"> W</p>
-          </div>
+        <div className="flex items-center justify-between px-3 py-3">
+          <Image
+            src="/logo.svg"
+            alt="Logo"
+            width={30}
+            height={30}
+            className="cursor-pointer"
+          />
           <h1 className="font-bold text-xl group-data-[collapsible=icon]:hidden">
             We<span className="italic">Kraft</span>
           </h1>

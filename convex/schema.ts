@@ -93,10 +93,28 @@ export default defineSchema({
     // Project owner (creator)
     ownerId: v.id("users"),
     about: v.optional(v.string()),
-    // new details for the project 
+    // new details for the project to maintain community engaement
     projectStars: v.number(), // this is for project , on wekraft platform
     projectForks: v.number(), // this fork currently dont include github forks ,only wekraft forks.
-    projectUpvotes: v.number(), 
+    projectUpvotes: v.number(),
+    // HEATH SCORES SUPER IMPORTANT ----------------
+    healthScore: v.optional(
+      v.object({
+        totalScore: v.number(), // 0–100
+        activityMomentum: v.number(), // 0–35
+        maintenanceQuality: v.number(), // 0–35
+        communityTrust: v.number(), // 0–20
+        freshness: v.number(), // 0–10
+        lastCalculatedDate: v.string(), // YYYY-MM-DD
+        // Stores last 2 health scores only
+        previousScores: v.array(
+          v.object({
+            totalScore: v.number(), // 0–100
+            calculatedDate: v.string(), // YYYY-MM-DD
+          })
+        ),
+      })
+    ),
     // TIME STAMPS----
     createdAt: v.number(),
     updatedAt: v.number(),

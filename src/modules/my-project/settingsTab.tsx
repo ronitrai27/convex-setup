@@ -297,9 +297,9 @@ const SettingTab = ({ project, isPro }: { project: ProjectData; isPro: boolean }
       {isPublic && (
         <div className="bg-accent/40 p-2 rounded-md w-full">
           <p className="text-sm  text-muted-foreground">
-            <LucideInfo className="inline w-4 h-4 mr-2" /> Make Sure you have
-            Right Tags , description and About & Good project health to
-            maintain Higher ranking on Wekraft
+            <LucideInfo className="inline w-4 h-4 mr-2" /> Make Sure to have
+            Right Tags, description, About & Good project health , so that 
+            your project can be found by more people.
           </p>
 
           {isPro ? (

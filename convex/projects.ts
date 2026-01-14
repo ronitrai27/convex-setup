@@ -268,3 +268,56 @@ export const updateAbout = mutation({
   },
 });
 
+// =================================
+// UPDATE HEALTH SCORE
+// =================================
+export const updateHealthScore = mutation({
+  args: {
+    projectId: v.id("projects"),
+    healthScore: v.object({
+      totalScore: v.number(),
+      activityMomentum: v.number(),
+      maintenanceQuality: v.number(),
+      communityTrust: v.number(),
+      freshness: v.number(),
+      lastCalculatedDate: v.string(),
+      previousScores: v.array(
+        v.object({
+          totalScore: v.number(),
+          calculatedDate: v.string(),
+        })
+      ),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("Project not found");
+
+    // Only owner can update health score (or maybe system? For now restrict to owner like others)
+    if (project.ownerId !== identity.tokenIdentifier && !project.ownerId) {
+       // Note: ownerId is a user ID (database ID), identity.tokenIdentifier is just the token sub.
+       // We should check user existence like other mutations.
+    }
+    
+    // We'll follow the pattern of other mutations to verify user
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier)
+      )
+      .unique();
+
+    if (!user) throw new Error("User not found");
+    if (project.ownerId !== user._id) throw new Error("Unauthorized");
+
+    await ctx.db.patch(args.projectId, {
+      healthScore: args.healthScore,
+      updatedAt: Date.now(),
+    });
+  },
+});
