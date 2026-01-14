@@ -34,6 +34,9 @@ import {
   LucideNotebook,
   LucideSlack,
   LucideExternalLink,
+  GitForkIcon,
+  LucideActivity,
+  LucideInfo,
 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -42,6 +45,12 @@ import StatsTab from "@/modules/my-project/Stats";
 import Image from "next/image";
 import SettingTab from "@/modules/my-project/settingsTab";
 import AboutTab from "@/modules/my-project/Abouttab";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const MyProjectId = () => {
   const params = useParams();
@@ -127,14 +136,6 @@ const MyProjectId = () => {
     <div className="w-full h-full animate-in fade-in duration-700 p-6 2xl:p-10 2xl:py-7">
       {/* Header Section */}
       <div className="flex flex-col gap-4">
-        {/* {activeTab === "home" && (
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors w-fit"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-          </Link>
-        )} */}
         {/* =========================== */}
         {/* TABS */}
         {/* =========================== */}
@@ -253,7 +254,7 @@ const MyProjectId = () => {
               {/* PARENT CONTAINER LEFT SIDE TABS || RIGHT SIDE PROJECT INFO */}
               <div className="flex">
                 {/* LEFT SIDE 3 TABS */}
-                <div className="w-[70%]">
+                <div className="w-[65%]">
                   {/* TABS */}
                   <div className="flex gap-6  px-4">
                     <Button
@@ -292,11 +293,12 @@ const MyProjectId = () => {
                   <Separator className="max-w-[99%] mx-auto my-5" />
 
                   {/* TAB CONTENT */}
-                  <div className="px-6">
+                  <div className="px-4">
                     {homeTab === "stats" && (
                       <StatsTab
                         repoName={project.repoName}
                         repoOwner={project.repoOwner}
+                        fullProject={project}
                       />
                     )}
 
@@ -313,9 +315,9 @@ const MyProjectId = () => {
                   </div>
                 </div>
                 {/* RIGHT SIDE PROJECT INFO */}
-                <div className="w-[30%] flex">
+                <div className="w-[35%] flex flex-1">
                   <Separator className="h-full" orientation="vertical" />
-                  <div className="flex flex-col items-center gap-5 px-4 text-muted-foreground">
+                  <div className="flex flex-col items-center gap-5 pl-4  text-muted-foreground">
                     <h1 className="text-lg font-semibold">
                       Project Info <LucidePen className="w-4 h-4 inline ml-3" />
                     </h1>
@@ -353,26 +355,99 @@ const MyProjectId = () => {
                       </p>
                     </div> */}
                     <div className="flex justify-between w-full">
-                      <p className="text-accent-foreground">
+                      <p className="text-accent-foreground max-w-[180px] truncate">
                         Owner : {project.repoOwner}
                       </p>
                       <p className="flex items-center gap-1 text-sm">
                         <StarIcon className="w-4 h-4 text-yellow-500 fill-yellow-400" />{" "}
-                        10
+                        {project?.projectStars}
                       </p>
                       <p className="flex items-center gap-1 text-sm">
-                        <Code className="w-4 h-4 text-blue-500" /> 100
+                        <Code className="w-4 h-4 text-blue-500" />{" "}
+                        {project?.projectUpvotes}
+                      </p>
+                      <p className="flex items-center gap-1 text-sm">
+                        <GitForkIcon className="w-4 h-4 text-blue-500" />{" "}
+                        {project?.projectForks}
                       </p>
                     </div>
                     <Separator className="max-w-[99%] mx-auto my-2" />
+                    {/* PROJECT HEALTH SCORE ! */}
+                    {project?.healthScore?.totalScore ? (
+                      <div className="px-4 flex items-center justify-center gap-10">
+                        <p className="text-sm font-medium">
+                          <LucideActivity className="w-4 h-4 inline mr-1" />{" "}
+                          Project Health Score
+                        </p>
+                        <p className="text-xl font-semibold">
+                          {project.healthScore?.totalScore}
+                        </p>
+                        {/* Tooltip */}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Button
+                                size="icon-xs"
+                                variant="outline"
+                                className="text-xs cursor-pointer"
+                              >
+                                <LucideInfo className="w-4 h-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <div className="text-xs">
+                                <p>
+                                  Health scores gives signal to users about the
+                                  quality of your project. Higher scores means
+                                  More users likely to discover your project.
+                                </p>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-5">
+                        <p>Calculate Health score</p>
+                        <Button size="sm" className="text-xs cursor-pointer">
+                          <LucideActivity className="w-4 h-4" /> Health Score
+                        </Button>
+                        {/* Tooltip */}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Button
+                                size="icon-xs"
+                                variant="outline"
+                                className="text-xs cursor-pointer"
+                              >
+                                <LucideInfo className="w-4 h-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <div className="text-xs ">
+                                <p>
+                                  Health scores gives signal to users about the
+                                  quality of your project. Higher scores means
+                                  More users likely to discover your project.
+                                </p>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    )}
                     {/* AI PRO PROMOTION !! */}
-                    <div className="bg-linear-to-br from-blue-500/30 to-transparent p-3 rounded-md">
+                    <div className="bg-linear-to-br from-blue-500/30 to-transparent p-3 max-w-[300px] mx-auto rounded-md">
                       <p className="text-sm font-semibold">
                         Get Better Public Visibility. Rank your project on
                         WeKraft
                       </p>
                       {isPro ? (
-                        <Button size="sm" className="text-xs cursor-pointer">
+                        <Button
+                          size="sm"
+                          className="text-xs cursor-pointer mt-2"
+                        >
                           <LucideBrain className="w-4 h-4" /> Analyze Project
                         </Button>
                       ) : (
