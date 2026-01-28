@@ -88,8 +88,6 @@ import { ThemeButtons } from "./ThemeButton";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 
-
-
 export const AppSidebar = () => {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -98,7 +96,7 @@ export const AppSidebar = () => {
   // Exact TS type of a user row (auto-generated from schema)
   // Fetch Current User
   const user: Doc<"users"> | undefined | null = useQuery(
-    api.users.getCurrentUser
+    api.users.getCurrentUser,
   );
 
   const projects = useQuery(api.projects.getProjects);
@@ -205,7 +203,7 @@ export const AppSidebar = () => {
           >
             <Link
               href="/dashboard"
-              className="relative z-10 flex items-center gap-3 px-3 py-2 data-[active=true]:text-white text-muted-foreground"
+              className="relative z-10 flex items-center gap-3 px-3 py-2 dark:data-[active=true]:text-white data-[active=true]:text-gray-700"
             >
               <LucideLayoutDashboard className="h-5 w-5" />
               <span className="text-base">Dashboard</span>
@@ -216,7 +214,7 @@ export const AppSidebar = () => {
         pointer-events-none absolute inset-0 -z-10
         opacity-0 transition-opacity
         group-data-[active=true]:opacity-100
-        bg-linear-to-l from-blue-600/50 via-transparent  to-transparent
+        bg-linear-to-l from-blue-600/80 dark:from-blue-600/50 via-blue-600/10  to-transparent
       "
               />
             </Link>
@@ -390,7 +388,7 @@ export const AppSidebar = () => {
                     <div className="flex flex-col gap-2 ">
                       {projects?.map((project) => (
                         <div key={project._id}>
-                          <div className="flex items-center text-xs tracking-tight hover:bg-accent hover:p-1 rounded-md transition-all duration-150">
+                          <div className="flex items-center text-xs tracking-tight hover:bg-accent p-1 rounded-md transition-all duration-150">
                             <Link
                               className="flex items-center gap-2 truncate w-full max-w-[160px]"
                               href={`/dashboard/my-projects/${project._id}`}
