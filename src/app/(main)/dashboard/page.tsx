@@ -500,6 +500,6 @@ const DashboardPage = () => {
 
 export default DashboardPage;
 
-// <SignOutButton>
-//   <Button variant="outline">Sign Out</Button>
-// </SignOutButton>
+{/* <SignOutButton>
+  <Button variant="outline">Sign Out</Button>
+</SignOutButton> */}
