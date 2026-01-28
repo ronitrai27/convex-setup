@@ -37,6 +37,7 @@ import {
   GitForkIcon,
   LucideActivity,
   LucideInfo,
+  ChevronLeft,
 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -142,6 +143,7 @@ const MyProjectId = () => {
         <div className="">
           {/* Tab Header */}
           <div className="flex gap-6 px-10 mb-10">
+            <Button className="text-xs" variant="ghost" size="sm"><ChevronLeft/>Back</Button>
             <Button
               size="sm"
               className="px-10 cursor-pointer"
