@@ -67,6 +67,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import RequestTab from "@/modules/my-project/ReqTab";
+import { shareViaWhatsApp, shareViaGmail, shareViaDiscord } from "@/lib/invite";
 
 const MyProjectId = () => {
   const params = useParams();
@@ -139,6 +140,8 @@ const MyProjectId = () => {
     }
   };
 
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
+
   const [activeTab, setActiveTab] = useState("home");
   const [homeTab, setHomeTab] = useState("stats");
   if (project === undefined) {
@@ -189,11 +192,11 @@ const MyProjectId = () => {
 
           {/* TAB HOME */}
           {activeTab === "home" && (
-            <>
+            <div className="w-full">
               {/* =========================== */}
               {/* PROJECT NAME AND CTA  */}
               {/* =========================== */}
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-4 mb-5">
+              <div className="flex justify-between items-center w-full gap-4 px-4 mb-5">
                 {/* /PROJECT NAME ONLY */}
                 <div className="space-y-2">
                   <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/50 truncate max-w-[450px] capitalize">
@@ -226,16 +229,17 @@ const MyProjectId = () => {
                   </Link>
 
                   {/* Invite link with the dialog */}
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        className="gap-2 bg-blue-500 hover:bg-blue-600 text-white cursor-pointer"
-                        size="sm"
-                      >
-                        <UserPlus className="w-4 h-4" /> Invite Others
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="min-w-md max-w-lg">
+                  <Button
+                    className="gap-2 bg-blue-500 hover:bg-blue-600 text-white"
+                    size="sm"
+                    onClick={() => setIsInviteOpen(true)}
+                  >
+                    <UserPlus className="w-4 h-4" /> Invite Others
+                  </Button>
+
+                  {/* INVITE DIALOG */}
+                  <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
+                    <DialogContent className="w-full min-w-md">
                       <DialogHeader>
                         <DialogTitle className="text-lg">
                           Collaborate with others{" "}
@@ -245,22 +249,105 @@ const MyProjectId = () => {
                           Invite a user to collaborate on this project
                         </DialogDescription>
                       </DialogHeader>
-                      <div className="flex w-full max-w-md items-center gap-4 overflow-hidden my-5">
-                        <div className="bg-muted/40 text-sm py-1.5 px-5 border border-accent rounded-md w-full">
-                          {inviteLink}
+
+                      {/* BODY */}
+                      <div className="flex flex-col">
+                        {/* INVITE LINK */}
+                        <div className="flex w-full items-center gap-4 my-5">
+                          <div className="bg-muted/40 text-sm py-1.5 px-5 border border-accent rounded-md w-full break-all">
+                            {inviteLink}
+                          </div>
+                          <Button
+                            className="cursor-pointer text-xs shrink-0"
+                            size="sm"
+                            onClick={() => {
+                              copyToClipboard();
+                            }}
+                          >
+                            Copy <Copy className="size-4 ml-2" />
+                          </Button>
                         </div>
-                        <Button
-                          className="cursor-pointer text-xs"
-                          size="sm"
-                          onClick={copyToClipboard}
-                        >
-                          Copy <Copy className="size-4 ml-2" />
-                        </Button>
+
+                        {/* DIVIDER */}
+                        <div className="flex items-center justify-center gap-4">
+                          <hr className="w-32 dark:border-white/20 border-black/20" />
+                          <p className="text-sm text-muted-foreground">
+                            send invite to
+                          </p>
+                          <hr className="w-32 dark:border-white/20 border-black/20" />
+                        </div>
+
+                        {/* SOCIAL BUTTONS */}
+                        <div className="flex items-center justify-evenly mt-6 px-12">
+                          <Button
+                            size="icon-lg"
+                            variant="outline"
+                            className="cursor-pointer"
+                            onClick={() =>
+                              shareViaWhatsApp(
+                                inviteLink!,
+                                project?.projectName ||
+                                  project?.repoName ||
+                                  "New Project",
+                              )
+                            }
+                          >
+                            <Image
+                              src="/whatsapp.png"
+                              alt="whatsapp"
+                              width={25}
+                              height={25}
+                            />
+                          </Button>
+
+                          <Button
+                            size="icon-lg"
+                            variant="outline"
+                            className="cursor-pointer"
+                            onClick={() =>
+                              shareViaGmail(
+                                inviteLink!,
+                                project?.projectName ||
+                                  project?.repoName ||
+                                  "New Project",
+                              )
+                            }
+                          >
+                            <Image
+                              src="/gmail.png"
+                              alt="gmail"
+                              width={25}
+                              height={25}
+                            />
+                          </Button>
+
+                          <Button
+                            size="icon-lg"
+                            variant="outline"
+                            className="cursor-pointer"
+                            onClick={() => {
+                              shareViaDiscord(inviteLink!);
+                              toast.success("Link copied and opening Discord");
+                            }}
+                          >
+                            <Image
+                              src="/dis.png"
+                              alt="discord"
+                              width={25}
+                              height={25}
+                            />
+                          </Button>
+                        </div>
                       </div>
+
+                      {/* FOOTER */}
                       <DialogFooter>
-                        <DialogClose asChild>
-                          <Button variant="outline">Cancel</Button>
-                        </DialogClose>
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsInviteOpen(false)}
+                        >
+                          Cancel
+                        </Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
@@ -373,12 +460,13 @@ const MyProjectId = () => {
                       <SettingTab project={project} isPro={isPro} />
                     )}
                     {/* THIS IS THE REQUEST TAB WHERE ALL REQUEST WILL BE SHOWN */}
-                    {homeTab === "requests" && <RequestTab projectId={projectId} />}
+                    {homeTab === "requests" && (
+                      <RequestTab projectId={projectId} />
+                    )}
                     {/* THIS IS THE ABOUT TAB WHERE EITHER README CONTENT OR GENERATED DOC WILL BE SHOWN! */}
                     {homeTab === "about" && (
                       <AboutTab project={project} isPro={isPro} />
                     )}
-
                   </div>
                 </div>
                 {/* RIGHT SIDE PROJECT INFO */}
@@ -407,10 +495,13 @@ const MyProjectId = () => {
                         </Badge>
                       ))}
                     </div>
-                   
+
                     <div className="flex justify-between w-full">
                       <p className="text-accent-foreground max-w-[180px] truncate">
-                        Owner : {project?.ownerName ? project?.ownerName : project?.repoOwner}
+                        Owner :{" "}
+                        {project?.ownerName
+                          ? project?.ownerName
+                          : project?.repoOwner}
                       </p>
                       <p className="flex items-center gap-1 text-sm">
                         <StarIcon className="w-4 h-4 text-yellow-500 fill-yellow-400" />{" "}
@@ -517,7 +608,7 @@ const MyProjectId = () => {
                   </div>
                 </div>
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>

@@ -282,13 +282,13 @@ export default function ProjectSidebar() {
         </SidebarMenu>
 
         {/* AI MENU  */}
-        <SidebarMenu className="">
+        <SidebarMenu className="px-1">
           <Collapsible asChild className="group/collapsible">
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton tooltip={aiMenu.label} className="w-full">
-                  <aiMenu.icon className="h-5 w-5 dark:text-white" />
-                  <span className="text-base dark:text-white">
+                  <aiMenu.icon className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-base text-muted-foreground">
                     {aiMenu.label}
                   </span>
                   <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />

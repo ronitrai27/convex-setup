@@ -6,10 +6,11 @@ export function useProjectRole(projectId: Id<"projects">) {
   const roleInfo = useQuery(api.projects.getMyProjectRole, { projectId });
   
   return {
-    isOwner: roleInfo?.isOwner ?? false,
-    isAdmin: roleInfo?.isAdmin ?? false,
-    isMember: roleInfo?.isMember ?? false,
-    role: roleInfo?.role ?? null,
+    isOwner: roleInfo?.isOwner,
+    isAdmin: roleInfo?.isAdmin,
+    isMember: roleInfo?.isMember,
+    isPower: roleInfo?.isPower,
+    role: roleInfo?.role,
     isLoading: roleInfo === undefined,
   };
 }

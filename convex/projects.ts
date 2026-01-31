@@ -452,6 +452,7 @@ export const getMyProjectRole = query({
     if (!project) return { isOwner: false, isAdmin: false, isMember: false, role: null };
 
     const isOwner = project.ownerId === user._id;
+    console.log("isOwner",isOwner);
 
     // Check member record
     const memberRecord = await ctx.db
@@ -460,13 +461,18 @@ export const getMyProjectRole = query({
       .filter((q) => q.eq(q.field("userId"), user._id))
       .first();
 
-    const isMember = isOwner || !!memberRecord;
-    const isAdmin = isOwner || memberRecord?.AccessRole === "admin";
+    const isMember = !isOwner || memberRecord?.AccessRole === "member" ; // who is part of team has member role
+    const isAdmin = memberRecord?.AccessRole === "admin"; // who is part of team as Admin
+    const isPower = isOwner || isAdmin; // who has power either admin or owner
     
+    console.log("isAdmin",isAdmin);
+    console.log("isMember",isMember);
+    console.log("isPower",isPower);
     return {
       isOwner,
       isAdmin,
       isMember,
+      isPower,
       role: isOwner ? "owner" : memberRecord?.AccessRole || (isMember ? "member" : null),
     };
   },
