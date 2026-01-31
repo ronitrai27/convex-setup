@@ -82,7 +82,8 @@ export default function Layout({
                 <CommunitySearchBar />
               </div>
               <div className="">
-              <HeaderProfile />
+              {/* <HeaderProfile /> */}
+              <UserButton/>
               </div>
             </header>
             <main className="flex-1 overflow-auto">{children}</main>

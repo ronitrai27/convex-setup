@@ -13,6 +13,7 @@ export const create = mutation({
     repoFullName: v.string(),
     repoOwner: v.string(),
     repoUrl: v.string(),
+    inviteLink: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -36,6 +37,18 @@ export const create = mutation({
       throw new Error("Please select between 2 and 5 tags.");
     }
 
+    // Ensure invite link is unique if provided
+    if (args.inviteLink) {
+        const existingProject = await ctx.db
+            .query("projects")
+            .withIndex("by_invite_link", (q) => q.eq("inviteLink", args.inviteLink))
+            .first();
+        
+        if (existingProject) {
+            throw new Error("Invite link already exists. Please try again.");
+        }
+    }
+
     // Check if project with same name already exists for this user (optional but good practice)
     // For now, we'll allow it or rely on unique constraints if any. 
     // Schema doesn't enforce unique project name per user, but it's good UX.
@@ -55,6 +68,7 @@ export const create = mutation({
       projectUpvotes: 0,
       repoUrl: args.repoUrl,
       ownerId: user._id,
+      inviteLink: args.inviteLink,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -319,5 +333,280 @@ export const updateHealthScore = mutation({
       healthScore: args.healthScore,
       updatedAt: Date.now(),
     });
+  },
+});
+
+
+// =======================================
+// GET PROJECT BY INVITE LINK
+// =======================================
+export const getProjectByInviteLink = query({
+  args: {
+    inviteLink: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const project = await ctx.db
+      .query("projects")
+      .withIndex("by_invite_link", (q) => q.eq("inviteLink", args.inviteLink))
+      .unique();
+
+    return project;
+  },
+});
+
+// =======================================
+// REQUEST JOIN PROJECT
+// =======================================
+export const requestJoinProject = mutation({
+  args: {
+    projectId: v.id("projects"),
+    message: v.string(),
+    source: v.union(v.literal("invited"), v.literal("manual")),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier)
+      )
+      .unique();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project) {
+      throw new Error("Project not found");
+    }
+
+    if (project.ownerId === user._id) {
+      throw new Error("You are the owner of this project");
+    }
+
+    // Check if request already exists
+    const existingRequest = await ctx.db
+      .query("projectJoinRequests")
+      .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+      .filter((q) => q.eq(q.field("userId"), user._id))
+      .first();
+
+    if (existingRequest) {
+      if (existingRequest.status === "pending") {
+        throw new Error("Request already pending");
+      }
+      if (existingRequest.status === "accepted") {
+        throw new Error("You are already a member");
+      }
+    }
+
+    // Check if already a member
+    const isMember = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+      .filter((q) => q.eq(q.field("userId"), user._id))
+      .first();
+
+    if (isMember) {
+        throw new Error("You are already a member of this project");
+    }
+
+    await ctx.db.insert("projectJoinRequests", {
+      projectId: args.projectId,
+      userId: user._id,
+      userName: user.name,
+      userImage: user.imageUrl,
+      message: args.message,
+      source: args.source,
+      status: "pending",
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// =======================================
+// GET MY PROJECT ROLE
+// =======================================
+export const getMyProjectRole = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return { isOwner: false, isAdmin: false, isMember: false, role: null };
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier)
+      )
+      .unique();
+
+    if (!user) return { isOwner: false, isAdmin: false, isMember: false, role: null };
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project) return { isOwner: false, isAdmin: false, isMember: false, role: null };
+
+    const isOwner = project.ownerId === user._id;
+
+    // Check member record
+    const memberRecord = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+      .filter((q) => q.eq(q.field("userId"), user._id))
+      .first();
+
+    const isMember = isOwner || !!memberRecord;
+    const isAdmin = isOwner || memberRecord?.AccessRole === "admin";
+    
+    return {
+      isOwner,
+      isAdmin,
+      isMember,
+      role: isOwner ? "owner" : memberRecord?.AccessRole || (isMember ? "member" : null),
+    };
+  },
+});
+
+// =======================================
+// GET PROJECT REQUESTS
+// =======================================
+export const getProjectRequests = query({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return [];
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier)
+      )
+      .unique();
+
+    if (!user) {
+      return [];
+    }
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project) return [];
+    
+    // Check if user is at least a member (or owner) to see requests
+    // Owner check:
+    const isOwner = project.ownerId === user._id;
+    
+    // Member check:
+    let isMember = isOwner;
+    if (!isMember) {
+        const member = await ctx.db
+            .query("projectMembers")
+            .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+            .filter((q) => q.eq(q.field("userId"), user._id))
+            .first();
+        isMember = !!member;
+    }
+    
+    if (!isMember) {
+        // Not authorized to view requests
+        return [];
+    }
+
+    const requests = await ctx.db
+      .query("projectJoinRequests")
+      .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+      .filter((q) => q.eq(q.field("status"), "pending"))
+      .collect();
+
+    return requests;
+  },
+});
+
+// =======================================
+// RESOLVE JOIN REQUEST
+// =======================================
+export const resolveJoinRequest = mutation({
+  args: {
+    requestId: v.id("projectJoinRequests"),
+    status: v.union(v.literal("accepted"), v.literal("rejected")),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier)
+      )
+      .unique();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const request = await ctx.db.get(args.requestId);
+    if (!request) {
+      throw new Error("Request not found");
+    }
+
+    const project = await ctx.db.get(request.projectId);
+    if (!project) {
+        throw new Error("Project not found");
+    }
+
+    // Check Authorization: Owner OR Admin
+    const isOwner = project.ownerId === user._id;
+    let isAdmin = isOwner;
+    
+    if (!isOwner) {
+        const memberRecord = await ctx.db
+            .query("projectMembers")
+            .withIndex("by_project", (q) => q.eq("projectId", project._id))
+            .filter((q) => q.eq(q.field("userId"), user._id))
+            .first();
+        
+        if (memberRecord?.AccessRole === "admin") {
+            isAdmin = true;
+        }
+    }
+
+    if (!isAdmin) {
+        throw new Error("Unauthorized: Only Admins can resolve requests");
+    }
+
+    await ctx.db.patch(args.requestId, {
+      status: args.status,
+      updatedAt: Date.now(),
+    });
+
+    if (args.status === "accepted") {
+      // Check if already a member to be safe
+       const isMember = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (q) => q.eq("projectId", request.projectId))
+      .filter((q) => q.eq(q.field("userId"), request.userId))
+      .first();
+
+      if (!isMember) {
+        await ctx.db.insert("projectMembers", {
+            projectId: request.projectId,
+            userId: request.userId,
+            userName: request.userName,
+            userImage: request.userImage,
+            AccessRole: "member",
+            joinedAt: Date.now(),
+        });
+      }
+    }
   },
 });

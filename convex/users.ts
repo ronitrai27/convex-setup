@@ -90,7 +90,6 @@ export const store = mutation({
         typeof identity.user_last_sign_in === "number"
           ? identity.user_last_sign_in
           : undefined,
-      inviteLink: undefined,
       // DEFAULT PLAN
       type: "free",
       limit: 2,
@@ -157,7 +156,6 @@ export const setGithubToken = mutation({
   },
 });
 
-// =========================================
 // COMPLETE ONBOARDING
 // =========================================
 export const completeOnboarding = mutation({

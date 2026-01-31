@@ -12,7 +12,6 @@ export default defineSchema({
     githubUsername: v.optional(v.string()),
     githubAccessToken: v.optional(v.string()), // cant store it in db for security reasons.
     last_sign_in: v.optional(v.number()),
-    inviteLink: v.optional(v.string()),
     // ✅ PLAN TYPE
     type: v.union(v.literal("free"), v.literal("pro"), v.literal("elite")),
 
@@ -21,7 +20,6 @@ export default defineSchema({
 
     createdAt: v.number(),
     updatedAt: v.number(),
-    //   INDEXES.....
   }).index("by_token", ["tokenIdentifier"]),
 
   // ===============================
@@ -56,7 +54,7 @@ export default defineSchema({
     status: v.union(
       v.literal("completed"),
       v.literal("failed"),
-      v.literal("pending")
+      v.literal("pending"),
     ),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -78,6 +76,7 @@ export default defineSchema({
     repoOwner: v.string(),
     repoUrl: v.string(),
     thumbnailUrl: v.optional(v.string()),
+
     lookingForMembers: v.optional(
       v.array(
         v.object({
@@ -85,13 +84,14 @@ export default defineSchema({
           type: v.union(
             v.literal("casual"),
             v.literal("part-time"),
-            v.literal("serious")
+            v.literal("serious"),
           ),
-        })
-      )
+        }),
+      ),
     ),
     // Project owner (creator)
     ownerId: v.id("users"),
+    ownerName: v.optional(v.string()),
     about: v.optional(v.string()),
     // new details for the project to maintain community engaement
     projectStars: v.number(), // this is for project , on wekraft platform
@@ -111,20 +111,57 @@ export default defineSchema({
           v.object({
             totalScore: v.number(), // 0–100
             calculatedDate: v.string(), // YYYY-MM-DD
-          })
+          }),
         ),
-      })
+      }),
     ),
+    // New additions
+    inviteLink: v.optional(v.string()), // new unique
     // TIME STAMPS----
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_owner", ["ownerId"])
     .index("by_repository", ["repositoryId"])
-    .index("by_public", ["isPublic"]), // For discovering public projects
+    .index("by_public", ["isPublic"])
+    .index("by_invite_link", ["inviteLink"]), // For discovering projects via invite link
 
-  // ====================
-  //  projectMembers: defineTable({
-  // projectId: v.id("projects"),
-  // userId: v.id("users"),
+  // ============================
+  // PROJECT MEMBERS TABLE ( for the particular project)
+  // ============================
+  projectMembers: defineTable({
+    projectId: v.id("projects"),
+    userId: v.id("users"),
+    userName: v.string(), // for quick lookup
+    userImage: v.optional(v.string()), // for quick lookup
+    AccessRole: v.optional(v.union(v.literal("admin"), v.literal("member"))),
+    joinedAt: v.optional(v.number()),
+    leftAt: v.optional(v.number()),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_user", ["userId"])
+    .index("by_access_role", ["AccessRole"]),
+
+  // ==============================
+  // projectJoinRequests
+  // ==============================
+  projectJoinRequests: defineTable({
+    projectId: v.id("projects"),
+    userId: v.id("users"),
+    userName: v.string(), // for quick lookup
+    userImage: v.optional(v.string()), // for quick lookup
+    message: v.optional(v.string()), // "Hey, I want to contribute"
+    source: v.union(v.literal("invited"), v.literal("manual")),
+
+    status: v.union(
+      v.literal("pending"),
+      v.literal("accepted"),
+      v.literal("rejected"),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(), // whenever status changes
+  })
+    .index("by_project", ["projectId"])
+    .index("by_user", ["userId"])
+    .index("by_status", ["status"]),
 });

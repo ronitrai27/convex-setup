@@ -22,6 +22,7 @@ import {
   Lock,
   Unlock,
   Loader2,
+  Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Image from "next/image";
 import { RepositoryList } from "./use-repo";
+import { generateInviteCode, getInviteLink, shareViaWhatsApp, shareViaGmail, shareViaDiscord } from "@/lib/invite";
 
 export function MultiStepOnboarding() {
   const [currentStep, setCurrentStep] = React.useState(1);
@@ -68,7 +70,7 @@ export function MultiStepOnboarding() {
   const [projectName, setProjectName] = React.useState("");
   const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
   const [isPublic, setIsPublic] = React.useState(true);
-  
+
   // Auto-fill project name from connected repo
   React.useEffect(() => {
     if (storedRepo && !projectName) {
@@ -78,8 +80,19 @@ export function MultiStepOnboarding() {
   }, [storedRepo, projectName]);
 
   // Step 4 State
-  const [inviteEmail, setInviteEmail] = React.useState("");
-  const [invitedEmails, setInvitedEmails] = React.useState<string[]>([]);
+  // const [inviteEmail, setInviteEmail] = React.useState("");
+  // const [invitedEmails, setInvitedEmails] = React.useState<string[]>([]);
+  const [inviteLink, setInviteLink] = React.useState("");
+  React.useEffect(() => {
+    if (!inviteLink) {
+      setInviteLink(getInviteLink(generateInviteCode()));
+    }
+  }, [inviteLink]);
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(inviteLink);
+    toast.success("Link copied to clipboard");
+  };
 
   const [localConnectingId, setLocalConnectingId] = React.useState<
     number | null
@@ -95,13 +108,13 @@ export function MultiStepOnboarding() {
         return;
       }
       if (selectedTags.length > 5) {
-         toast.error("Please select at most 5 tags");
-         return;
+        toast.error("Please select at most 5 tags");
+        return;
       }
-      
+
       if (!storedRepo) {
         toast.error("No repository connected", {
-            description: "Please go back and connect a repository."
+          description: "Please go back and connect a repository.",
         });
         return;
       }
@@ -110,7 +123,7 @@ export function MultiStepOnboarding() {
       try {
         await createProject({
           projectName,
-          description: "", // Optional or add input
+          description: "", // Optional at start , can be updated later
           tags: selectedTags,
           isPublic,
           repositoryId: storedRepo._id,
@@ -118,8 +131,9 @@ export function MultiStepOnboarding() {
           repoFullName: storedRepo.fullName,
           repoOwner: storedRepo.owner,
           repoUrl: storedRepo.url,
+          inviteLink: inviteLink,
         });
-        
+
         setDirection(1);
         setCurrentStep((prev) => prev + 1);
         toast.success("Project details saved!");
@@ -160,20 +174,20 @@ export function MultiStepOnboarding() {
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   };
 
-  const addInvite = () => {
-    if (inviteEmail && !invitedEmails.includes(inviteEmail)) {
-      setInvitedEmails((prev) => [...prev, inviteEmail]);
-      setInviteEmail("");
-    }
-  };
+  // const addInvite = () => {
+  //   if (inviteEmail && !invitedEmails.includes(inviteEmail)) {
+  //     setInvitedEmails((prev) => [...prev, inviteEmail]);
+  //     setInviteEmail("");
+  //   }
+  // };
 
-  const removeInvite = (email: string) => {
-    setInvitedEmails((prev) => prev.filter((e) => e !== email));
-  };
+  // const removeInvite = (email: string) => {
+  //   setInvitedEmails((prev) => prev.filter((e) => e !== email));
+  // };
 
   const variants = {
     enter: (direction: number) => ({
@@ -193,7 +207,7 @@ export function MultiStepOnboarding() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 md:p-8 relative">
+    <div className="dark flex flex-col items-center justify-center min-h-screen p-4 md:p-8 relative text-foreground">
       <Image
         src="/a1.jpg"
         alt="bg-image"
@@ -212,7 +226,7 @@ export function MultiStepOnboarding() {
                 "flex items-center justify-center w-8 h-8 rounded-full border text-sm transition-all duration-300",
                 currentStep >= step.id
                   ? "bg-white text-black border-white"
-                  : "bg-transparent text-muted-foreground border-white/10"
+                  : "bg-transparent text-muted-foreground border-white/10",
               )}
             >
               {currentStep > step.id ? <Check className="w-4 h-4" /> : step.id}
@@ -221,7 +235,7 @@ export function MultiStepOnboarding() {
               <div
                 className={cn(
                   "w-8 h-[1px] transition-colors duration-300",
-                  currentStep > step.id ? "bg-white" : "bg-white/10"
+                  currentStep > step.id ? "bg-white" : "bg-white/10",
                 )}
               />
             )}
@@ -339,7 +353,7 @@ export function MultiStepOnboarding() {
 
                   <RepositoryList
                     searchQuery={searchQuery}
-                    selectedRepo={selectedRepo}
+                    selectedRepo={selectedRepo!}
                     setSelectedRepo={setSelectedRepo}
                   />
                 </div>
@@ -349,7 +363,7 @@ export function MultiStepOnboarding() {
                 <div className="space-y-6 relative">
                   <div className="space-y-2">
                     <h2 className="text-2xl font-semibold tracking-tight">
-                     Lets Create Your Project
+                      Lets Create Your Project
                     </h2>
                     <p className="text-muted-foreground">
                       Name your project and add relevant category tags.
@@ -375,7 +389,10 @@ export function MultiStepOnboarding() {
 
                     <div className="space-y-3">
                       <Label className="text-xs uppercase tracking-widest text-muted-foreground">
-                         Tags <span className="text-[10px] normal-case opacity-50 ml-2">(Min 2, Max 5)</span>
+                        Tags{" "}
+                        <span className="text-[10px] normal-case opacity-50 ml-2">
+                          (Min 2, Max 5)
+                        </span>
                       </Label>
                       <div className="flex flex-wrap gap-2">
                         {TAG_OPTIONS.map((tag) => (
@@ -386,7 +403,7 @@ export function MultiStepOnboarding() {
                               "px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
                               selectedTags.includes(tag)
                                 ? "bg-white text-black border-white"
-                                : "bg-white/5 text-muted-foreground border-white/10 hover:border-white/30"
+                                : "bg-white/5 text-muted-foreground border-white/10 hover:border-white/30",
                             )}
                           >
                             {tag}
@@ -394,51 +411,67 @@ export function MultiStepOnboarding() {
                         ))}
                       </div>
                       {selectedTags.length < 2 && selectedTags.length > 0 && (
-                          <p className="text-[10px] text-red-400">Select at least {2 - selectedTags.length} more tag(s)</p>
+                        <p className="text-[10px] text-red-400">
+                          Select at least {2 - selectedTags.length} more tag(s)
+                        </p>
                       )}
                     </div>
-                    
-                    <div className="space-y-3 pt-2">
-                         <Label className="text-xs uppercase tracking-widest text-muted-foreground">
-                            Visibility
-                         </Label>
-                        <div className="grid grid-cols-2 gap-3">
-                            <div 
-                                onClick={() => setIsPublic(true)}
-                                className={cn(
-                                    "cursor-pointer p-2 rounded-xl border flex items-center gap-3 transition-all",
-                                    isPublic 
-                                        ? "bg-white/10 border-white text-white" 
-                                        : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
-                                )}
-                            >
-                                <div className={cn("p-2 rounded-full", isPublic ? "bg-white text-black" : "bg-white/10")}>
-                                    <Globe className="w-4 h-4" />
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-sm font-medium">Public</span>
-                                    <span className="text-[10px] opacity-70">Everyone can see</span>
-                                </div>
-                            </div>
 
-                            <div 
-                                onClick={() => setIsPublic(false)}
-                                className={cn(
-                                    "cursor-pointer p-2 rounded-xl border flex items-center gap-3 transition-all",
-                                    !isPublic 
-                                        ? "bg-white/10 border-white text-white" 
-                                        : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10"
-                                )}
-                            >
-                                <div className={cn("p-2 rounded-full", !isPublic ? "bg-white text-black" : "bg-white/10")}>
-                                    <Lock className="w-4 h-4" />
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-sm font-medium">Private</span>
-                                    <span className="text-[10px] opacity-70">Only you can see</span>
-                                </div>
-                            </div>
+                    <div className="space-y-3 pt-2">
+                      <Label className="text-xs uppercase tracking-widest text-muted-foreground">
+                        Visibility
+                      </Label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div
+                          onClick={() => setIsPublic(true)}
+                          className={cn(
+                            "cursor-pointer p-2 rounded-xl border flex items-center gap-3 transition-all",
+                            isPublic
+                              ? "bg-white/10 border-white text-white"
+                              : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10",
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              "p-2 rounded-full",
+                              isPublic ? "bg-white text-black" : "bg-white/10",
+                            )}
+                          >
+                            <Globe className="w-4 h-4" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">Public</span>
+                            <span className="text-[10px] opacity-70">
+                              Everyone can see
+                            </span>
+                          </div>
                         </div>
+
+                        <div
+                          onClick={() => setIsPublic(false)}
+                          className={cn(
+                            "cursor-pointer p-2 rounded-xl border flex items-center gap-3 transition-all",
+                            !isPublic
+                              ? "bg-white/10 border-white text-white"
+                              : "bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10",
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              "p-2 rounded-full",
+                              !isPublic ? "bg-white text-black" : "bg-white/10",
+                            )}
+                          >
+                            <Lock className="w-4 h-4" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">Private</span>
+                            <span className="text-[10px] opacity-70">
+                              Only you can see
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -446,7 +479,7 @@ export function MultiStepOnboarding() {
 
               {currentStep === 4 && (
                 <div className="space-y-6">
-                  <div className="space-y-2">
+                  <div className="space-y-2 ">
                     <h2 className="text-2xl font-semibold tracking-tight">
                       Step 4: Collaborate
                     </h2>
@@ -455,54 +488,75 @@ export function MultiStepOnboarding() {
                     </p>
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <Send className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          placeholder="email@example.com"
-                          className="bg-white/5 border-white/10 pl-10 focus:ring-1 focus:ring-white/20"
-                          value={inviteEmail}
-                          onChange={(e) => setInviteEmail(e.target.value)}
-                          onKeyPress={(e) => e.key === "Enter" && addInvite()}
-                        />
+                  <div className="space-y-4 relative">
+                    <div className="flex gap-5 items-center">
+                      <div className="bg-muted/40 text-sm py-1.5 px-5 border border-accent rounded-xl w-full">
+                        {inviteLink}
                       </div>
                       <Button
-                        variant="secondary"
-                        size="icon"
-                        onClick={addInvite}
-                        className="bg-white text-black hover:bg-white/90"
+                        className="cursor-pointer text-xs"
+                        size="sm"
+                        onClick={copyToClipboard}
                       >
-                        <Plus className="w-4 h-4" />
+                        Copy <Copy className="size-4 ml-2" />
                       </Button>
                     </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-xs uppercase tracking-widest text-muted-foreground">
-                        Invited Members
-                      </Label>
-                      {invitedEmails.length === 0 ? (
-                        <div className="text-sm text-muted-foreground italic py-2">
-                          No invites sent yet...
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          {invitedEmails.map((email) => (
-                            <div
-                              key={email}
-                              className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5"
-                            >
-                              <span className="text-sm">{email}</span>
-                              <Button
-                                onClick={() => removeInvite(email)}
-                                className="text-muted-foreground hover:text-white transition-colors"
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                    {/* Other ways to Invite */}
+                    <div>
+                      <div className="flex items-center justify-center gap-4">
+                        <hr className="w-30 border-white/20" />
+                        <p className="text-sm text-muted-foreground">
+                          Invite Via
+                        </p>
+                        <hr className="w-30 border-white/20" />
+                      </div>
+                      <div className="flex items-center justify-evenly mt-4 px-12">
+                        <Button 
+                          size="icon-sm" 
+                          variant="outline" 
+                          className="cursor-pointer"
+                          onClick={() => shareViaWhatsApp(inviteLink, projectName || storedRepo?.name || "New Project")}
+                        >
+                          <Image
+                            src="/whatsapp.png"
+                            alt="whatsapp"
+                            width={30}
+                            height={30}
+                            className=""
+                          />
+                        </Button>
+                        <Button 
+                          size="icon-sm" 
+                          variant="outline" 
+                          className="cursor-pointer"
+                          onClick={() => shareViaGmail(inviteLink, projectName || storedRepo?.name || "New Project")}
+                        >
+                          <Image
+                            src="/gmail.png"
+                            alt="gmail"
+                            width={30}
+                            height={30}
+                            className=""
+                          />
+                        </Button>
+                        <Button 
+                          size="icon-sm" 
+                          variant="outline" 
+                          className="cursor-pointer"
+                          onClick={() => {
+                            shareViaDiscord(inviteLink);
+                            toast.success("Link copied and opening Discord");
+                          }}
+                        >
+                          <Image
+                            src="/dis.png"
+                            alt="discord"
+                            width={30}
+                            height={30}
+                            className=""
+                          />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -530,7 +584,9 @@ export function MultiStepOnboarding() {
           >
             {isLoading && <Loader2 className="w-3 h-3 animate-spin mr-2" />}
             {currentStep === 4 ? "Complete" : "Continue"}
-            {currentStep !== 4 && !isLoading && <ChevronRight className="w-4 h-4 ml-2" />}
+            {currentStep !== 4 && !isLoading && (
+              <ChevronRight className="w-4 h-4 ml-2" />
+            )}
           </Button>
         </div>
       </div>

@@ -115,7 +115,7 @@ export function RepositoryList({
               key={repo.id}
               onClick={() => handleRepoClick(repo)}
               className={cn(
-                "w-full flex flex-col space-y-2 items-center justify-between p-3 rounded-xl border transition-all duration-200 group",
+                "w-full flex flex-col space-y-2 items-center justify-between p-2.5 rounded-xl border transition-all duration-200 group",
                 selectedRepo === repo.name
                   ? "bg-white/20 text-white border-white"
                   : "bg-white/5 text-white border-white/5 hover:border-white/20 hover:bg-white/[0.07]",

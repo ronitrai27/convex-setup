@@ -220,30 +220,7 @@ export const AppSidebar = () => {
             </Link>
           </SidebarMenuButton>
 
-          {/* MARKETPLACE */}
-          {/* <SidebarMenuButton
-              asChild
-              data-active={isActive("/dashboard/marketplace")}
-              className="group relative overflow-hidden"
-            >
-              <Link
-                href="/dashboard/marketplace"
-                className="relative z-10 flex items-center gap-3 px-3 py-2 data-[active=true]:text-white text-muted-foreground"
-              >
-                <Store className="h-5 w-5" />
-                <span className="text-base">Marketplace</span>
-
-                <span
-                  className="
-          pointer-events-none absolute inset-0 -z-10
-          opacity-0 transition-opacity
-          group-data-[active=true]:opacity-100
-          bg-linear-to-l from-blue-600/50 via-transparent  to-transparent
-        "
-                />
-              </Link>
-            </SidebarMenuButton> */}
-
+        
           {/* Community with hover popover fields */}
           <Popover>
             <PopoverTrigger asChild>

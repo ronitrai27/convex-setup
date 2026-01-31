@@ -38,6 +38,9 @@ import {
   LucideActivity,
   LucideInfo,
   ChevronLeft,
+  UserPlus,
+  LucideUser2,
+  Copy,
 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -52,6 +55,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTrigger,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import RequestTab from "@/modules/my-project/ReqTab";
 
 const MyProjectId = () => {
   const params = useParams();
@@ -61,6 +76,7 @@ const MyProjectId = () => {
   const project = useQuery(api.projects.getProjectById, { projectId });
   const user = useQuery(api.users.getCurrentUser);
 
+  const inviteLink = project?.inviteLink;
   const isPro = user?.type !== "free";
   // -----------------
   const updateThumbnail = useMutation(api.projects.updateThumbnail);
@@ -116,6 +132,13 @@ const MyProjectId = () => {
   };
   // ----------------------------
 
+  const copyToClipboard = () => {
+    if (inviteLink) {
+      navigator.clipboard.writeText(inviteLink);
+      toast.success("Link copied to clipboard");
+    }
+  };
+
   const [activeTab, setActiveTab] = useState("home");
   const [homeTab, setHomeTab] = useState("stats");
   if (project === undefined) {
@@ -143,7 +166,10 @@ const MyProjectId = () => {
         <div className="">
           {/* Tab Header */}
           <div className="flex gap-6 px-10 mb-10">
-            <Button className="text-xs" variant="ghost" size="sm"><ChevronLeft/>Back</Button>
+            <Button className="text-xs" variant="ghost" size="sm">
+              <ChevronLeft />
+              Back
+            </Button>
             <Button
               size="sm"
               className="px-10 cursor-pointer"
@@ -170,7 +196,7 @@ const MyProjectId = () => {
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-4 mb-5">
                 {/* /PROJECT NAME ONLY */}
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/50 truncate max-w-[450px]">
+                  <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/50 truncate max-w-[450px] capitalize">
                     {project.projectName}
                   </h1>
                 </div>
@@ -179,7 +205,7 @@ const MyProjectId = () => {
                   {project.isPublic ? (
                     <Badge
                       variant="secondary"
-                      className="gap-1.5 px-3 py-2 text-emerald-600 bg-emerald-500/20 hover:bg-emerald-500/30"
+                      className="gap-1.5 px-5 py-2.5 text-emerald-600 bg-emerald-500/20 hover:bg-emerald-500/30"
                     >
                       <Globe className="w-3.5 h-3.5" /> Public
                     </Badge>
@@ -194,13 +220,50 @@ const MyProjectId = () => {
 
                   {/* VIEW REPO */}
                   <Link href={project.repoUrl} target="_blank">
-                    <Button
-                      className="gap-2 shadow-lg shadow-primary/20"
-                      size="sm"
-                    >
+                    <Button className="gap-2 " size="sm">
                       <Github className="w-4 h-4" /> View On Github
                     </Button>
                   </Link>
+
+                  {/* Invite link with the dialog */}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        className="gap-2 bg-blue-500 hover:bg-blue-600 text-white cursor-pointer"
+                        size="sm"
+                      >
+                        <UserPlus className="w-4 h-4" /> Invite Others
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="min-w-md max-w-lg">
+                      <DialogHeader>
+                        <DialogTitle className="text-lg">
+                          Collaborate with others{" "}
+                          <LucideUser2 className="inline ml-3 size-5" />
+                        </DialogTitle>
+                        <DialogDescription>
+                          Invite a user to collaborate on this project
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="flex w-full max-w-md items-center gap-4 overflow-hidden my-5">
+                        <div className="bg-muted/40 text-sm py-1.5 px-5 border border-accent rounded-md w-full">
+                          {inviteLink}
+                        </div>
+                        <Button
+                          className="cursor-pointer text-xs"
+                          size="sm"
+                          onClick={copyToClipboard}
+                        >
+                          Copy <Copy className="size-4 ml-2" />
+                        </Button>
+                      </div>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="outline">Cancel</Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
 
@@ -214,6 +277,7 @@ const MyProjectId = () => {
                     alt="Project Thumbnail"
                     fill
                     className="object-cover"
+                    unoptimized
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
@@ -309,11 +373,12 @@ const MyProjectId = () => {
                       <SettingTab project={project} isPro={isPro} />
                     )}
                     {/* THIS IS THE REQUEST TAB WHERE ALL REQUEST WILL BE SHOWN */}
-                    {/* {homeTab === "requests" && <RequestsTab />} */}
+                    {homeTab === "requests" && <RequestTab projectId={projectId} />}
                     {/* THIS IS THE ABOUT TAB WHERE EITHER README CONTENT OR GENERATED DOC WILL BE SHOWN! */}
                     {homeTab === "about" && (
                       <AboutTab project={project} isPro={isPro} />
                     )}
+
                   </div>
                 </div>
                 {/* RIGHT SIDE PROJECT INFO */}
@@ -342,23 +407,10 @@ const MyProjectId = () => {
                         </Badge>
                       ))}
                     </div>
-                    {/* <div className="text-xs tracking-tight">
-                      <p>
-                        Created On :{" "}
-                        {formatDistanceToNow(project.createdAt, {
-                          addSuffix: true,
-                        })}
-                      </p>
-                      <p>
-                        Updated On :{" "}
-                        {formatDistanceToNow(project.updatedAt, {
-                          addSuffix: true,
-                        })}
-                      </p>
-                    </div> */}
+                   
                     <div className="flex justify-between w-full">
                       <p className="text-accent-foreground max-w-[180px] truncate">
-                        Owner : {project.repoOwner}
+                        Owner : {project?.ownerName ? project?.ownerName : project?.repoOwner}
                       </p>
                       <p className="flex items-center gap-1 text-sm">
                         <StarIcon className="w-4 h-4 text-yellow-500 fill-yellow-400" />{" "}
