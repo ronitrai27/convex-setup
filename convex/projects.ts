@@ -641,11 +641,11 @@ export const searchAndRank = query({
     }
 
     const filtered = allPublicProjects.filter((project) => {
-      const hasTags = args.tags && args.tags.length > 0;
+      const hasTags = args.tags && args.tags.length > 0; 
       const hasRoles = args.roles && args.roles.length > 0;
 
       // Check tags match
-      let tagMatch = true;
+      let tagMatch = true; 
       if (hasTags) {
         tagMatch = project.tags.some((tag) => args.tags!.includes(tag));
       }
