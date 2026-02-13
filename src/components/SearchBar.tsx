@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const MODES = [
   {
@@ -32,16 +34,6 @@ const MODES = [
       "AI healthcare projects",
       "Web3 side projects",
       "Full-stack projects in Next.js",
-    ],
-  },
-  {
-    id: "products",
-    label: "Products",
-    icon: ShoppingBag,
-    placeholders: [
-      "Developer tools",
-      "SaaS products built with Next.js",
-      "AI productivity apps",
     ],
   },
   {
@@ -68,8 +60,18 @@ const MODES = [
 export function CommunitySearchBar() {
   const [mode, setMode] = useState(MODES[0]);
   const [query, setQuery] = useState("");
-
+  const router = useRouter();
   const ActiveIcon = mode.icon;
+
+  const handleQuery = () => {
+    if (!query.trim()) {
+      toast.info("Query cant be empty !");
+      return;
+    }
+
+    // Redirect instantly to community with query and mode
+    router.push(`/dashboard/community?query=${encodeURIComponent(query)}&mode=${mode.id}`);
+  };
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -107,7 +109,7 @@ export function CommunitySearchBar() {
                         "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition",
                         active
                           ? "bg-primary/10 text-primary"
-                          : "hover:bg-muted"
+                          : "hover:bg-muted",
                       )}
                     >
                       <Icon className="h-4 w-4" />
@@ -138,6 +140,11 @@ export function CommunitySearchBar() {
 
           <Input
             value={query}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleQuery();
+              }
+            }}
             onChange={(e) => setQuery(e.target.value)}
             className="h-9 pl-9 rounded-md focus-visible:ring-0 text-xs "
           />

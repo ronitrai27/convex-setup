@@ -228,18 +228,12 @@ export const AppSidebar = () => {
                 data-active={isActive("/dashboard/community")}
                 className="group relative overflow-hidden"
               >
-                <div className="relative z-10 flex items-center gap-3 w-full px-1 text-muted-foreground">
+                <div className="relative z-10 flex items-center gap-3 w-full text-muted-foreground">
                   <Users className="h-5 w-5" />
                   <span className="text-base">Community</span>
                   <ChevronRight className="h-4 w-4 ml-auto" />
-
                   <span
-                    className="
-            pointer-events-none absolute inset-0 -z-10
-            opacity-0 transition-opacity
-            group-data-[active=true]:opacity-100
-             bg-linear-to-l from-blue-600/50 via-transparent  to-transparent
-          "
+                    className=""
                   />
                 </div>
               </SidebarMenuButton>
@@ -248,7 +242,7 @@ export const AppSidebar = () => {
             <PopoverContent side="right" className="w-56 p-2">
               <div className="flex flex-col gap-1">
                 <Link
-                  href="/community/discover"
+                  href="/dashboard/community?mode=discover"
                   className="flex items-center gap-2 rounded px-2 py-1 text-sm text-base hover:bg-accent"
                 >
                   <Compass className="h-4 w-4" />
@@ -256,7 +250,7 @@ export const AppSidebar = () => {
                 </Link>
 
                 <Link
-                  href="/community/bounties"
+                  href="/dashboard/community?mode=bounties"
                   className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-accent"
                 >
                   <Gift className="h-4 w-4" />
@@ -264,7 +258,7 @@ export const AppSidebar = () => {
                 </Link>
 
                 <Link
-                  href="/community/teammates"
+                  href="/dashboard/community?mode=find-team"
                   className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-accent"
                 >
                   <UserPlus className="h-4 w-4" />

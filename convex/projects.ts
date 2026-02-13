@@ -616,3 +616,57 @@ export const resolveJoinRequest = mutation({
     }
   },
 });
+// =======================================
+// SEARCH AND RANK PROJECTS
+// =======================================
+export const searchAndRank = query({
+  args: {
+    tags: v.optional(v.array(v.string())),
+    roles: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    // Fetch all public projects
+    const allPublicProjects = await ctx.db
+      .query("projects")
+      .withIndex("by_public", (q) => q.eq("isPublic", true))
+      .collect();
+
+    // If no tags or roles provided, just return all public projects ranked
+    if (!args.tags && !args.roles) {
+      return allPublicProjects.sort((a, b) => {
+        const scoreA = a.healthScore?.totalScore ?? 0;
+        const scoreB = b.healthScore?.totalScore ?? 0;
+        return scoreB - scoreA;
+      });
+    }
+
+    const filtered = allPublicProjects.filter((project) => {
+      const hasTags = args.tags && args.tags.length > 0;
+      const hasRoles = args.roles && args.roles.length > 0;
+
+      // Check tags match
+      let tagMatch = true;
+      if (hasTags) {
+        tagMatch = project.tags.some((tag) => args.tags!.includes(tag));
+      }
+
+      // Check roles match
+      let roleMatch = true;
+      if (hasRoles) {
+        roleMatch = project.lookingForMembers 
+          ? project.lookingForMembers.some((m) => args.roles!.includes(m.role))
+          : false;
+      }
+
+      // Intersection (AND) logic: Must satisfy both if both are provided
+      return tagMatch && roleMatch;
+    });
+
+    // Rank by healthScore totalScore
+    return filtered.sort((a, b) => {
+      const scoreA = a.healthScore?.totalScore ?? 0;
+      const scoreB = b.healthScore?.totalScore ?? 0;
+      return scoreB - scoreA;
+    });
+  },
+});
