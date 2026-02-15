@@ -91,7 +91,8 @@ export default defineSchema({
     ),
     // Project owner (creator)
     ownerId: v.id("users"),
-    ownerName: v.optional(v.string()),
+    ownerName: v.string(),
+    ownerImage: v.optional(v.string()),
     about: v.optional(v.string()),
     // new details for the project to maintain community engaement
     projectStars: v.number(), // this is for project , on wekraft platform

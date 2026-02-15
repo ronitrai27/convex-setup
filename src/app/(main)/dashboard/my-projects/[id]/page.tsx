@@ -41,6 +41,7 @@ import {
   UserPlus,
   LucideUser2,
   Copy,
+  LucideUserPlus,
 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -604,6 +605,29 @@ const MyProjectId = () => {
                           <LucideExternalLink className="w-4 h-4" /> Unlock Pro
                         </Button>
                       )}
+                    </div>
+
+                    {/* TEAM MEMBERS DETAILS (NAME + IMAGE + ROLE) */}
+                    <div>
+                        <p className="text-sm font-semibold">Team Members <LucideUserPlus className="w-4 h-4 inline ml-1" /></p>
+                        <div className="flex gap-4">
+                            <div className="flex items-center gap-2">
+                              <div className="bg-accent h-9 w-9 flex items-center justify-center rounded-full">
+                                <LucideUser2 className="w-5 h-5" />
+                              </div>
+                              <p>{project?.ownerName}</p>
+                                {/* <Image
+                                    src={project?.}
+                                    alt={project?.projectOwner?.name}
+                                    width={40}
+                                    height={40}
+                                    className="rounded-full"
+                                />
+                                <p className="text-sm font-semibold">
+                                    {project?.projectOwner?.name}
+                                </p> */}
+                            </div>
+                        </div>
                     </div>
                   </div>
                 </div>

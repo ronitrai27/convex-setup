@@ -44,9 +44,19 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Image from "next/image";
 import { RepositoryList } from "./use-repo";
-import { generateInviteCode, getInviteLink, shareViaWhatsApp, shareViaGmail, shareViaDiscord } from "@/lib/invite";
+import {
+  generateInviteCode,
+  getInviteLink,
+  shareViaWhatsApp,
+  shareViaGmail,
+  shareViaDiscord,
+} from "@/lib/invite";
+import { Doc } from "../../../convex/_generated/dataModel";
 
 export function MultiStepOnboarding() {
+  const user: Doc<"users"> | undefined | null = useQuery(
+    api.users.getCurrentUser,
+  );
   const [currentStep, setCurrentStep] = React.useState(1);
   const [direction, setDirection] = React.useState(0);
   const completeOnboardingMutation = useMutation(api.users.completeOnboarding);
@@ -178,17 +188,6 @@ export function MultiStepOnboarding() {
     );
   };
 
-  // const addInvite = () => {
-  //   if (inviteEmail && !invitedEmails.includes(inviteEmail)) {
-  //     setInvitedEmails((prev) => [...prev, inviteEmail]);
-  //     setInviteEmail("");
-  //   }
-  // };
-
-  // const removeInvite = (email: string) => {
-  //   setInvitedEmails((prev) => prev.filter((e) => e !== email));
-  // };
-
   const variants = {
     enter: (direction: number) => ({
       x: direction > 0 ? 20 : -20,
@@ -226,7 +225,7 @@ export function MultiStepOnboarding() {
                 "flex items-center justify-center w-8 h-8 rounded-full border text-sm transition-all duration-300",
                 currentStep >= step.id
                   ? "bg-white text-black border-white"
-                  : "bg-transparent text-muted-foreground border-white/10",
+                  : "bg-transparent text-muted-foreground border-white/40",
               )}
             >
               {currentStep > step.id ? <Check className="w-4 h-4" /> : step.id}
@@ -235,7 +234,7 @@ export function MultiStepOnboarding() {
               <div
                 className={cn(
                   "w-8 h-[1px] transition-colors duration-300",
-                  currentStep > step.id ? "bg-white" : "bg-white/10",
+                  currentStep > step.id ? "bg-white" : "bg-white/40",
                 )}
               />
             )}
@@ -244,7 +243,7 @@ export function MultiStepOnboarding() {
       </div>
 
       {/* BODY  */}
-      <div className="w-full max-w-xl  bg-linear-to-b from-white/30 to-transparent rounded-2xl overflow-hidden font-sans">
+      <div className="w-full max-w-xl  bg-linear-to-b from-white/40 to-transparent rounded-2xl overflow-hidden font-sans">
         <div className="p-8 ">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
@@ -511,11 +510,16 @@ export function MultiStepOnboarding() {
                         <hr className="w-30 border-white/20" />
                       </div>
                       <div className="flex items-center justify-evenly mt-4 px-12">
-                        <Button 
-                          size="icon-sm" 
-                          variant="outline" 
+                        <Button
+                          size="icon-sm"
+                          variant="outline"
                           className="cursor-pointer"
-                          onClick={() => shareViaWhatsApp(inviteLink, projectName || storedRepo?.name || "New Project")}
+                          onClick={() =>
+                            shareViaWhatsApp(
+                              inviteLink,
+                              projectName || storedRepo?.name || "New Project",
+                            )
+                          }
                         >
                           <Image
                             src="/whatsapp.png"
@@ -525,11 +529,16 @@ export function MultiStepOnboarding() {
                             className=""
                           />
                         </Button>
-                        <Button 
-                          size="icon-sm" 
-                          variant="outline" 
+                        <Button
+                          size="icon-sm"
+                          variant="outline"
                           className="cursor-pointer"
-                          onClick={() => shareViaGmail(inviteLink, projectName || storedRepo?.name || "New Project")}
+                          onClick={() =>
+                            shareViaGmail(
+                              inviteLink,
+                              projectName || storedRepo?.name || "New Project",
+                            )
+                          }
                         >
                           <Image
                             src="/gmail.png"
@@ -539,9 +548,9 @@ export function MultiStepOnboarding() {
                             className=""
                           />
                         </Button>
-                        <Button 
-                          size="icon-sm" 
-                          variant="outline" 
+                        <Button
+                          size="icon-sm"
+                          variant="outline"
                           className="cursor-pointer"
                           onClick={() => {
                             shareViaDiscord(inviteLink);

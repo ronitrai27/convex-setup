@@ -15,6 +15,7 @@ import {
   StarIcon,
   Code,
   GitForkIcon,
+  LucideExternalLink,
 } from "lucide-react";
 import {
   Card,
@@ -32,6 +33,7 @@ import { CommunityFilters } from "@/components/CommunityFilters";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
+import Link from "next/link";
 
 const CommunityPage = () => {
   const searchParams = useSearchParams();
@@ -191,9 +193,11 @@ const CommunityPage = () => {
                       <CardFooter className="w-full h-full border-t dark:bg-muted/40 bg-muted -mt-2">
                         <div className="flex flex-col w-full">
                           <div className="flex w-full items-center justify-between">
-                            <p className="text-xl font-semibold capitalize tracking-tight truncate">
-                              {project.projectName}
+                            <Link href={`/dashboard/projects/${project._id}`}>
+                            <p className="text-xl font-semibold capitalize tracking-tight truncate cursor-pointer">
+                            <LucideExternalLink className="w-5 h-5 inline mr-2 -mt-1" />  {project.projectName}
                             </p>
+                            </Link>
 
                             <div className="flex gap-4">
                               <p className="flex items-center gap-1 text-sm">

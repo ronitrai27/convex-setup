@@ -1,7 +1,16 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Github, Check, Loader2, LucideGitBranch, LucideExternalLink, Star, GitFork, Play } from "lucide-react";
+import {
+  Github,
+  Check,
+  Loader2,
+  LucideGitBranch,
+  LucideExternalLink,
+  Star,
+  GitFork,
+  Play,
+} from "lucide-react";
 import { useRepositories } from "./repo";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,8 +18,9 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { triggerRepoIndexing } from "@/app/actions/inngest";
 import { useState } from "react";
+import { createWebhook } from "../github/action";
+import { ConnectRepo } from ".";
 
 interface Repository {
   id: number;
@@ -52,9 +62,12 @@ export function RepositoryList({
       toast.error("You can already have a connected repository.");
       return;
     }
-
+    const toastId = toast.loading(`Connecting ${repo.name}...`);
     setIsConnecting(true);
     try {
+      // first connect webhook ! if success then save in db
+      // Create Webhook
+      await createWebhook(repo.owner.login, repo.name);
       await createRepo({
         githubId: BigInt(repo.id),
         name: repo.name,
@@ -63,18 +76,22 @@ export function RepositoryList({
         url: repo.html_url,
       });
 
-      toast.success("Repository connected successfully!");
-      
-      // Trigger background indexing
-      // toast.info("Starting background indexing...");
-      await triggerRepoIndexing(repo.owner.login, repo.name);
-      toast.success("Indexing started!");
+      toast.success(`Repository ${repo.name} connected successfully!`, {
+        id: toastId,
+      });
 
+      // Trigger background indexing
+      // triggerRepoIndexing(repo.owner.login, repo.name);
+      ConnectRepo({ owner: repo.owner.login, repo: repo.name });
+      console.log("Repository triggered for Indexing.....!");
+      // toast.success("Indexing started!");
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Failed to connect repository");
+      toast.dismiss(toastId);
     } finally {
       setIsConnecting(false);
+      // toast.dismiss(toastId);
     }
   };
 
@@ -96,7 +113,7 @@ export function RepositoryList({
 
   const filteredRepos =
     repositories?.filter((repo) =>
-      repo.name.toLowerCase().includes(searchQuery.toLowerCase())
+      repo.name.toLowerCase().includes(searchQuery.toLowerCase()),
     ) || [];
 
   return (
@@ -118,8 +135,8 @@ export function RepositoryList({
                 "w-full flex flex-col space-y-2 items-center justify-between p-2.5 rounded-xl border transition-all duration-200 group",
                 selectedRepo === repo.name
                   ? "bg-white/20 text-white border-white"
-                  : "bg-white/5 text-white border-white/5 hover:border-white/20 hover:bg-white/[0.07]",
-                 isConnected && "border-green-500/50 bg-green-500/10"
+                  : "bg-white/10 text-white border-white/5 hover:border-white/20 hover:bg-white/[0.07]",
+                isConnected && "border-green-500/50 bg-green-500/10",
               )}
             >
               <div className="flex w-full justify-between">
@@ -129,30 +146,46 @@ export function RepositoryList({
                       "w-5 h-5",
                       selectedRepo === repo.name
                         ? "text-white"
-                        : "text-muted-foreground"
+                        : "text-muted-foreground",
                     )}
                   />
                   <div className="flex items-center gap-2 ">
-                    <p className="font-medium block capitalize text-sm">{repo.name}</p>
-                    <Link href={repo.html_url} target="_blank" ><LucideExternalLink className="w-4 h-4" /></Link>
+                    <p className="font-medium block capitalize text-sm">
+                      {repo.name}
+                    </p>
+                    <Link href={repo.html_url} target="_blank">
+                      <LucideExternalLink className="w-4 h-4" />
+                    </Link>
                   </div>
                 </div>
-                <Badge variant="outline" className="text-xs border-accent-foreground/10"><Star className="w-4 h-4" />{repo.stargazers_count}</Badge>
+                <Badge
+                  variant="outline"
+                  className="text-xs border-accent-foreground/10"
+                >
+                  <Star className="w-4 h-4" />
+                  {repo.stargazers_count}
+                </Badge>
               </div>
-              
+
               {isConnected ? (
-                 <Button variant="ghost" size="sm" className="w-fit text-[10px] mr-auto ml-5 text-green-400 hover:text-green-300 pointer-events-none gap-1">
-                   <Check className="w-3 h-3" /> Connected
-                 </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-fit text-[10px] mr-auto ml-5 text-green-400 hover:text-green-300 pointer-events-none gap-1"
+                >
+                  <Check className="w-3 h-3" /> Connected
+                </Button>
               ) : (
-                <Button 
+                <Button
                   disabled={isOtherConnected || isConnecting}
-                  variant={selectedRepo === repo.name ? "default" : "outline"} 
-                  size="sm" 
+                  variant={selectedRepo === repo.name ? "default" : "outline"}
+                  size="sm"
                   className="w-fit cursor-pointer text-[10px] mr-auto ml-5"
                   onClick={(e) => handleConnect(e, repo)}
                 >
-                  {isConnecting && selectedRepo === repo.name ? <Loader2 className="w-3 h-3 animate-spin mr-1"/> : null}
+                  {isConnecting && selectedRepo === repo.name ? (
+                    <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                  ) : null}
                   {isOtherConnected ? "Connect " : "Connect"}
                 </Button>
               )}
