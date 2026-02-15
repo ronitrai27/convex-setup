@@ -18,7 +18,7 @@ export const createRepository = mutation({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -62,7 +62,7 @@ export const getRepository = query({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -84,5 +84,27 @@ export const getRepoByGithubId = query({
       .query("repositories")
       .withIndex("by_github_id", (q) => q.eq("githubId", args.githubId))
       .first();
+  },
+});
+
+export const getReviewsByRepoId = query({
+  args: { repoId: v.id("repositories") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("reviews")
+      .withIndex("by_repo", (q) => q.eq("repoId", args.repoId))
+      .order("desc")
+      .collect();
+  },
+});
+
+export const getIssuesByRepoId = query({
+  args: { repoId: v.id("repositories") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("issues")
+      .withIndex("by_repo", (q) => q.eq("repoId", args.repoId))
+      .order("desc")
+      .collect();
   },
 });

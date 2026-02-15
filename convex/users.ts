@@ -55,7 +55,7 @@ export const store = mutation({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -81,7 +81,7 @@ export const store = mutation({
       tokenIdentifier: identity.tokenIdentifier,
       email: identity.email ?? "",
       imageUrl: identity.pictureUrl ?? undefined,
-
+      clerkUserId: identity.subject,
       hasCompletedOnboarding: false,
 
       githubUsername: identity.nickname ?? undefined,
@@ -119,7 +119,7 @@ export const getCurrentUser = query({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -142,7 +142,7 @@ export const setGithubToken = mutation({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -165,14 +165,14 @@ export const completeOnboarding = mutation({
 
     if (!identity) {
       throw new Error(
-        "Called completeOnboarding without authentication present"
+        "Called completeOnboarding without authentication present",
       );
     }
 
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -185,7 +185,6 @@ export const completeOnboarding = mutation({
     });
   },
 });
-
 
 export const getUser = query({
   args: { userId: v.id("users") },

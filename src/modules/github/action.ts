@@ -761,6 +761,13 @@ export async function getCommitDetails(
       author: commit.commit.author?.name || "Unknown",
       date: commit.commit.author?.date,
       files: validFiles,
+      // Real GitHub username (fallback to git name)
+      authorName:
+        commit.author?.login || commit.commit.author?.name || "Unknown",
+
+      // Real GitHub avatar (fallback to null)
+      authorAvatar:
+        commit.author?.avatar_url || commit.committer?.avatar_url || null,
       stats: {
         totalFiles: validFiles.length,
         totalAdditions: validFiles.reduce((sum, f) => sum + f.additions, 0),
@@ -808,20 +815,12 @@ export async function handlePushEvent(payload: any) {
     return { message: "User not found", status: "skipped" };
   }
 
-  // Check limits
-  // if (userData.aiLimits && userData.aiLimits.commit >= 5) {
-  //   console.log("Usage limit exceeded for user", userData.userName);
-  //   return { message: "Usage limit exceeded", status: "skipped" };
-  // }
-  // console.log("Limit passed for the user. !!!");
-
-  // Get GitHub token using clerkUserId from database
-  if (!userData.tokenIdentifier) {
+  if (!userData.clerkUserId) {
     console.error("Clerk User ID not found for user:", userData.name);
     return { message: "Clerk User ID not found", status: "failed" };
   }
 
-  const token = await getUserGithubToken(userData.tokenIdentifier);
+  const token = await getUserGithubToken(userData.clerkUserId);
 
   if (!token) {
     console.error("GitHub token not found for user:", userData.name);
@@ -851,6 +850,7 @@ export async function handlePushEvent(payload: any) {
       pushUrl: commit.url,
       commitHash: commit.id,
       authorUserName: commit.author.name || pusher.name,
+      authorAvatar: commit.author.avatar_url || avatarUrl,
       reviewType: "commit",
       reviewStatus: "pending",
     });
