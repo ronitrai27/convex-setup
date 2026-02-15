@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, X, Check } from "lucide-react";
+import { Search, X, Check, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 
@@ -59,12 +59,12 @@ export function CommunityFilters({ searchFilters, setSearchFilters }: CommunityF
   return (
     <div className="space-y-6 pr-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-bold flex items-center gap-2">
-          Filters
+        <h3 className="text-base font-bold flex items-center gap-2">
+          Filters <SlidersHorizontal className="inline size-4 ml-2 "/>
         </h3>
         {(activeTags.length > 0 || activeRoles.length > 0) && (
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="sm" 
             onClick={clearFilters}
             className="h-7 px-2 text-[10px] text-muted-foreground hover:text-primary"
@@ -74,7 +74,7 @@ export function CommunityFilters({ searchFilters, setSearchFilters }: CommunityF
         )}
       </div>
 
-      <div className="relative mb-6">
+      <div className="relative mb-6 dark:bg-muted/10 bg-accent rounded-full">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
         <Input
           placeholder="Search tags or roles..."
@@ -88,13 +88,13 @@ export function CommunityFilters({ searchFilters, setSearchFilters }: CommunityF
         {/* TAGS SECTION */}
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+            <span className="text-[14px] font-semibold text-muted-foreground">
               Popular Tags
             </span>
-            <span className="text-[10px] text-muted-foreground/40">{activeTags.length} selected</span>
+            <span className="text-[12px] text-muted-foreground">{activeTags.length} selected</span>
           </div>
           <ScrollArea className="h-44 pr-3">
-            <div className="flex flex-wrap gap-1.5 pt-1">
+            <div className="flex flex-wrap gap-2.5 pt-1">
               {filteredTags.map((tag) => {
                 const isSelected = activeTags.includes(tag);
                 return (
@@ -103,10 +103,10 @@ export function CommunityFilters({ searchFilters, setSearchFilters }: CommunityF
                     onClick={() => toggleTag(tag)}
                     variant={isSelected ? "default" : "outline"}
                     className={cn(
-                      "cursor-pointer text-[10px] py-0.5 px-2 transition-all border-muted-foreground/10",
+                      "cursor-pointer text-[11px] py-0.5 px-2 transition-all border-muted-foreground/30",
                       isSelected 
                         ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20" 
-                        : "bg-transparent hover:bg-muted hover:border-primary/30 font-thin italic opacity-80"
+                        : "dark:bg-muted/20 bg-accent/40 hover:bg-muted hover:border-primary/30 italic opacity-80"
                     )}
                   >
                     {tag}
@@ -117,15 +117,15 @@ export function CommunityFilters({ searchFilters, setSearchFilters }: CommunityF
           </ScrollArea>
         </div>
 
-        <Separator className="opacity-40" />
+        <Separator className="opacity-100" />
 
         {/* ROLES SECTION */}
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+            <span className="text-[14px] font-semibold text-muted-foreground">
               Wanted Roles
             </span>
-            <span className="text-[10px] text-muted-foreground/40">{activeRoles.length} selected</span>
+            <span className="text-[12px] text-muted-foreground">{activeRoles.length} selected</span>
           </div>
           <ScrollArea className="h-64 pr-3">
             <div className="space-y-1 pt-1">
