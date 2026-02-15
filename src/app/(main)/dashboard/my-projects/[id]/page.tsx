@@ -77,6 +77,7 @@ const MyProjectId = () => {
   // Fetch project details
   const project = useQuery(api.projects.getProjectById, { projectId });
   const user = useQuery(api.users.getCurrentUser);
+  const members = useQuery(api.projects.getProjectMembers, { projectId });
 
   const inviteLink = project?.inviteLink;
   const isPro = user?.type !== "free";
@@ -608,26 +609,57 @@ const MyProjectId = () => {
                     </div>
 
                     {/* TEAM MEMBERS DETAILS (NAME + IMAGE + ROLE) */}
-                    <div>
-                        <p className="text-sm font-semibold">Team Members <LucideUserPlus className="w-4 h-4 inline ml-1" /></p>
-                        <div className="flex gap-4">
-                            <div className="flex items-center gap-2">
-                              <div className="bg-accent h-9 w-9 flex items-center justify-center rounded-full">
-                                <LucideUser2 className="w-5 h-5" />
-                              </div>
-                              <p>{project?.ownerName}</p>
-                                {/* <Image
-                                    src={project?.}
-                                    alt={project?.projectOwner?.name}
-                                    width={40}
-                                    height={40}
-                                    className="rounded-full"
-                                />
-                                <p className="text-sm font-semibold">
-                                    {project?.projectOwner?.name}
-                                </p> */}
-                            </div>
+                    <div className="w-full px-8">
+                      <p className="text-lg font-semibold text-center mb-2">
+                        Team Members{" "}
+                        <LucideUserPlus className="w-4 h-4 inline ml-1" />
+                      </p>
+                      <div className="flex flex-col gap-4 w-full mt-2">
+                        {/* OWNER */}
+                        <div className="flex gap-4 justify-between items-center w-full">
+                          <div className="flex items-center gap-4">
+                            <Image
+                              src={project?.ownerImage}
+                              alt={project?.ownerName}
+                              width={40}
+                              height={40}
+                              className="rounded-full"
+                            />
+                            <p>{project?.ownerName}</p>
+                          </div>
+                          <p className="text-sm italic">Owner</p>
                         </div>
+
+                        {/* OTHER MEMBERS */}
+                        {members?.map((member) => (
+                          <div
+                            key={member._id}
+                            className="flex gap-4 justify-between items-center w-full"
+                          >
+                            <div className="flex items-center gap-4">
+                              {member.userImage ? (
+                                <Image
+                                  src={member.userImage}
+                                  alt={member.userName}
+                                  width={40}
+                                  height={40}
+                                  className="rounded-full"
+                                />
+                              ) : (
+                                <div className="bg-accent h-10 w-10 flex items-center justify-center rounded-full">
+                                  <LucideUser2 className="w-5 h-5" />
+                                </div>
+                              )}
+                              <p className="truncate max-w-[140px]">
+                                {member.userName}
+                              </p>
+                            </div>
+                            <p className="text-sm italic capitalize ">
+                              {member.AccessRole}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>

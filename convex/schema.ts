@@ -26,6 +26,7 @@ export default defineSchema({
   // REPOSITORIES TABLE
   // ===============================
   repositories: defineTable({
+    // relation to project table , every repo is must linked to 1 project.
     githubId: v.int64(),
     name: v.string(),
     owner: v.string(),
@@ -38,27 +39,6 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_github_id", ["githubId"]),
-
-  // ===============================
-  // REVIEWS TABLE
-  // ===============================
-  reviews: defineTable({
-    // Relation to repositories table
-    repositoryId: v.id("repositories"),
-    prNumber: v.number(),
-    prTitle: v.string(),
-    prUrl: v.string(),
-    // Large AI-generated review text
-    review: v.string(),
-    // Review status
-    status: v.union(
-      v.literal("completed"),
-      v.literal("failed"),
-      v.literal("pending"),
-    ),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  }).index("by_repository", ["repositoryId"]),
   // ===============================
   // PROJECTS TABLE
   // ===============================
@@ -92,7 +72,7 @@ export default defineSchema({
     // Project owner (creator)
     ownerId: v.id("users"),
     ownerName: v.string(),
-    ownerImage: v.optional(v.string()),
+    ownerImage: v.string(),
     about: v.optional(v.string()),
     // new details for the project to maintain community engaement
     projectStars: v.number(), // this is for project , on wekraft platform

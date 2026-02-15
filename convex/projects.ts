@@ -13,6 +13,8 @@ export const create = mutation({
     repoFullName: v.string(),
     repoOwner: v.string(),
     repoUrl: v.string(),
+    ownerName: v.string(),
+    ownerImage: v.string(),
     inviteLink: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -24,7 +26,7 @@ export const create = mutation({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -39,18 +41,18 @@ export const create = mutation({
 
     // Ensure invite link is unique if provided
     if (args.inviteLink) {
-        const existingProject = await ctx.db
-            .query("projects")
-            .withIndex("by_invite_link", (q) => q.eq("inviteLink", args.inviteLink))
-            .first();
-        
-        if (existingProject) {
-            throw new Error("Invite link already exists. Please try again.");
-        }
+      const existingProject = await ctx.db
+        .query("projects")
+        .withIndex("by_invite_link", (q) => q.eq("inviteLink", args.inviteLink))
+        .first();
+
+      if (existingProject) {
+        throw new Error("Invite link already exists. Please try again.");
+      }
     }
 
     // Check if project with same name already exists for this user (optional but good practice)
-    // For now, we'll allow it or rely on unique constraints if any. 
+    // For now, we'll allow it or rely on unique constraints if any.
     // Schema doesn't enforce unique project name per user, but it's good UX.
     // omitted for MVP speed unless requested.
 
@@ -69,6 +71,8 @@ export const create = mutation({
       repoUrl: args.repoUrl,
       ownerId: user._id,
       inviteLink: args.inviteLink,
+      ownerName: user.name,
+      ownerImage: user.imageUrl,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -76,7 +80,6 @@ export const create = mutation({
     return projectId;
   },
 });
-
 
 // =================================
 // GET PROJECTS
@@ -92,7 +95,7 @@ export const getProjects = query({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -110,7 +113,6 @@ export const getProjects = query({
   },
 });
 
-
 // =================================
 // GET PROJECT BY ID
 // =================================
@@ -125,11 +127,11 @@ export const getProjectById = query({
     }
 
     const project = await ctx.db.get(args.projectId);
-    
+
     // Optional: You might want to check if the user is the owner
     // const user = ... get user ...
     // if (project.ownerId !== user._id) throw new Error("Unauthorized");
-    
+
     return project;
   },
 });
@@ -148,7 +150,7 @@ export const updateThumbnail = mutation({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -158,11 +160,11 @@ export const updateThumbnail = mutation({
 
     const project = await ctx.db.get(args.projectId);
     if (!project) {
-        throw new Error("Project not found");
+      throw new Error("Project not found");
     }
 
     if (project.ownerId !== user._id) {
-        throw new Error("Unauthorized");
+      throw new Error("Unauthorized");
     }
 
     await ctx.db.patch(args.projectId, {
@@ -189,10 +191,10 @@ export const updateProject = mutation({
           type: v.union(
             v.literal("casual"),
             v.literal("part-time"),
-            v.literal("serious")
+            v.literal("serious"),
           ),
-        })
-      )
+        }),
+      ),
     ),
   },
   handler: async (ctx, args) => {
@@ -204,7 +206,7 @@ export const updateProject = mutation({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -258,7 +260,7 @@ export const updateAbout = mutation({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -314,10 +316,10 @@ export const updateHealthScore = mutation({
 
     // Only owner can update health score (or maybe system? For now restrict to owner like others)
     if (project.ownerId !== identity.tokenIdentifier && !project.ownerId) {
-       // Note: ownerId is a user ID (database ID), identity.tokenIdentifier is just the token sub.
-       // We should check user existence like other mutations.
+      // Note: ownerId is a user ID (database ID), identity.tokenIdentifier is just the token sub.
+      // We should check user existence like other mutations.
     }
-    
+
     // We'll follow the pattern of other mutations to verify user
     const user = await ctx.db
       .query("users")
@@ -335,7 +337,6 @@ export const updateHealthScore = mutation({
     });
   },
 });
-
 
 // =======================================
 // GET PROJECT BY INVITE LINK
@@ -413,7 +414,7 @@ export const requestJoinProject = mutation({
       .first();
 
     if (isMember) {
-        throw new Error("You are already a member of this project");
+      throw new Error("You are already a member of this project");
     }
 
     await ctx.db.insert("projectJoinRequests", {
@@ -437,22 +438,25 @@ export const getMyProjectRole = query({
   args: { projectId: v.id("projects") },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return { isOwner: false, isAdmin: false, isMember: false, role: null };
+    if (!identity)
+      return { isOwner: false, isAdmin: false, isMember: false, role: null };
 
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
-    if (!user) return { isOwner: false, isAdmin: false, isMember: false, role: null };
+    if (!user)
+      return { isOwner: false, isAdmin: false, isMember: false, role: null };
 
     const project = await ctx.db.get(args.projectId);
-    if (!project) return { isOwner: false, isAdmin: false, isMember: false, role: null };
+    if (!project)
+      return { isOwner: false, isAdmin: false, isMember: false, role: null };
 
     const isOwner = project.ownerId === user._id;
-    console.log("isOwner",isOwner);
+    console.log("isOwner", isOwner);
 
     // Check member record
     const memberRecord = await ctx.db
@@ -461,19 +465,21 @@ export const getMyProjectRole = query({
       .filter((q) => q.eq(q.field("userId"), user._id))
       .first();
 
-    const isMember = !isOwner || memberRecord?.AccessRole === "member" ; // who is part of team has member role
+    const isMember = !isOwner || memberRecord?.AccessRole === "member"; // who is part of team has member role
     const isAdmin = memberRecord?.AccessRole === "admin"; // who is part of team as Admin
     const isPower = isOwner || isAdmin; // who has power either admin or owner
-    
-    console.log("isAdmin",isAdmin);
-    console.log("isMember",isMember);
-    console.log("isPower",isPower);
+
+    console.log("isAdmin", isAdmin);
+    console.log("isMember", isMember);
+    console.log("isPower", isPower);
     return {
       isOwner,
       isAdmin,
       isMember,
       isPower,
-      role: isOwner ? "owner" : memberRecord?.AccessRole || (isMember ? "member" : null),
+      role: isOwner
+        ? "owner"
+        : memberRecord?.AccessRole || (isMember ? "member" : null),
     };
   },
 });
@@ -504,25 +510,25 @@ export const getProjectRequests = query({
 
     const project = await ctx.db.get(args.projectId);
     if (!project) return [];
-    
+
     // Check if user is at least a member (or owner) to see requests
     // Owner check:
     const isOwner = project.ownerId === user._id;
-    
+
     // Member check:
     let isMember = isOwner;
     if (!isMember) {
-        const member = await ctx.db
-            .query("projectMembers")
-            .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
-            .filter((q) => q.eq(q.field("userId"), user._id))
-            .first();
-        isMember = !!member;
+      const member = await ctx.db
+        .query("projectMembers")
+        .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+        .filter((q) => q.eq(q.field("userId"), user._id))
+        .first();
+      isMember = !!member;
     }
-    
+
     if (!isMember) {
-        // Not authorized to view requests
-        return [];
+      // Not authorized to view requests
+      return [];
     }
 
     const requests = await ctx.db
@@ -552,7 +558,7 @@ export const resolveJoinRequest = mutation({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -567,27 +573,27 @@ export const resolveJoinRequest = mutation({
 
     const project = await ctx.db.get(request.projectId);
     if (!project) {
-        throw new Error("Project not found");
+      throw new Error("Project not found");
     }
 
     // Check Authorization: Owner OR Admin
     const isOwner = project.ownerId === user._id;
     let isAdmin = isOwner;
-    
+
     if (!isOwner) {
-        const memberRecord = await ctx.db
-            .query("projectMembers")
-            .withIndex("by_project", (q) => q.eq("projectId", project._id))
-            .filter((q) => q.eq(q.field("userId"), user._id))
-            .first();
-        
-        if (memberRecord?.AccessRole === "admin") {
-            isAdmin = true;
-        }
+      const memberRecord = await ctx.db
+        .query("projectMembers")
+        .withIndex("by_project", (q) => q.eq("projectId", project._id))
+        .filter((q) => q.eq(q.field("userId"), user._id))
+        .first();
+
+      if (memberRecord?.AccessRole === "admin") {
+        isAdmin = true;
+      }
     }
 
     if (!isAdmin) {
-        throw new Error("Unauthorized: Only Admins can resolve requests");
+      throw new Error("Unauthorized: Only Admins can resolve requests");
     }
 
     await ctx.db.patch(args.requestId, {
@@ -597,20 +603,20 @@ export const resolveJoinRequest = mutation({
 
     if (args.status === "accepted") {
       // Check if already a member to be safe
-       const isMember = await ctx.db
-      .query("projectMembers")
-      .withIndex("by_project", (q) => q.eq("projectId", request.projectId))
-      .filter((q) => q.eq(q.field("userId"), request.userId))
-      .first();
+      const isMember = await ctx.db
+        .query("projectMembers")
+        .withIndex("by_project", (q) => q.eq("projectId", request.projectId))
+        .filter((q) => q.eq(q.field("userId"), request.userId))
+        .first();
 
       if (!isMember) {
         await ctx.db.insert("projectMembers", {
-            projectId: request.projectId,
-            userId: request.userId,
-            userName: request.userName,
-            userImage: request.userImage,
-            AccessRole: "member",
-            joinedAt: Date.now(),
+          projectId: request.projectId,
+          userId: request.userId,
+          userName: request.userName,
+          userImage: request.userImage,
+          AccessRole: "member",
+          joinedAt: Date.now(),
         });
       }
     }
@@ -641,11 +647,11 @@ export const searchAndRank = query({
     }
 
     const filtered = allPublicProjects.filter((project) => {
-      const hasTags = args.tags && args.tags.length > 0; 
+      const hasTags = args.tags && args.tags.length > 0;
       const hasRoles = args.roles && args.roles.length > 0;
 
       // Check tags match
-      let tagMatch = true; 
+      let tagMatch = true;
       if (hasTags) {
         tagMatch = project.tags.some((tag) => args.tags!.includes(tag));
       }
@@ -653,7 +659,7 @@ export const searchAndRank = query({
       // Check roles match
       let roleMatch = true;
       if (hasRoles) {
-        roleMatch = project.lookingForMembers 
+        roleMatch = project.lookingForMembers
           ? project.lookingForMembers.some((m) => args.roles!.includes(m.role))
           : false;
       }
@@ -668,5 +674,19 @@ export const searchAndRank = query({
       const scoreB = b.healthScore?.totalScore ?? 0;
       return scoreB - scoreA;
     });
+  },
+});
+
+// =======================================
+// GET PROJECT MEMBERS
+// =======================================
+export const getProjectMembers = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, args) => {
+    const members = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+      .collect();
+    return members;
   },
 });

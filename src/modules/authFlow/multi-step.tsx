@@ -142,6 +142,8 @@ export function MultiStepOnboarding() {
           repoOwner: storedRepo.owner,
           repoUrl: storedRepo.url,
           inviteLink: inviteLink,
+          ownerName: user?.name!,
+          ownerImage: user?.imageUrl!,
         });
 
         setDirection(1);

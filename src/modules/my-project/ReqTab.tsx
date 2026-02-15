@@ -80,7 +80,7 @@ const RequestTab = ({ projectId }: { projectId: Id<"projects"> }) => {
               </Avatar>
 
               <div className="flex items-center gap-3">
-                <span className="font-semibold">{request.userName}</span>
+                <span className="font-semibold truncate max-w-[180px]">{request.userName}</span>
                 <span className="text-xs px-2 py-0.5 rounded-full dark:bg-blue-500/10 bg-blue-500/20 text-blue-500 border border-blue-500/20 capitalize">
                   {request.source}
                 </span>
