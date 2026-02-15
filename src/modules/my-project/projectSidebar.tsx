@@ -70,27 +70,27 @@ const workspaceMenu = [
   },
   {
     label: "Tasks",
-    path: "tasks",
+    path: "workspace/tasks",
     icon: ClipboardList,
   },
   {
     label: "Time Logs",
-    path: "time-logs",
+    path: "workspace/time-logs",
     icon: AudioWaveform,
   },
   {
     label: "Teamspace",
-    path: "teamspace",
+    path: "workspace/teamspace",
     icon: PlaneTakeoff,
   },
   {
     label: "Activity feed",
-    path: "activity",
+    path: "workspace/activity",
     icon: Activity,
   },
   {
     label: "Whiteboard",
-    path: "whiteboard",
+    path: "workspace/whiteboard",
     icon: PenTool,
   },
 ];

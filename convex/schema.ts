@@ -34,6 +34,8 @@ export default defineSchema({
     url: v.string(),
     // Relation to users table
     userId: v.id("users"),
+    // New additions
+    language: v.optional(v.any()), // store only top 2 languages..
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -98,6 +100,7 @@ export default defineSchema({
     ),
     // New additions
     inviteLink: v.optional(v.string()), // new unique
+    agentMode: v.optional(v.union(v.literal("semi-auto"), v.literal("auto"))),
     // TIME STAMPS----
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -145,4 +148,53 @@ export default defineSchema({
     .index("by_project", ["projectId"])
     .index("by_user", ["userId"])
     .index("by_status", ["status"]),
+
+  // =========REVIEWS TABLE===========
+  reviews: defineTable({
+    repoId: v.id("repositories"),
+    pushTitle: v.string(),
+    pushUrl: v.optional(v.string()),
+    authorUserName: v.optional(v.string()),
+    authorAvatar: v.optional(v.string()),
+    // prNumber: v.optional(v.number()), // for pr
+    commitHash: v.optional(v.string()), // for commit
+    reviewType: v.union(v.literal("pr"), v.literal("commit")),
+    reviewStatus: v.optional(
+      v.union(
+        v.literal("pending"),
+        v.literal("completed"),
+        v.literal("failed"),
+      ),
+    ),
+    ctiticalIssueFound: v.optional(v.boolean()),
+    review: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_repo", ["repoId"])
+    .index("by_push", ["pushTitle"])
+    .index("by_commit", ["commitHash"])
+    .index("by_type", ["reviewType"]),
+
+  // ===============Issues Table==============
+  issues: defineTable({
+    repoId: v.id("repositories"),
+    issueTitle: v.string(),
+    issueDescription: v.string(),
+    issueCreatedByName: v.optional(v.string()),
+    issueAssignedTo: v.optional(v.id("users")),
+    issueStatus: v.optional(
+      v.union(
+        v.literal("assigned"),
+        v.literal("ignored"),
+        v.literal("pending"),
+        v.literal("resolved"),
+      ),
+    ),
+    issueCreatedAt: v.number(),
+    issueUpdatedAt: v.number(),
+  })
+    .index("by_repo", ["repoId"])
+    .index("by_status", ["issueStatus"])
+    .index("by_assigned_to", ["issueAssignedTo"]),
 });

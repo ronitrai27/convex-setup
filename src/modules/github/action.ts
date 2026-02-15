@@ -648,3 +648,232 @@ export async function getLatestCommitSHA(
 
   return data.commit.sha;
 }
+
+// =================================
+// GET COMMIT DETAILS WITH FILES
+// =================================
+export async function getCommitDetails(
+  token: string,
+  owner: string,
+  repo: string,
+  commitSha: string,
+) {
+  const octokit = new Octokit({ auth: token });
+
+  try {
+    console.log("Fetching commits contents");
+    const { data: commit } = await octokit.rest.repos.getCommit({
+      owner,
+      repo,
+      ref: commitSha,
+    });
+
+    // Limit files processed to prevent rate limits & token overflow
+    const filesToProcess = (commit.files || []).slice(0, 20); // Max 20 files
+
+    const files = await Promise.all(
+      filesToProcess.map(async (file) => {
+        // Skip removed files
+        if (file.status === "removed") return null;
+
+        // Skip files we don't want to review (binary, configs, etc.)
+        if (!shouldIncludeFile(file.filename)) return null;
+
+        // Skip files that are too large (>100KB)
+        if ((file.changes || 0) > 1000) {
+          console.log(
+            `⚠️ Skipping large file: ${file.filename} (${file.changes} changes)`,
+          );
+          return null;
+        }
+
+        try {
+          // Fetch full file content at this commit
+          const { data: fileData } = await octokit.rest.repos.getContent({
+            owner,
+            repo,
+            path: file.filename,
+            ref: commitSha,
+          });
+
+          // Ensure it's a file (not a directory) with content
+          if (
+            Array.isArray(fileData) ||
+            fileData.type !== "file" ||
+            !fileData.content
+          ) {
+            return null;
+          }
+
+          // Decode base64 content
+          const content = Buffer.from(fileData.content, "base64").toString(
+            "utf-8",
+          );
+
+          // Additional safety: skip if content is massive
+          if (content.length > 50000) {
+            // 50KB limit
+            console.log(`⚠️ Skipping large content: ${file.filename}`);
+            return {
+              filename: file.filename,
+              status: file.status,
+              additions: file.additions || 0,
+              deletions: file.deletions || 0,
+              patch: file.patch || "",
+              content: "// Content too large to include",
+            };
+          }
+
+          return {
+            filename: file.filename,
+            status: file.status,
+            additions: file.additions || 0,
+            deletions: file.deletions || 0,
+            patch: file.patch || "",
+            content: content,
+          };
+        } catch (error) {
+          // File might not exist at this ref or API error
+          console.error(
+            `❌ Failed to fetch content for ${file.filename}:`,
+            error,
+          );
+          return {
+            filename: file.filename,
+            status: file.status,
+            additions: file.additions || 0,
+            deletions: file.deletions || 0,
+            patch: file.patch || "",
+            content: null, // Indicate failure but keep file in results
+          };
+        }
+      }),
+    );
+
+    // Filter out null entries
+    const validFiles = files.filter(
+      (f): f is NonNullable<typeof f> => f !== null,
+    );
+
+    return {
+      sha: commit.sha,
+      message: commit.commit.message,
+      author: commit.commit.author?.name || "Unknown",
+      date: commit.commit.author?.date,
+      files: validFiles,
+      stats: {
+        totalFiles: validFiles.length,
+        totalAdditions: validFiles.reduce((sum, f) => sum + f.additions, 0),
+        totalDeletions: validFiles.reduce((sum, f) => sum + f.deletions, 0),
+      },
+    };
+  } catch (error) {
+    console.error(`❌ Failed to fetch commit ${commitSha}:`, error);
+    throw new Error(`Failed to fetch commit details: ${error}`);
+  }
+}
+
+// =================================
+// HANDLE PUSH EVENT
+// =================================
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "../../../convex/_generated/api";
+import { inngest } from "@/inngest/client";
+
+export async function handlePushEvent(payload: any) {
+  const { repository, commits, pusher, sender } = payload;
+  console.log("Sender and pusher============================>", sender, pusher);
+  const avatarUrl = sender.avatar_url;
+  console.log("avatar_URL---------->", avatarUrl);
+  const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
+  // 1. Get Repo & User
+  console.log("Fetching repo data");
+  const repoData = await convex.query(api.repos.getRepoByGithubId, {
+    githubId: BigInt(repository.id) as any,
+  });
+  console.log("Repo data fetched:", repoData);
+
+  if (!repoData) {
+    console.log("Repository not found in database:", repository.full_name);
+    return { message: "Repository not found", status: "skipped" };
+  }
+
+  const userData = await convex.query(api.users.getUser, {
+    userId: repoData.userId,
+  });
+
+  if (!userData) {
+    console.log("User not found for repo:", repoData.name);
+    return { message: "User not found", status: "skipped" };
+  }
+
+  // Check limits
+  // if (userData.aiLimits && userData.aiLimits.commit >= 5) {
+  //   console.log("Usage limit exceeded for user", userData.userName);
+  //   return { message: "Usage limit exceeded", status: "skipped" };
+  // }
+  // console.log("Limit passed for the user. !!!");
+
+  // Get GitHub token using clerkUserId from database
+  if (!userData.tokenIdentifier) {
+    console.error("Clerk User ID not found for user:", userData.name);
+    return { message: "Clerk User ID not found", status: "failed" };
+  }
+
+  const token = await getUserGithubToken(userData.tokenIdentifier);
+
+  if (!token) {
+    console.error("GitHub token not found for user:", userData.name);
+    return { message: "GitHub token not found", status: "failed" };
+  }
+  console.log("Token found for user:", userData.name);
+
+  // Process each commit
+  const results = [];
+  for (const commit of commits) {
+    console.log(`Processing commit: ${commit.id}`);
+
+    // 2. Fetch commit details (files & content)
+    console.log("Fetching commits contents");
+    const commitDetails = await getCommitDetails(
+      token,
+      repository.owner.name || repository.owner.login,
+      repository.name,
+      commit.id,
+    );
+    // console.log("Commit details fetched:", commitDetails);
+
+    // 3. Create initial review record (pending)
+    const reviewId = await convex.mutation(api.projects.createReview, {
+      repoId: repoData._id,
+      pushTitle: commit.message || "No title",
+      pushUrl: commit.url,
+      commitHash: commit.id,
+      authorUserName: commit.author.name || pusher.name,
+      reviewType: "commit",
+      reviewStatus: "pending",
+    });
+    console.log("Review created:", reviewId);
+
+    // 4. Send Inngest Event to trigger AI review
+    console.log("Sending Inngest event");
+    await inngest.send({
+      name: "commit/analyze",
+      data: {
+        reviewId,
+        commitDetails,
+        repoId: repoData._id,
+      },
+    });
+
+    // Increment usage limit
+    // await convex.mutation(api.users.incrementCommitCount, {
+    //   userId: userData._id,
+    // });
+
+    results.push({ commit: commit.id, status: "queued" });
+  }
+
+  return { message: "Processed", results };
+}

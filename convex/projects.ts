@@ -301,7 +301,7 @@ export const updateHealthScore = mutation({
         v.object({
           totalScore: v.number(),
           calculatedDate: v.string(),
-        })
+        }),
       ),
     }),
   },
@@ -324,7 +324,7 @@ export const updateHealthScore = mutation({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -373,7 +373,7 @@ export const requestJoinProject = mutation({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -500,7 +500,7 @@ export const getProjectRequests = query({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -688,5 +688,77 @@ export const getProjectMembers = query({
       .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
       .collect();
     return members;
+  },
+});
+
+// ===============================================
+export const createReview = mutation({
+  args: {
+    repoId: v.id("repositories"),
+    pushTitle: v.string(),
+    pushUrl: v.optional(v.string()),
+    commitHash: v.optional(v.string()),
+    authorAvatar: v.optional(v.string()),
+    authorUserName: v.string(),
+    reviewType: v.union(v.literal("pr"), v.literal("commit")),
+    reviewStatus: v.union(v.literal("pending"), v.literal("completed")),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("reviews", {
+      repoId: args.repoId,
+      pushTitle: args.pushTitle,
+      pushUrl: args.pushUrl,
+      commitHash: args.commitHash,
+      authorAvatar: args.authorAvatar,
+      authorUserName: args.authorUserName,
+      reviewType: args.reviewType,
+      reviewStatus: args.reviewStatus, // pending
+      review: "", // Initial empty review
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// ===============================================
+export const updateReview = mutation({
+  args: {
+    reviewId: v.id("reviews"),
+    review: v.string(),
+    reviewStatus: v.union(v.literal("completed"), v.literal("failed")),
+    ctiticalIssueFound: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.reviewId, {
+      review: args.review,
+      reviewStatus: args.reviewStatus,
+      ctiticalIssueFound: args.ctiticalIssueFound,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// ===============================================
+export const createIssue = mutation({
+  args: {
+    repoId: v.id("repositories"),
+    issueTitle: v.string(),
+    issueDescription: v.string(),
+    issueStatus: v.union(
+      v.literal("assigned"),
+      v.literal("ignored"),
+      v.literal("pending"),
+      v.literal("resolved"),
+    ),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("issues", {
+      repoId: args.repoId,
+      issueTitle: args.issueTitle,
+      issueDescription: args.issueDescription,
+      issueStatus: args.issueStatus,
+      issueCreatedAt: Date.now(),
+      issueUpdatedAt: Date.now(),
+    });
   },
 });

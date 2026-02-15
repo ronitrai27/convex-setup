@@ -1,13 +1,3 @@
-// import { useQuery } from "@tanstack/react-query";
-// import { getRepositories } from "@/app/modules/github/action";
-
-// export function useRepositories(page: number = 1, perPage: number = 10) {
-//   return useQuery({
-//     queryKey: ["repositories", page, perPage],
-//     queryFn: () => getRepositories(page, perPage),
-//     staleTime: 5 * 60 * 1000, // 5 minutes
-//   });
-// }
 
 import { useQuery } from "@tanstack/react-query";
 import { getRepositories } from "@/modules/github/action";

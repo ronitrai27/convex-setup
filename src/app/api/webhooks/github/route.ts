@@ -1,3 +1,4 @@
+import { handlePushEvent } from "@/modules/github/action";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -26,6 +27,14 @@ export async function POST(req: NextRequest) {
       console.log("repoName", repoName);
       console.log("branch", branch);
       console.log("pusher", pusher);
+      handlePushEvent(body)
+        .then(() => console.log(`✅ Push Event Processed`))
+        .catch((err: any) => console.error(`❌ Error:`, err));
+
+      return NextResponse.json(
+        { message: "Webhook received" },
+        { status: 202 },
+      );
     }
     // ===============================
     // ISSUES

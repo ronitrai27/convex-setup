@@ -76,3 +76,13 @@ export const getRepository = query({
       .first();
   },
 });
+
+export const getRepoByGithubId = query({
+  args: { githubId: v.int64() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("repositories")
+      .withIndex("by_github_id", (q) => q.eq("githubId", args.githubId))
+      .first();
+  },
+});
