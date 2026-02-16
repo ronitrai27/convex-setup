@@ -20,7 +20,7 @@ export async function analyzeRepoTree(
   }
 
   const risks = await getFolderRiskHeatmap(token, owner, repo, branch);
-  console.log("================RISK--------->", risks);
+  console.log("================tree Risk--------->", risks);
 
   return risks;
 }

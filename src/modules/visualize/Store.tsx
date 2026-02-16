@@ -3,8 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   ReactFlow,
-  MiniMap,
-  Controls,
   Background,
   useNodesState,
   useEdgesState,
@@ -23,8 +21,6 @@ import {
   ChevronRight,
   ChevronDown,
   Layout,
-  Maximize2,
-  Minimize2,
 } from "lucide-react";
 
 import { generateRepoVisualization } from "./index";
@@ -110,7 +106,7 @@ function FolderNode({ data }: any) {
         }}
       >
         <div className="flex items-center gap-2 px-3 py-2">
-          {/* {isCollapsible && ( */}
+          {isCollapsible && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -124,7 +120,7 @@ function FolderNode({ data }: any) {
                 <ChevronDown size={16} className="text-muted-foreground" />
               )}
             </button>
-          {/* )} */}
+          )}
 
           <div
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
@@ -172,7 +168,6 @@ function FolderNode({ data }: any) {
             {data.path || "/"}
           </div>
 
-          {/* Progress bar based on "risk" (file changes) */}
           {data.fileCount > 0 && (
             <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
               <div
@@ -216,53 +211,21 @@ export default function RepoVisualizer({ owner, repo }: RepoVisualizerProps) {
 
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
 
+  // Store the FULL original edge list so collapse logic always has access
+  const [allEdges, setAllEdges] = useState<Edge[]>([]);
+
   const onLayout = useCallback(
     (direction: string) => {
       const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
         nodes,
         edges,
-        direction
+        direction,
       );
       setNodes([...layoutedNodes]);
       setEdges([...layoutedEdges]);
     },
-    [nodes, edges, setNodes, setEdges]
+    [nodes, edges, setNodes, setEdges],
   );
-
-  useEffect(() => {
-    async function load() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const data = await generateRepoVisualization(owner, repo);
-
-        if (!data.nodes || data.nodes.length === 0) {
-          setError("No repository data found.");
-          return;
-        }
-
-        // Initial layout
-        const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-          data.nodes as Node[],
-          data.edges as Edge[],
-          "TB"
-        );
-
-        setNodes(layoutedNodes);
-        setEdges(layoutedEdges);
-      } catch (err) {
-        console.error("❌ Error loading visualization:", err);
-        setError(err instanceof Error ? err.message : "Unknown error");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    if (owner && repo) {
-      load();
-    }
-  }, [owner, repo]);
 
   const toggleNodeCollapse = useCallback((nodeId: string) => {
     setCollapsedNodes((prev) => {
@@ -276,50 +239,99 @@ export default function RepoVisualizer({ owner, repo }: RepoVisualizerProps) {
     });
   }, []);
 
-  // Update nodes and edges based on collapse state
+  // Load data once
   useEffect(() => {
-    if (nodes.length === 0) return;
+    async function load() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const data = await generateRepoVisualization(owner, repo);
+
+        if (!data.nodes || data.nodes.length === 0) {
+          setError("No repository data found.");
+          return;
+        }
+
+        const rawEdges = data.edges as Edge[];
+
+        // Pre-compute which node IDs are parents (have children)
+        const parentNodeIds = new Set<string>();
+        rawEdges.forEach((edge) => parentNodeIds.add(edge.source));
+
+        // Inject isCollapsible + onToggleCollapse into node data RIGHT AWAY
+        const enrichedNodes = (data.nodes as Node[]).map((node) => ({
+          ...node,
+          data: {
+            ...node.data,
+            isCollapsible: parentNodeIds.has(node.id),
+            isCollapsed: false,
+            onToggleCollapse: () => toggleNodeCollapse(node.id),
+          },
+        }));
+
+        // Apply layout
+        const { nodes: layoutedNodes, edges: layoutedEdges } =
+          getLayoutedElements(enrichedNodes, rawEdges, "TB");
+
+        setAllEdges(rawEdges); // save full edges for collapse lookups
+        setNodes(layoutedNodes);
+        setEdges(layoutedEdges);
+      } catch (err) {
+        console.error("Error loading visualization:", err);
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (owner && repo) {
+      load();
+    }
+  }, [owner, repo]);
+
+  // React to collapse changes — uses `allEdges` (stable, always the full list)
+  useEffect(() => {
+    if (allEdges.length === 0) return;
 
     setNodes((nds) =>
       nds.map((node) => {
-        const nodeHasChildren = edges.some((edge) => edge.source === node.id);
         const isCollapsed = collapsedNodes.has(node.id);
 
-        // A node is hidden if any of its ancestors are collapsed
+        // Walk up ancestors using allEdges to check if any parent is collapsed
         let isHidden = false;
-        let currentParent = edges.find((e) => e.target === node.id)?.source;
+        let currentParent = allEdges.find(
+          (e) => e.target === node.id,
+        )?.source;
         while (currentParent) {
           if (collapsedNodes.has(currentParent)) {
             isHidden = true;
             break;
           }
-          currentParent = edges.find((e) => e.target === currentParent)?.source;
+          currentParent = allEdges.find(
+            (e) => e.target === currentParent,
+          )?.source;
         }
 
         return {
           ...node,
           data: {
             ...node.data,
-            isCollapsible: nodeHasChildren,
             isCollapsed,
             onToggleCollapse: () => toggleNodeCollapse(node.id),
           },
           hidden: isHidden,
         };
-      })
+      }),
     );
 
     setEdges((eds) =>
-      eds.map((edge) => {
-        // Hide edge if source or target is hidden, or source is collapsed
-        const sourceIsCollapsed = collapsedNodes.has(edge.source);
-        return {
-          ...edge,
-          hidden: sourceIsCollapsed,
-        };
-      })
+      eds.map((edge) => ({
+        ...edge,
+        hidden: collapsedNodes.has(edge.source),
+      })),
     );
-  }, [collapsedNodes, edges.length === 0]); // Only re-run when collapsedNodes change or edges are first loaded
+  }, [collapsedNodes, allEdges, toggleNodeCollapse, setNodes, setEdges]);
 
   if (loading) {
     return (
@@ -364,7 +376,7 @@ export default function RepoVisualizer({ owner, repo }: RepoVisualizerProps) {
   }
 
   return (
-    <div className="relative h-[calc(100vh-160px)] w-full bg-background overflow-hidden rounded-xl border shadow-inner">
+    <div className="relative h-[calc(100vh-160px)] w-full overflow-hidden rounded-xl border bg-background shadow-inner">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -390,7 +402,7 @@ export default function RepoVisualizer({ owner, repo }: RepoVisualizerProps) {
               </div>
             </div>
           </div>
-          
+
           <div className="flex gap-2">
             <button
               onClick={() => onLayout("TB")}
@@ -416,7 +428,7 @@ export default function RepoVisualizer({ owner, repo }: RepoVisualizerProps) {
               <LuLightbulb size={18} className="text-primary" />
             </button>
           ) : (
-            <div className="w-64 rounded-xl border bg-card p-4 shadow-xl animate-in fade-in slide-in-from-top-2">
+            <div className="w-64 animate-in fade-in slide-in-from-top-2 rounded-xl border bg-card p-4 shadow-xl">
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="flex items-center gap-2 text-sm font-bold">
                   <LuLightbulb className="text-primary" />
@@ -431,16 +443,28 @@ export default function RepoVisualizer({ owner, repo }: RepoVisualizerProps) {
               </div>
               <ul className="space-y-2.5 text-xs text-muted-foreground">
                 <li className="flex items-start gap-2">
-                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] text-primary">1</span>
-                  <span>Click <b>toggle icons</b> to expand or collapse folders</span>
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] text-primary">
+                    1
+                  </span>
+                  <span>
+                    Click <b>toggle icons</b> to expand or collapse folders
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] text-primary">2</span>
-                  <span><b>Scroll</b> to zoom, <b>Drag</b> to pan the view</span>
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] text-primary">
+                    2
+                  </span>
+                  <span>
+                    <b>Scroll</b> to zoom, <b>Drag</b> to pan the view
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] text-primary">3</span>
-                  <span>Click the <b>external link</b> to view on GitHub</span>
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] text-primary">
+                    3
+                  </span>
+                  <span>
+                    Click the <b>external link</b> to view on GitHub
+                  </span>
                 </li>
               </ul>
             </div>
