@@ -182,7 +182,10 @@ export default defineSchema({
     repoId: v.id("repositories"),
     issueTitle: v.string(),
     issueDescription: v.string(),
+    issueCreatedByUserId: v.optional(v.id("users")), // in case user creates issue ("by_user")
     issueCreatedByName: v.optional(v.string()),
+    issueType: v.optional(v.union(v.literal("by_user"), v.literal("by_agent"), v.literal("from_github"))), // this will help to identify the exact issue and can be use to show in repo visulaizer.
+    issueFiles: v.optional(v.string()), // llm will provide the file source
     issueAssignedTo: v.optional(v.id("users")),
     issueStatus: v.optional(
       v.union(

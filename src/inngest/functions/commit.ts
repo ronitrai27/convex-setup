@@ -30,9 +30,6 @@ const ReviewSchema = z.object({
         line: z.number().optional(),
         description: z.string(),
         fix: z.string(),
-        severity: z
-          .enum(["low", "medium", "high", "critical"])
-          .describe("Impact level of the issue"),
       }),
     )
     .optional()
@@ -91,7 +88,7 @@ Provide:
    - Include ONLY if there are MAJOR or CRITICAL issues.
    - Maximum 1-2 issues.
    - Ignore minor suggestions, refactors, style, or optimizations.
-   - Must have: title, file, line (optional), description, and fix
+   - Must have: title, file eg (src/app/folder/file), line (optional), description, and fix
    - Must be respond in markdown format
    -Be precise. Do not invent problems. Only flag issues with strong confidence`,
       });
@@ -103,11 +100,14 @@ Provide:
     const issues = reviewContent.criticalIssues ?? [];
     const hasActualIssue = issues.length > 0;
     await step.run("update-review", async () => {
-      //   const issues = reviewContent.criticalIssues ?? [];
-      //   const hasActualIssue = issues.length > 0;
 
       // Format review as markdown
       let markdownReview = `## Summary\n${reviewContent.summary}\n\n`;
+
+      // Add sequence diagram if present
+      if (reviewContent.sequenceDiagram) {
+        markdownReview += `## Sequence Diagram\n\`\`\`mermaid\n${reviewContent.sequenceDiagram}\n\`\`\`\n\n`;
+      }
 
       markdownReview += `## Walkthrough\n`;
       reviewContent.walkthrough.forEach((w) => {
@@ -128,7 +128,6 @@ Provide:
           if (issue.line) {
             markdownReview += `- **Line**: ${issue.line}\n`;
           }
-          markdownReview += `- **Severity**: ${issue.severity}\n`;
           markdownReview += `- **Description**: ${issue.description}\n`;
           markdownReview += `- **Fix**: ${issue.fix}\n\n`;
         });
@@ -161,6 +160,8 @@ Provide:
             issueTitle: `Critical issue in ${shortSha}: ${issue.title}`,
             issueDescription: issueMarkdown,
             issueStatus: "pending",
+            issueType: "by_agent",
+            issueFiles: issue.file,
           });
         }
       }
@@ -179,7 +180,7 @@ Provide:
           (issue, index) =>
             `${index + 1}. ${issue.title}\nFile: ${issue.file}${
               issue.line ? ` (Line ${issue.line})` : ""
-            }\nSeverity: ${issue.severity}\n`,
+            }\n`,
         )
         .join("\n");
 

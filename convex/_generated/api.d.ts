@@ -10,7 +10,6 @@
 
 import type * as projects from "../projects.js";
 import type * as repos from "../repos.js";
-import type * as seedProjects from "../seedProjects.js";
 import type * as users from "../users.js";
 
 import type {
@@ -22,7 +21,6 @@ import type {
 declare const fullApi: ApiFromModules<{
   projects: typeof projects;
   repos: typeof repos;
-  seedProjects: typeof seedProjects;
   users: typeof users;
 }>;
 

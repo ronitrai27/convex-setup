@@ -405,73 +405,138 @@ function shouldIncludeFile(filePath: string): boolean {
 // commitsLast60Days
 // prMergeRate
 // ============================================
+// export const getProjectHealthData = async (owner: string, repo: string) => {
+//   console.log(`📊 Fetching health data for: ${owner}/${repo}`);
+
+//   const token = await getGithubAccessToken();
+//   const octokit = new Octokit({ auth: token });
+
+//   try {
+//     // 1️⃣ Get open issues count
+//     console.log("🔍 Fetching open issues...");
+//     const { data: openIssuesData } = await octokit.rest.issues.listForRepo({
+//       owner,
+//       repo,
+//       state: "open",
+//       per_page: 1, // We only need the count
+//     });
+//     const openIssuesCount = openIssuesData.length;
+//     console.log(`✅ Open issues: ${openIssuesCount}`);
+
+//     // 2️⃣ Get closed issues count
+//     console.log("🔍 Fetching closed issues...");
+//     const { data: closedIssuesData } = await octokit.rest.issues.listForRepo({
+//       owner,
+//       repo,
+//       state: "closed",
+//       per_page: 1, // We only need the count
+//     });
+//     const closedIssuesCount = closedIssuesData.length;
+//     console.log(`✅ Closed issues: ${closedIssuesCount}`);
+
+//     // 3️⃣ Get last commit date
+//     console.log("🔍 Fetching last commit date...");
+//     const { data: repoData } = await octokit.rest.repos.get({
+//       owner,
+//       repo,
+//     });
+//     const lastCommitDate = repoData.pushed_at;
+//     console.log(`✅ Last commit date: ${lastCommitDate}`);
+
+//     // 4️⃣ Get commits from last 60 days
+//     const sixtyDaysAgo = new Date();
+//     sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+
+//     console.log("🔍 Fetching commits from last 60 days...");
+//     const { data: commits } = await octokit.rest.repos.listCommits({
+//       owner,
+//       repo,
+//       since: sixtyDaysAgo.toISOString(),
+//       per_page: 100,
+//     });
+//     const commitsLast60Days = commits.length;
+//     console.log(`✅ Commits in last 60 days: ${commitsLast60Days}`);
+
+//     // 5️⃣ Get PR merge rate
+//     console.log("🔍 Fetching pull requests...");
+//     const { data: allPRs } = await octokit.rest.pulls.list({
+//       owner,
+//       repo,
+//       state: "all",
+//       per_page: 100,
+//     });
+
+//     const totalPRs = allPRs.length;
+//     const mergedPRs = allPRs.filter((pr) => pr.merged_at !== null).length;
+//     const prMergeRate = totalPRs > 0 ? (mergedPRs / totalPRs) * 100 : 0;
+
+//     console.log(`✅ Total PRs: ${totalPRs}, Merged: ${mergedPRs}`);
+//     console.log(`✅ PR merge rate: ${prMergeRate.toFixed(1)}%`);
+
+//     return {
+//       openIssuesCount,
+//       closedIssuesCount,
+//       lastCommitDate,
+//       commitsLast60Days,
+//       totalPRs,
+//       mergedPRs,
+//       prMergeRate: Math.round(prMergeRate),
+//     };
+//   } catch (error) {
+//     console.error("❌ Error fetching health data:", error);
+//     throw new Error("Failed to fetch project health data");
+//   }
+// };
+
 export const getProjectHealthData = async (owner: string, repo: string) => {
   console.log(`📊 Fetching health data for: ${owner}/${repo}`);
 
   const token = await getGithubAccessToken();
   const octokit = new Octokit({ auth: token });
 
+  const sixtyDaysAgo = new Date();
+  sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+
   try {
-    // 1️⃣ Get open issues count
-    console.log("🔍 Fetching open issues...");
-    const { data: openIssuesData } = await octokit.rest.issues.listForRepo({
-      owner,
-      repo,
-      state: "open",
-      per_page: 1, // We only need the count
-    });
+    // 🚀 Execute ALL requests in parallel
+    const [
+      { data: openIssuesData },
+      { data: closedIssuesData },
+      { data: repoData },
+      { data: commits },
+      { data: allPRs },
+    ] = await Promise.all([
+      octokit.rest.issues.listForRepo({
+        owner,
+        repo,
+        state: "open",
+        per_page: 1,
+      }),
+      octokit.rest.issues.listForRepo({
+        owner,
+        repo,
+        state: "closed",
+        per_page: 1,
+      }),
+      octokit.rest.repos.get({ owner, repo }),
+      octokit.rest.repos.listCommits({
+        owner,
+        repo,
+        since: sixtyDaysAgo.toISOString(),
+        per_page: 100,
+      }),
+      octokit.rest.pulls.list({ owner, repo, state: "all", per_page: 100 }),
+    ]);
+
+    // Process results
     const openIssuesCount = openIssuesData.length;
-    console.log(`✅ Open issues: ${openIssuesCount}`);
-
-    // 2️⃣ Get closed issues count
-    console.log("🔍 Fetching closed issues...");
-    const { data: closedIssuesData } = await octokit.rest.issues.listForRepo({
-      owner,
-      repo,
-      state: "closed",
-      per_page: 1, // We only need the count
-    });
     const closedIssuesCount = closedIssuesData.length;
-    console.log(`✅ Closed issues: ${closedIssuesCount}`);
-
-    // 3️⃣ Get last commit date
-    console.log("🔍 Fetching last commit date...");
-    const { data: repoData } = await octokit.rest.repos.get({
-      owner,
-      repo,
-    });
     const lastCommitDate = repoData.pushed_at;
-    console.log(`✅ Last commit date: ${lastCommitDate}`);
-
-    // 4️⃣ Get commits from last 60 days
-    const sixtyDaysAgo = new Date();
-    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-
-    console.log("🔍 Fetching commits from last 60 days...");
-    const { data: commits } = await octokit.rest.repos.listCommits({
-      owner,
-      repo,
-      since: sixtyDaysAgo.toISOString(),
-      per_page: 100,
-    });
     const commitsLast60Days = commits.length;
-    console.log(`✅ Commits in last 60 days: ${commitsLast60Days}`);
-
-    // 5️⃣ Get PR merge rate
-    console.log("🔍 Fetching pull requests...");
-    const { data: allPRs } = await octokit.rest.pulls.list({
-      owner,
-      repo,
-      state: "all",
-      per_page: 100,
-    });
 
     const totalPRs = allPRs.length;
     const mergedPRs = allPRs.filter((pr) => pr.merged_at !== null).length;
     const prMergeRate = totalPRs > 0 ? (mergedPRs / totalPRs) * 100 : 0;
-
-    console.log(`✅ Total PRs: ${totalPRs}, Merged: ${mergedPRs}`);
-    console.log(`✅ PR merge rate: ${prMergeRate.toFixed(1)}%`);
 
     return {
       openIssuesCount,

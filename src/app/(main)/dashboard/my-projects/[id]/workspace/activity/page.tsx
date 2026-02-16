@@ -69,17 +69,26 @@ const ActivityFeed = () => {
         ))}
       </div>
 
-      <div className="max-w-3xl">
-        <h2>Issues</h2>
+      <div className="max-w-3xl border-t my-5">
+        <h2 className="text-xl font-bold">Issues</h2>
         {issues?.map((issue) => (
-          <Message key={issue._id} from="assistant">
-            <MessageContent>
-              <MessageResponse>{issue.issueDescription}</MessageResponse>
-            </MessageContent>
-          </Message>
+          <div className="bg-muted p-4">
+            <p>Issue Status: {issue?.issueStatus}</p>
+            <p>Issue Title: {issue?.issueTitle}</p>
+            <p>Issue Type: {issue?.issueType}</p>
+            <p>Issue File: {issue?.issueFiles}</p>
+            <p>Issue assigned to {issue?.issueAssignedTo || "Unassigned"}</p>
+
+            <Message key={issue._id} from="assistant">
+              <MessageContent>
+                <MessageResponse>{issue.issueDescription}</MessageResponse>
+              </MessageContent>
+            </Message>
+          </div>
         ))}
       </div>
     </div>
+
   );
 };
 
