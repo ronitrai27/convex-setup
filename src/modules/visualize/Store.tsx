@@ -21,6 +21,10 @@ import {
   ChevronRight,
   ChevronDown,
   Layout,
+  AlertCircle,
+  CheckCircle2,
+  Activity,
+  Eye,
 } from "lucide-react";
 
 import { generateRepoVisualization } from "./index";
@@ -28,6 +32,8 @@ import { LuLightbulb, LuX } from "react-icons/lu";
 import { useTheme } from "next-themes";
 import { Separator } from "@/components/ui/separator";
 import dagre from "dagre";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -67,22 +73,17 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = "TB") => 
 
 function FolderNode({ data }: any) {
   const isRoot = data.level === 0;
-  const { isCollapsible, isCollapsed, onToggleCollapse } = data;
+  const { isCollapsible, isCollapsed, onToggleCollapse, issueStatus, fileCount } = data;
 
-  const getFolderColor = (name: string): string => {
-    const colorMap: { [key: string]: string } = {
-      src: "#6366f1",
-      app: "#8b5cf6",
-      components: "#ec4899",
-      modules: "#3b82f6",
-      lib: "#10b981",
-      utils: "#f59e0b",
-      api: "#ef4444",
-    };
-    return colorMap[name.toLowerCase()] || "#86A5E7";
+  const getFolderColor = (): string => {
+    const isActive = issueStatus === "pending" || issueStatus === "assigned" || issueStatus === "ignored";
+    if (isActive) return "#ef4444"; // Red for active issues
+    if (fileCount >= 8) return "#f59e0b"; // Yellow for high changes (>= 8)
+    return "#3b82f6"; // Blue for normal
   };
 
-  const color = getFolderColor(data.label);
+  const color = getFolderColor();
+  const [showDetails, setShowDetails] = useState(false);
 
   return (
     <div
@@ -101,8 +102,8 @@ function FolderNode({ data }: any) {
       <div
         className="overflow-hidden rounded-xl border bg-card p-1 shadow-sm transition-all hover:shadow-md"
         style={{
-          borderColor: isRoot ? "#6366f1" : "rgba(134, 165, 231, 0.3)",
-          borderWidth: isRoot ? "2px" : "1px",
+          borderColor: (issueStatus || fileCount > 10) ? color : (isRoot ? "#6366f1" : "rgba(134, 165, 231, 0.3)"),
+          borderWidth: (issueStatus || isRoot) ? "2px" : "1px",
         }}
       >
         <div className="flex items-center gap-2 px-3 py-2">
@@ -123,20 +124,69 @@ function FolderNode({ data }: any) {
           )}
 
           <div
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-            style={{ backgroundColor: `${color}15` }}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg relative"
+            style={{ 
+              backgroundColor: (issueStatus && issueStatus !== "resolved") ? "#ef4444" : `${color}15`,
+              color: (issueStatus && issueStatus !== "resolved") ? "white" : color
+            }}
           >
-            <Folder size={18} style={{ color: color }} />
+            {issueStatus === "pending" ? (
+              <AlertCircle size={15} className="animate-pulse" />
+            ) : issueStatus === "resolved" ? (
+              <CheckCircle2 size={15} className="text-green-500" />
+            ) : issueStatus === "assigned" || issueStatus === "ignored" ? (
+              <Activity size={15} />
+            ) : (
+              <Folder size={15} />
+            )}
           </div>
 
           <div className="min-w-0 flex-1">
             <div
-              className="truncate text-sm font-semibold capitalize"
+              className={`truncate text-sm font-semibold capitalize flex items-center gap-1.5 ${(issueStatus && issueStatus !== "resolved") ? "text-red-500" : ""}`}
               title={data.label}
             >
               {data.label}
+              {issueStatus && (
+                <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase ${
+                  issueStatus === "resolved" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                }`}>
+                  {issueStatus}
+                </span>
+              )}
             </div>
           </div>
+
+          {issueStatus && issueStatus !== "resolved" && (
+            <div className="absolute -top-1 -right-1 z-20">
+              <button
+                className="h-6 w-6 flex items-center justify-center rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDetails(!showDetails);
+                }}
+              >
+                <Eye size={12} />
+              </button>
+              
+              {showDetails && (
+                <div className="absolute bottom-full right-0 mb-2 w-48 rounded-lg border bg-popover p-2 text-[10px] shadow-xl animate-in fade-in zoom-in-95">
+                  <div className="font-bold border-b pb-1 mb-1">Issue Overview</div>
+                  <div className="flex justify-between py-0.5">
+                    <span className="text-muted-foreground">Status:</span>
+                    <span className="font-medium uppercase text-red-500">{issueStatus}</span>
+                  </div>
+                  <div className="flex justify-between py-0.5">
+                    <span className="text-muted-foreground">Priority:</span>
+                    <span className="font-medium text-orange-500">High</span>
+                  </div>
+                  <div className="mt-1 pt-1 border-t text-muted-foreground italic">
+                    Assignee and full details available in future update.
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <button
             className="shrink-0 p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground"
@@ -210,6 +260,11 @@ export default function RepoVisualizer({ owner, repo }: RepoVisualizerProps) {
   const { theme } = useTheme();
 
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
+
+  const repository = useQuery(api.repos.getRepoByName, { owner, name: repo });
+  const issues = useQuery(api.repos.getIssuesByRepoId, {
+    repoId: repository?._id as any,
+  });
 
   // Store the FULL original edge list so collapse logic always has access
   const [allEdges, setAllEdges] = useState<Edge[]>([]);
@@ -290,7 +345,7 @@ export default function RepoVisualizer({ owner, repo }: RepoVisualizerProps) {
     }
   }, [owner, repo]);
 
-  // React to collapse changes — uses `allEdges` (stable, always the full list)
+  // React to collapse changes OR issue updates
   useEffect(() => {
     if (allEdges.length === 0) return;
 
@@ -313,12 +368,37 @@ export default function RepoVisualizer({ owner, repo }: RepoVisualizerProps) {
           )?.source;
         }
 
+        // Enrich with issue data
+        let nodeIssueStatus = undefined;
+        if (issues) {
+          const path = node.data.path;
+          const relevantIssues = issues.filter(
+            (issue) =>
+              issue.issueFiles === path ||
+              issue.issueFiles?.startsWith(path + "/"),
+          );
+
+          if (relevantIssues.length > 0) {
+            // Find the most critical status
+            const activeIssue = relevantIssues.find(
+              (i) => i.issueStatus === "pending" || i.issueStatus === "assigned" || i.issueStatus === "ignored"
+            );
+            
+            if (activeIssue) {
+              nodeIssueStatus = activeIssue.issueStatus;
+            } else {
+              nodeIssueStatus = "resolved";
+            }
+          }
+        }
+
         return {
           ...node,
           data: {
             ...node.data,
             isCollapsed,
             onToggleCollapse: () => toggleNodeCollapse(node.id),
+            issueStatus: nodeIssueStatus,
           },
           hidden: isHidden,
         };
@@ -331,7 +411,7 @@ export default function RepoVisualizer({ owner, repo }: RepoVisualizerProps) {
         hidden: collapsedNodes.has(edge.source),
       })),
     );
-  }, [collapsedNodes, allEdges, toggleNodeCollapse, setNodes, setEdges]);
+  }, [collapsedNodes, allEdges, toggleNodeCollapse, setNodes, setEdges, issues]);
 
   if (loading) {
     return (
@@ -376,7 +456,7 @@ export default function RepoVisualizer({ owner, repo }: RepoVisualizerProps) {
   }
 
   return (
-    <div className="relative h-[calc(100vh-160px)] w-full overflow-hidden rounded-xl border bg-background shadow-inner">
+    <div className="relative h-[calc(100vh-170px)] w-full overflow-hidden rounded-xl border bg-background shadow-inner">
       <ReactFlow
         nodes={nodes}
         edges={edges}

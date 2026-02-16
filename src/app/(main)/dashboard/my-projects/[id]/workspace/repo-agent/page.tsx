@@ -6,6 +6,7 @@ import { Id } from "../../../../../../../../convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { api } from "../../../../../../../../convex/_generated/api";
 import RepoVisualizer from "@/modules/visualize/Store";
+import { LuLayers2, LuLayers3 } from "react-icons/lu";
 
 const RepoPage = () => {
   const { id } = useParams(); // this contains the id of the project
@@ -22,10 +23,26 @@ const RepoPage = () => {
       <div className="flex flex-col gap-4 h-full">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Repository Visualizer</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Repo Tree Visualizer <LuLayers3 className="inline ml-2" size={24}/></h1>
             <p className="text-muted-foreground text-sm">
-              Exploring the architecture and risk heatmap of {repoOwner}/{repoName}
+              Explore the Structure and risk heatmap of {repoOwner}/{repoName}
             </p>
+          </div>
+
+          <div>
+            <p className="text-sm mb-1">Risk Heatmaps</p>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-red-500"></div>
+              <p className="text-xs ml-2">High Risks</p>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+              <p className="text-xs ml-2">Bottlenecks</p>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-blue-700"></div>
+              <p className="text-xs ml-2">Normal</p>
+            </div>
           </div>
         </div>
         

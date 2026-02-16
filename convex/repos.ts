@@ -108,3 +108,17 @@ export const getIssuesByRepoId = query({
       .collect();
   },
 });
+export const getRepoByName = query({
+  args: { owner: v.string(), name: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("repositories")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("owner"), args.owner),
+          q.eq(q.field("name"), args.name),
+        ),
+      )
+      .first();
+  },
+});

@@ -1132,7 +1132,10 @@ export async function getFolderRiskHeatmap(
               }
             });
           } catch (error) {
-            console.error(`⚠️ Error fetching commit ${commit.sha.slice(0, 7)}`);
+            console.error(
+              `⚠️ Error fetching commit ${commit.sha.slice(0, 7)}:`,
+              error,
+            );
           }
         }),
       ),
