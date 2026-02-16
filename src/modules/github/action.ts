@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { clerkClient } from "@clerk/nextjs/server";
 import { Octokit } from "octokit";
+import pLimit from "p-limit";
 
 // ========================================
 // GETTING GITHUB ACCESS TOKEN FROM CLERK
@@ -876,4 +877,218 @@ export async function handlePushEvent(payload: any) {
   }
 
   return { message: "Processed", results };
+}
+
+// =========================================================
+//  GITHUB TREE VISUALIZER
+// =========================================================
+
+// export async function getRepoTree(
+//   token: string,
+//   owner: string,
+//   repo: string,
+//   latestCommitSHA: string,
+// ) {
+//   const octokit = new Octokit({ auth: token });
+
+//   const { data: treeData } = await octokit.rest.git.getTree({
+//     owner,
+//     repo,
+//     tree_sha: latestCommitSHA,
+//     recursive: "true",
+//   });
+
+//   return treeData;
+// )}
+
+interface FolderRisk {
+  path: string;
+  name: string;
+  filesChanged: number;
+}
+
+const SKIP_FOLDERS = new Set([
+  // Node / JS
+  "node_modules",
+  ".next",
+  ".nuxt",
+  ".output",
+  "dist",
+  "build",
+  "out",
+  ".cache",
+  ".turbo",
+  ".vercel",
+  ".parcel-cache",
+  ".vite",
+  ".expo",
+  // Git
+  ".git",
+  ".github",
+  // Logs & coverage
+  "coverage",
+  "logs",
+  // Public static heavy assets
+  "public/assets",
+  "public/images",
+  "public/fonts",
+  "assets",
+  "static",
+  // IDE / Editor
+  ".vscode",
+  ".idea",
+  // Python
+  "__pycache__",
+  ".pytest_cache",
+  ".mypy_cache",
+  ".venv",
+  "venv",
+  "env",
+  // Java / Kotlin
+  ".gradle",
+  "target",
+  "build",
+  // PHP
+  "vendor",
+  // Ruby
+  ".bundle",
+  // Go
+  "bin",
+  "pkg",
+  // Rust
+  "target",
+  // Swift / Xcode
+  "DerivedData",
+  ".build",
+  // Docker
+  ".docker",
+  // Terraform
+  ".terraform",
+  // Misc
+  "tmp",
+  "temp",
+]);
+
+function shouldSkipFolder(folderPath: string): boolean {
+  const parts = folderPath.split("/");
+  return parts.some((part) => SKIP_FOLDERS.has(part));
+}
+
+export async function getFolderRiskHeatmap(
+  token: string,
+  owner: string,
+  repo: string,
+  branch: string = "main",
+  commitLimit: number = 30,
+): Promise<FolderRisk[]> {
+  const octokit = new Octokit({ auth: token });
+  const limit = pLimit(5);
+
+  // 1️⃣ Get tree structure
+  const { data: branchData } = await octokit.rest.repos.getBranch({
+    owner,
+    repo,
+    branch,
+  });
+
+  const { data: treeData } = await octokit.rest.git.getTree({
+    owner,
+    repo,
+    tree_sha: branchData.commit.sha,
+    recursive: "true",
+  });
+
+  // 2️⃣ Extract folders (with filtering)
+  const folders = new Set<string>();
+
+  treeData.tree.forEach((item) => {
+    if (item.path?.includes("/")) {
+      const pathParts = item.path.split("/");
+
+      for (let i = 1; i <= pathParts.length - 1; i++) {
+        const folderPath = pathParts.slice(0, i).join("/");
+
+        if (!shouldSkipFolder(folderPath)) {
+          folders.add(folderPath);
+        }
+      }
+    }
+  });
+
+  console.log(
+    `📊 Analyzing ${folders.size} folders (filtered from ${treeData.tree.length} items)`,
+  );
+
+  // 3️⃣ Get commits in parallel
+  const { data: commits } = await octokit.rest.repos.listCommits({
+    owner,
+    repo,
+    sha: branch,
+    per_page: commitLimit,
+  });
+
+  const folderChangeCount = new Map<string, Set<string>>();
+
+  // 🚀 Batch commit fetching
+  const commitBatches = [];
+  for (let i = 0; i < commits.length; i += 10) {
+    commitBatches.push(commits.slice(i, i + 10));
+  }
+
+  for (const batch of commitBatches) {
+    await Promise.all(
+      batch.map((commit) =>
+        limit(async () => {
+          try {
+            const { data: commitDetail } = await octokit.rest.repos.getCommit({
+              owner,
+              repo,
+              ref: commit.sha,
+            });
+
+            commitDetail.files?.forEach((file) => {
+              const filePath = file.filename;
+
+              if (shouldSkipFolder(filePath)) return;
+
+              if (filePath.includes("/")) {
+                const pathParts = filePath.split("/");
+
+                for (let i = 1; i <= pathParts.length - 1; i++) {
+                  const folderPath = pathParts.slice(0, i).join("/");
+
+                  if (!shouldSkipFolder(folderPath)) {
+                    if (!folderChangeCount.has(folderPath)) {
+                      folderChangeCount.set(folderPath, new Set());
+                    }
+                    folderChangeCount.get(folderPath)!.add(filePath);
+                  }
+                }
+              }
+            });
+          } catch (error) {
+            console.error(`⚠️ Error fetching commit ${commit.sha.slice(0, 7)}`);
+          }
+        }),
+      ),
+    );
+  }
+
+  // 4️⃣ Build result array
+  const folderRisks: FolderRisk[] = Array.from(folders)
+    .map((folder) => {
+      const filesChanged = folderChangeCount.get(folder)?.size || 0;
+
+      return {
+        path: folder,
+        name: folder.split("/").pop() || folder,
+        filesChanged,
+      };
+    })
+    .filter((risk) => risk.filesChanged > 0)
+    .sort((a, b) => b.filesChanged - a.filesChanged);
+
+  console.log(`✅ Found ${folderRisks.length} folders with changes`);
+
+  return folderRisks;
 }

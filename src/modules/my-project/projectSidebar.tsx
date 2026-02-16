@@ -101,17 +101,17 @@ const aiMenu = {
   items: [
     {
       label: "UI/UX Studio",
-      path: "ai/ui-ux-studio",
+      path: "workspace/ui-ux-studio",
       icon: Code2,
     },
     {
       label: "Repo Agent",
-      path: "ai/repo-agent",
+      path: "workspace/repo-agent",
       icon: Network,
     },
     {
       label: "Doc Agent",
-      path: "ai/doc-agent",
+      path: "workspace/doc-agent",
       icon: FileText,
     },
   ],

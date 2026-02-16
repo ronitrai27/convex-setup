@@ -1,0 +1,452 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import {
+  ReactFlow,
+  MiniMap,
+  Controls,
+  Background,
+  useNodesState,
+  useEdgesState,
+  BackgroundVariant,
+  Node,
+  Edge,
+  Handle,
+  Position,
+  Panel,
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import {
+  ExternalLink,
+  Folder,
+  FileText,
+  ChevronRight,
+  ChevronDown,
+  Layout,
+  Maximize2,
+  Minimize2,
+} from "lucide-react";
+
+import { generateRepoVisualization } from "./index";
+import { LuLightbulb, LuX } from "react-icons/lu";
+import { useTheme } from "next-themes";
+import { Separator } from "@/components/ui/separator";
+import dagre from "dagre";
+
+const dagreGraph = new dagre.graphlib.Graph();
+dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+const nodeWidth = 280;
+const nodeHeight = 160;
+
+const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = "TB") => {
+  const isHorizontal = direction === "LR";
+  dagreGraph.setGraph({ rankdir: direction, ranksep: 80, nodesep: 50 });
+
+  nodes.forEach((node) => {
+    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+  });
+
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  dagre.layout(dagreGraph);
+
+  const layoutedNodes = nodes.map((node) => {
+    const nodeWithPosition = dagreGraph.node(node.id);
+    return {
+      ...node,
+      targetPosition: isHorizontal ? Position.Left : Position.Top,
+      sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
+      position: {
+        x: nodeWithPosition.x - nodeWidth / 2,
+        y: nodeWithPosition.y - nodeHeight / 2,
+      },
+    };
+  });
+
+  return { nodes: layoutedNodes, edges };
+};
+
+function FolderNode({ data }: any) {
+  const isRoot = data.level === 0;
+  const { isCollapsible, isCollapsed, onToggleCollapse } = data;
+
+  const getFolderColor = (name: string): string => {
+    const colorMap: { [key: string]: string } = {
+      src: "#6366f1",
+      app: "#8b5cf6",
+      components: "#ec4899",
+      modules: "#3b82f6",
+      lib: "#10b981",
+      utils: "#f59e0b",
+      api: "#ef4444",
+    };
+    return colorMap[name.toLowerCase()] || "#86A5E7";
+  };
+
+  const color = getFolderColor(data.label);
+
+  return (
+    <div
+      className="group relative"
+      style={{
+        width: "280px",
+      }}
+    >
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="h-2.5! w-2.5! border-2! border-white!"
+        style={{ background: color }}
+      />
+
+      <div
+        className="overflow-hidden rounded-xl border bg-card p-1 shadow-sm transition-all hover:shadow-md"
+        style={{
+          borderColor: isRoot ? "#6366f1" : "rgba(134, 165, 231, 0.3)",
+          borderWidth: isRoot ? "2px" : "1px",
+        }}
+      >
+        <div className="flex items-center gap-2 px-3 py-2">
+          {/* {isCollapsible && ( */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleCollapse?.();
+              }}
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-muted"
+            >
+              {isCollapsed ? (
+                <ChevronRight size={16} className="text-muted-foreground" />
+              ) : (
+                <ChevronDown size={16} className="text-muted-foreground" />
+              )}
+            </button>
+          {/* )} */}
+
+          <div
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+            style={{ backgroundColor: `${color}15` }}
+          >
+            <Folder size={18} style={{ color: color }} />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div
+              className="truncate text-sm font-semibold capitalize"
+              title={data.label}
+            >
+              {data.label}
+            </div>
+          </div>
+
+          <button
+            className="shrink-0 p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground"
+            onClick={(e) => {
+              e.stopPropagation();
+              window.open(data.githubUrl, "_blank");
+            }}
+          >
+            <ExternalLink size={14} />
+          </button>
+        </div>
+
+        <Separator className="opacity-50" />
+
+        <div className="space-y-2 p-3">
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <FileText size={12} />
+              <span>{data.fileCount} changes</span>
+            </div>
+            {isCollapsed && (
+              <span className="rounded-full bg-muted px-2 py-0.5 font-medium">
+                collapsed
+              </span>
+            )}
+          </div>
+
+          <div className="truncate rounded-md bg-muted px-2 py-1 font-mono text-[10px] text-muted-foreground">
+            {data.path || "/"}
+          </div>
+
+          {/* Progress bar based on "risk" (file changes) */}
+          {data.fileCount > 0 && (
+            <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${Math.min(100, (data.fileCount / 20) * 100)}%`,
+                  backgroundColor: color,
+                }}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        className="h-2.5! w-2.5! border-2! border-white!"
+        style={{ background: color }}
+      />
+    </div>
+  );
+}
+
+export const nodeTypes = {
+  custom: FolderNode,
+};
+
+interface RepoVisualizerProps {
+  owner: string;
+  repo: string;
+}
+
+export default function RepoVisualizer({ owner, repo }: RepoVisualizerProps) {
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [guideOpen, setGuideOpen] = useState(false);
+  const { theme } = useTheme();
+
+  const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
+
+  const onLayout = useCallback(
+    (direction: string) => {
+      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+        nodes,
+        edges,
+        direction
+      );
+      setNodes([...layoutedNodes]);
+      setEdges([...layoutedEdges]);
+    },
+    [nodes, edges, setNodes, setEdges]
+  );
+
+  useEffect(() => {
+    async function load() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const data = await generateRepoVisualization(owner, repo);
+
+        if (!data.nodes || data.nodes.length === 0) {
+          setError("No repository data found.");
+          return;
+        }
+
+        // Initial layout
+        const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+          data.nodes as Node[],
+          data.edges as Edge[],
+          "TB"
+        );
+
+        setNodes(layoutedNodes);
+        setEdges(layoutedEdges);
+      } catch (err) {
+        console.error("❌ Error loading visualization:", err);
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (owner && repo) {
+      load();
+    }
+  }, [owner, repo]);
+
+  const toggleNodeCollapse = useCallback((nodeId: string) => {
+    setCollapsedNodes((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(nodeId)) {
+        newSet.delete(nodeId);
+      } else {
+        newSet.add(nodeId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  // Update nodes and edges based on collapse state
+  useEffect(() => {
+    if (nodes.length === 0) return;
+
+    setNodes((nds) =>
+      nds.map((node) => {
+        const nodeHasChildren = edges.some((edge) => edge.source === node.id);
+        const isCollapsed = collapsedNodes.has(node.id);
+
+        // A node is hidden if any of its ancestors are collapsed
+        let isHidden = false;
+        let currentParent = edges.find((e) => e.target === node.id)?.source;
+        while (currentParent) {
+          if (collapsedNodes.has(currentParent)) {
+            isHidden = true;
+            break;
+          }
+          currentParent = edges.find((e) => e.target === currentParent)?.source;
+        }
+
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            isCollapsible: nodeHasChildren,
+            isCollapsed,
+            onToggleCollapse: () => toggleNodeCollapse(node.id),
+          },
+          hidden: isHidden,
+        };
+      })
+    );
+
+    setEdges((eds) =>
+      eds.map((edge) => {
+        // Hide edge if source or target is hidden, or source is collapsed
+        const sourceIsCollapsed = collapsedNodes.has(edge.source);
+        return {
+          ...edge,
+          hidden: sourceIsCollapsed,
+        };
+      })
+    );
+  }, [collapsedNodes, edges.length === 0]); // Only re-run when collapsedNodes change or edges are first loaded
+
+  if (loading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="h-16 w-16 animate-spin rounded-full border-4 border-primary/20 border-t-primary"></div>
+            <Folder
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary"
+              size={24}
+            />
+          </div>
+          <div className="text-center">
+            <p className="text-lg font-semibold">Building Repository Tree</p>
+            <p className="text-sm text-muted-foreground">
+              Analyzing {owner}/{repo}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-background">
+        <div className="max-w-md rounded-xl border bg-card p-8 text-center shadow-lg">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+            <LuX size={24} />
+          </div>
+          <h2 className="mb-2 text-xl font-bold">Failed to Load</h2>
+          <p className="mb-6 text-sm text-muted-foreground">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-[calc(100vh-160px)] w-full bg-background overflow-hidden rounded-xl border shadow-inner">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes}
+        fitView
+        fitViewOptions={{ padding: 0.2 }}
+        minZoom={0.1}
+        maxZoom={2}
+      >
+        <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
+
+        <Panel position="top-left" className="flex flex-col gap-2">
+          <div className="rounded-lg border bg-card p-3 shadow-sm backdrop-blur-sm">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Folder size={20} />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold leading-none">{repo}</h2>
+                <p className="mt-1 text-xs text-muted-foreground">{owner}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <button
+              onClick={() => onLayout("TB")}
+              className="flex h-9 items-center gap-2 rounded-md border bg-card px-3 text-xs font-medium shadow-sm transition-colors hover:bg-muted"
+            >
+              <Layout size={14} /> Vertical
+            </button>
+            <button
+              onClick={() => onLayout("LR")}
+              className="flex h-9 items-center gap-2 rounded-md border bg-card px-3 text-xs font-medium shadow-sm transition-colors hover:bg-muted"
+            >
+              <Layout size={14} className="rotate-90" /> Horizontal
+            </button>
+          </div>
+        </Panel>
+
+        <Panel position="top-right">
+          {!guideOpen ? (
+            <button
+              onClick={() => setGuideOpen(true)}
+              className="flex h-10 w-10 items-center justify-center rounded-full border bg-card shadow-md transition-all hover:scale-105"
+            >
+              <LuLightbulb size={18} className="text-primary" />
+            </button>
+          ) : (
+            <div className="w-64 rounded-xl border bg-card p-4 shadow-xl animate-in fade-in slide-in-from-top-2">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="flex items-center gap-2 text-sm font-bold">
+                  <LuLightbulb className="text-primary" />
+                  Tree Navigation
+                </h3>
+                <button
+                  onClick={() => setGuideOpen(false)}
+                  className="rounded-md p-1 hover:bg-muted"
+                >
+                  <LuX size={16} />
+                </button>
+              </div>
+              <ul className="space-y-2.5 text-xs text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] text-primary">1</span>
+                  <span>Click <b>toggle icons</b> to expand or collapse folders</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] text-primary">2</span>
+                  <span><b>Scroll</b> to zoom, <b>Drag</b> to pan the view</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] text-primary">3</span>
+                  <span>Click the <b>external link</b> to view on GitHub</span>
+                </li>
+              </ul>
+            </div>
+          )}
+        </Panel>
+      </ReactFlow>
+    </div>
+  );
+}
