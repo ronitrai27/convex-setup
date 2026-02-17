@@ -93,6 +93,11 @@ const workspaceMenu = [
     path: "workspace/whiteboard",
     icon: PenTool,
   },
+  {
+    label: "Repo Agent",
+    path: "workspace/repo-agent",
+    icon: Network,
+  },
 ];
 
 const aiMenu = {
@@ -243,9 +248,9 @@ export default function ProjectSidebar() {
         </Popover>
 
         <div className="flex items-center justify-center gap-2  my-4">
-          <hr className="w-12 border border-accent"/>
+          <hr className="w-12 border border-accent" />
           <p className="text-base text-center ">Manage Project</p>
-          <hr className="w-12 border border-accent"/>
+          <hr className="w-12 border border-accent" />
         </div>
         {/* ALL MENU */}
         <SidebarMenu className="flex flex-col space-y-3 py-2 ">
@@ -282,7 +287,7 @@ export default function ProjectSidebar() {
         </SidebarMenu>
 
         {/* AI MENU  */}
-        <SidebarMenu className="px-1">
+        {/* <SidebarMenu className="px-1">
           <Collapsible asChild className="group/collapsible">
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
@@ -319,7 +324,7 @@ export default function ProjectSidebar() {
               </CollapsibleContent>
             </SidebarMenuItem>
           </Collapsible>
-        </SidebarMenu>
+        </SidebarMenu> */}
       </SidebarContent>
 
       {/* ───────── FOOTER ───────── */}

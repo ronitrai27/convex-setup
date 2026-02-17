@@ -773,3 +773,33 @@ export const createIssue = mutation({
     });
   },
 });
+
+// -------------------------
+// PojectDetails
+// --------------------------
+export const getProject_Details = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, args) => {
+    const project = await ctx.db
+    .query("projectDetails")
+    .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+    .first();
+    return project;
+  },
+})
+
+// -----------------------------
+// CREATE PROJECT DETAILS
+// -----------------------------
+// export const createProjectDetails = mutation({
+//   args: {
+//     projectId: v.id("projects"),
+//     projectDetails: v.string(),
+//   },
+//   handler: async (ctx, args) => {
+//     await ctx.db.insert("projectDetails", {
+//       projectId: args.projectId,
+//       projectDetails: args.projectDetails,
+//     });
+//   },
+// })

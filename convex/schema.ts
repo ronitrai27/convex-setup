@@ -18,6 +18,9 @@ export default defineSchema({
 
     // ✅ PROJECT LIMIT
     limit: v.union(v.literal(2), v.literal(5), v.literal(15)),
+    // SKILLS
+    skills: v.optional(v.array(v.string())),
+    lastUpdatedSkillsAt: v.optional(v.number()),
 
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -184,7 +187,13 @@ export default defineSchema({
     issueDescription: v.string(),
     issueCreatedByUserId: v.optional(v.id("users")), // in case user creates issue ("by_user")
     issueCreatedByName: v.optional(v.string()),
-    issueType: v.optional(v.union(v.literal("by_user"), v.literal("by_agent"), v.literal("from_github"))), // this will help to identify the exact issue and can be use to show in repo visulaizer.
+    issueType: v.optional(
+      v.union(
+        v.literal("by_user"),
+        v.literal("by_agent"),
+        v.literal("from_github"),
+      ),
+    ), // this will help to identify the exact issue and can be use to show in repo visulaizer.
     issueFiles: v.optional(v.string()), // llm will provide the file source
     issueAssignedTo: v.optional(v.id("users")),
     issueStatus: v.optional(
@@ -201,4 +210,18 @@ export default defineSchema({
     .index("by_repo", ["repoId"])
     .index("by_status", ["issueStatus"])
     .index("by_assigned_to", ["issueAssignedTo"]),
+
+  // ------------ADDTIONAL PROJECT_DETAILS TABLE FOR AI -------------------
+  projectDetails: defineTable({
+    projectId: v.id("projects"),
+    repoId: v.id("repositories"),
+    projectTimeline: v.optional(v.string()), // by AI
+    projectFeaturesList: v.optional(v.any()), // by AI
+    projectOverview: v.optional(v.string()), // by AI , after understanding user requirements.
+    projectStatus: v.optional(
+      v.union(v.literal("completed"), v.literal("incomplete")),
+    ), // to check if agent has completed the project or not
+  })
+    .index("by_project", ["projectId"])
+    .index("by_repo", ["repoId"]),
 });

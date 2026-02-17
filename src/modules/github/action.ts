@@ -948,24 +948,6 @@ export async function handlePushEvent(payload: any) {
 //  GITHUB TREE VISUALIZER
 // =========================================================
 
-// export async function getRepoTree(
-//   token: string,
-//   owner: string,
-//   repo: string,
-//   latestCommitSHA: string,
-// ) {
-//   const octokit = new Octokit({ auth: token });
-
-//   const { data: treeData } = await octokit.rest.git.getTree({
-//     owner,
-//     repo,
-//     tree_sha: latestCommitSHA,
-//     recursive: "true",
-//   });
-
-//   return treeData;
-// )}
-
 interface FolderRisk {
   path: string;
   name: string;
@@ -1160,3 +1142,49 @@ export async function getFolderRiskHeatmap(
 
   return folderRisks;
 }
+
+// ===================================================
+// GET USER LANGUAGES FOR SKIILS
+// ===================================================
+export const getUserTopLanguages = async (
+  username: string,
+): Promise<string[]> => {
+  console.log(`🔍 Fetching top languages for: ${username}`);
+
+  const token = await getGithubAccessToken();
+  const octokit = new Octokit({ auth: token });
+
+  try {
+    const { data: repos } = await octokit.rest.repos.listForUser({
+      username,
+      per_page: 30,
+      sort: "pushed",
+      direction: "desc",
+      type: "owner",
+    });
+
+    console.log(`📦 Got ${repos.length} repos — counting languages...`);
+
+    // count how many repos each language appears in
+    const counts: Record<string, number> = {};
+    for (const repo of repos) {
+      if (!repo.language) continue;
+      counts[repo.language] = (counts[repo.language] ?? 0) + 1;
+    }
+
+    console.log(`📊 Raw language counts:`, counts);
+
+    const threshold = repos.length * 0.1; // 30 * 0.1 = 3 repos minimum
+    const topLanguages = Object.entries(counts)
+      .filter(([, count]) => count >= threshold)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 4)
+      .map(([lang]) => lang);
+
+    console.log(`✅ Top languages for ${username}:`, topLanguages);
+    return topLanguages;
+  } catch (error) {
+    console.error(`❌ Error fetching languages for ${username}:`, error);
+    return [];
+  }
+};

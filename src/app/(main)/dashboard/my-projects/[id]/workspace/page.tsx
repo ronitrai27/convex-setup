@@ -13,27 +13,22 @@ const ProjectWorkspace = () => {
   const projectId = params.id as Id<"projects">;
   const repoId = params.repoId as Id<"repositories">;
   const [isOrbOpen, setIsOrbOpen] = useState(false);
+  // const [projectDetails, setProjectDetails] = useState({
+  //   projectTimeline: "",
+  //   projectFeaturesList: [],
+  //   projectOverview: "",
+  //   projectStatus: "",
+  // });
 
   return (
     <div className="h-[calc(100vh-72px)] w-full p-6 relative">
-      <main>
-        <Link href={`/dashboard/my-projects/${projectId}`}>
-          <Button className="text-xs cursor-pointer" variant="ghost" size="sm">
-            <ChevronLeft />
-            Back to Home
-          </Button>
-        </Link>
-        <h1>DEDICATED PROJECT WORKSPACE</h1>
-        <p>Check here who joins and who leaves</p>
-        <p>check here recent pr / fork / commit made by who ?</p>
-        <p>
-          visit to-do , time-tracker, Activity(where all commits/ pr /issue with
-          tags created and solved, etc), Whiteboard(for team ideation , sketches
-          and brainstorming), Code generator(from to-do/sketch to code with live
-          preview.) and Actions ( repo visulaizer, schema visualizer,
-          Architecture visualizer.){" "}
-        </p>
-      </main>
+      <Link href={`/dashboard/my-projects/${projectId}`}>
+        <Button className="text-xs cursor-pointer" variant="outline" size="sm">
+          <ChevronLeft />
+          Back to Home
+        </Button>
+      </Link>
+      <main></main>
 
       {/* Orb Button  */}
       <Button
@@ -52,7 +47,11 @@ const ProjectWorkspace = () => {
         </div>
       </Button>
 
-      <DialogOrb isOrbOpen={isOrbOpen} setIsOrbOpen={setIsOrbOpen} repoId={repoId} />
+      <DialogOrb
+        isOrbOpen={isOrbOpen}
+        setIsOrbOpen={setIsOrbOpen}
+        repoId={repoId}
+      />
     </div>
   );
 };
