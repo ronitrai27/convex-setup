@@ -18,20 +18,31 @@ export type ChatMessage = UIMessage<never, UIDataTypes>;
 
 export async function POST(req: Request) {
   try {
-    console.log("Project Agent Route Hit")
-    const { messages, projectId}: { messages: ChatMessage[]; projectId: string } = await req.json();
+    console.log("Project Agent Route Hit");
+    const {
+      messages,
+      projectId,
+    }: { messages: ChatMessage[]; projectId: string } = await req.json();
+    console.log("PROJECT ID AT ROUTE:", projectId);
+    console.log("MESSAGES AT ROUTE:", messages);
 
     // Resolve repoId and projectName server-side from the project
     const project = await convex.query(api.projects.getProjectById, {
       projectId: projectId as Id<"projects">,
     });
 
-    // if (!project) {
-    //   return new Response("Project not found", { status: 404 });
-    // }
+    // This dosent work !
+    console.log("PROJECT DETAILS AT ROUTE:", project);
+    //     PROJECT DETAILS AT ROUTE: null
+    // PROJECT DETAILS NOT FOUND
+
+    if (!project) {
+      // return new Response("Project not found", { status: 404 });
+      console.log("PROJECT DETAILS NOT FOUND");
+    }
 
     // const repoId = project.repositoryId;
-    // const projectName = project.projectName;
+    const projectName = project?.projectName;
 
     // console.log("✅ REPO ID AT ROUTE:", repoId);
     // console.log("✅ PROJECT ID AT ROUTE:", projectId);
@@ -94,7 +105,10 @@ export async function POST(req: Request) {
         // @ts-ignore
         execute: async (_args) => {
           try {
-            console.log("📁 Fetching repo structure for:", "j97bs9tx86hcq60e5yr5h0paz981bnpa");
+            console.log(
+              "📁 Fetching repo structure for:",
+              "j97bs9tx86hcq60e5yr5h0paz981bnpa",
+            );
 
             const repo = await convex.query(api.repos.getRepoById, {
               repoId: "j97bs9tx86hcq60e5yr5h0paz981bnpa" as Id<"repositories">,
@@ -131,6 +145,7 @@ export async function POST(req: Request) {
 ## CONTEXT:
 - Project ID: ${projectId}
 - Repo ID: j97bs9tx86hcq60e5yr5h0paz981bnpa
+- project Name: ${projectName}
 
 ## YOUR RESPONSE FORMAT RULES:
 - Important to include exact Tag  <action type="confirm" /> for confirmation from user.

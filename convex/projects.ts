@@ -123,10 +123,10 @@ export const getProjectById = query({
     projectId: v.id("projects"),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return null;
-    }
+    // const identity = await ctx.auth.getUserIdentity();
+    // if (!identity) {
+    //   return null;
+    // }
 
     const project = await ctx.db.get(args.projectId);
 

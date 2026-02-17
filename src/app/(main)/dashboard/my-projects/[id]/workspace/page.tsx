@@ -64,16 +64,16 @@ const ProjectWorkspace = () => {
   console.log("PROJECT ID FRONTEND: ", projectId);
   console.log("REPO ID FRONTEND: ", repoId);
 
-  // if (!project) {
-  //   return (
-  //     <div className="h-[calc(100vh-80px)] w-full flex items-center justify-center">
-  //       <Loader />
-  //       <span className="ml-2 text-sm text-muted-foreground">
-  //         Loading project...
-  //       </span>
-  //     </div>
-  //   );
-  // }
+  if (!project) {
+    return (
+      <div className="h-[calc(100vh-80px)] w-full flex items-center justify-center">
+        <Loader />
+        <span className="ml-2 text-sm text-muted-foreground">
+          Loading project...
+        </span>
+      </div>
+    );
+  }
 
   const {
     messages,
