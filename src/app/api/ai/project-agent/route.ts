@@ -57,11 +57,15 @@ export async function POST(req: Request) {
             .describe("Brief overview of the project plan"),
         }),
         // @ts-ignore
-        execute: async (
-          projectTimeline: string,
-          projectOverview: string,
-          projectFeaturesList: any,
-        ) => {
+        execute: async ({
+          projectTimeline,
+          projectOverview,
+          projectFeaturesList,
+        }: {
+          projectTimeline: string;
+          projectOverview: string;
+          projectFeaturesList: any;
+        }) => {
           if (!project) return { success: false, error: "Project not found" };
           if (projectTimeline || projectOverview || projectFeaturesList) {
             await convex.mutation(api.projects.updateProjectDetails, {
@@ -73,7 +77,10 @@ export async function POST(req: Request) {
             });
             return { success: true };
           }
-          return { success: false, error: "No data provided, please provide data" };
+          return {
+            success: false,
+            error: "No data provided, please provide data",
+          };
         },
       }),
 
@@ -174,7 +181,7 @@ Task 5: On confirmation, update database. with  projectTimeline, projectOverview
       messages: await convertToModelMessages(messages),
       tools: LocalTools,
       toolChoice: "auto",
-      stopWhen: stepCountIs(5),
+      stopWhen: stepCountIs(3),
     });
 
     return result.toUIMessageStreamResponse({
