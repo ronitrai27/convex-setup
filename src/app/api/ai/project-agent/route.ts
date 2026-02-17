@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     });
 
     // This dosent work !
-    console.log("PROJECT DETAILS AT ROUTE:", project);
+    // console.log("PROJECT DETAILS AT ROUTE:", project);
     //     PROJECT DETAILS AT ROUTE: null
     // PROJECT DETAILS NOT FOUND
 
@@ -62,14 +62,23 @@ export async function POST(req: Request) {
             .describe("Brief overview of the project plan"),
         }),
         // @ts-ignore
-        execute: async (args) => {
-          console.log("Updating project details:", args);
-          await convex.mutation(api.projects.updateProjectDetails, {
-            projectId: projectId as Id<"projects">,
-            repoId: "j97bs9tx86hcq60e5yr5h0paz981bnpa" as Id<"repositories">,
-            ...args,
-          });
-          return { success: true };
+        execute: async (
+          projectTimeline: string,
+          projectOverview: string,
+          projectFeaturesList: any,
+        ) => {
+          if (!project) return { success: false, error: "Project not found" };
+          if (projectTimeline || projectOverview || projectFeaturesList) {
+            await convex.mutation(api.projects.updateProjectDetails, {
+              projectId: projectId as Id<"projects">,
+              repoId: "j97bs9tx86hcq60e5yr5h0paz981bnpa" as Id<"repositories">,
+              projectTimeline,
+              projectOverview,
+              projectFeaturesList,
+            });
+            return { success: true };
+          }
+          return { success: false, error: "No data provided, please provide data" };
         },
       }),
 
@@ -98,46 +107,46 @@ export async function POST(req: Request) {
         },
       }),
 
-      getRepoStructure: tool({
-        description:
-          "Get the repository folder structure and README content to understand the project.",
-        parameters: z.object({}),
-        // @ts-ignore
-        execute: async (_args) => {
-          try {
-            console.log(
-              "📁 Fetching repo structure for:",
-              "j97bs9tx86hcq60e5yr5h0paz981bnpa",
-            );
+      // getRepoStructure: tool({
+      //   description:
+      //     "Get the repository folder structure and README content to understand the project.",
+      //   parameters: z.object({}),
+      //   // @ts-ignore
+      //   execute: async (_args) => {
+      //     try {
+      //       console.log(
+      //         "📁 Fetching repo structure for:",
+      //         "j97bs9tx86hcq60e5yr5h0paz981bnpa",
+      //       );
 
-            const repo = await convex.query(api.repos.getRepoById, {
-              repoId: "j97bs9tx86hcq60e5yr5h0paz981bnpa" as Id<"repositories">,
-            });
+      //       const repo = await convex.query(api.repos.getRepoById, {
+      //         repoId: "j97bs9tx86hcq60e5yr5h0paz981bnpa" as Id<"repositories">,
+      //       });
 
-            if (!repo)
-              return {
-                success: false,
-                error: `Repository not found for id: ${"j97bs9tx86hcq60e5yr5h0paz981bnpa"}`,
-              };
+      //       if (!repo)
+      //         return {
+      //           success: false,
+      //           error: `Repository not found for id: ${"j97bs9tx86hcq60e5yr5h0paz981bnpa"}`,
+      //         };
 
-            const [structure, readme] = await Promise.all([
-              getRepoFolderStructure(repo.owner, repo.name),
-              getReadme(repo.owner, repo.name),
-            ]);
+      //       const [structure, readme] = await Promise.all([
+      //         getRepoFolderStructure(repo.owner, repo.name),
+      //         getReadme(repo.owner, repo.name),
+      //       ]);
 
-            return {
-              success: true,
-              folderStructure: structure,
-              readme: readme ? readme.slice(0, 1500) : "No README found",
-            };
-          } catch (error) {
-            const message =
-              error instanceof Error ? error.message : String(error);
-            console.error("❌ getRepoStructure failed:", message);
-            return { success: false, error: message };
-          }
-        },
-      }),
+      //       return {
+      //         success: true,
+      //         folderStructure: structure,
+      //         readme: readme ? readme.slice(0, 1500) : "No README found",
+      //       };
+      //     } catch (error) {
+      //       const message =
+      //         error instanceof Error ? error.message : String(error);
+      //       console.error("❌ getRepoStructure failed:", message);
+      //       return { success: false, error: message };
+      //     }
+      //   },
+      // }),
     } satisfies ToolSet;
 
     const systemPrompt = `You are a professional onboarding AI agent helping users plan their project. Talk like a concise project manager.
@@ -164,16 +173,13 @@ Task 5: On confirmation, update database using tools. Respond with <complete>.
 ### Proposing features (Task 4):
 
   Based on your repo and team skills, here's your project plan:
-    [
-      { "id": "1", "title": "Feature title", "description": "What it does and why"},
-      { "id": "2", "title": "Feature title", "description": "What it does and why"}
-    ]
-  <action type="confirm" />
+  all Features with at the end add <action> tag to let User confirm it.
+  <action type="confirmation" />
 
 ## RULES:
 - Never call updateProject tool before user confirms features
-- If user says regenerate, redo Task 4 with a fresh <features> block
-- Keep messages short — you are a PM, not an essay writer
+- If user says regenerate, redo Task 4 with a fresh features list.
+- Keep messages short — you are a PM, not an essay writer, Act like a senior dev and talk naturally like humans.
 - if any tool failed or error try again.`;
 
     const result = streamText({
