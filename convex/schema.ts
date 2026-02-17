@@ -214,9 +214,9 @@ export default defineSchema({
   // ------------ADDTIONAL PROJECT_DETAILS TABLE FOR AI -------------------
   projectDetails: defineTable({
     projectId: v.id("projects"),
-    repoId: v.id("repositories"),
+    repoId: v.optional(v.id("repositories")),
     projectTimeline: v.optional(v.string()), // by AI
-    projectFeaturesList: v.optional(v.any()), // by AI
+    projectFeaturesList: v.optional(v.any()), // by AI to know where project goes.
     projectOverview: v.optional(v.string()), // by AI , after understanding user requirements.
     projectStatus: v.optional(
       v.union(v.literal("completed"), v.literal("incomplete")),

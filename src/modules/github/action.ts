@@ -1026,7 +1026,7 @@ export async function getFolderRiskHeatmap(
   owner: string,
   repo: string,
   branch: string = "main",
-  commitLimit: number = 30,
+  commitLimit: number = 10,
 ): Promise<FolderRisk[]> {
   const octokit = new Octokit({ auth: token });
   const limit = pLimit(5);
@@ -1186,5 +1186,61 @@ export const getUserTopLanguages = async (
   } catch (error) {
     console.error(`❌ Error fetching languages for ${username}:`, error);
     return [];
+  }
+};
+
+// ==================================================
+// GET REPO FOLDER STRUCTURE
+// =================================================
+export const getRepoFolderStructure = async (
+  owner: string,
+  repo: string,
+): Promise<string> => {
+  console.log(`📁 Fetching folder structure for: ${owner}/${repo}`);
+
+  const token = await getGithubAccessToken();
+  const octokit = new Octokit({ auth: token });
+
+  try {
+    const { data } = await octokit.rest.git.getTree({
+      owner,
+      repo,
+      tree_sha: "HEAD",
+      recursive: "true", // single call — gets everything flat
+    });
+
+    console.log(
+      `🌳 Got ${data.tree.length} total items — filtering folders...`,
+    );
+
+    // only keep folders (blobs are files, trees are folders)
+    const folders = data.tree
+      .filter((item) => item.type === "tree")
+      .map((item) => item.path!)
+      .filter((path) => {
+        const depth = path.split("/").length;
+        return depth <= 3; // max 3 levels deep — enough signal, no noise
+      });
+
+    console.log(`📂 Found ${folders.length} folders (max depth 3)`);
+
+    // build a readable tree string
+    const tree = folders
+      .map((path) => {
+        const depth = path.split("/").length - 1;
+        const name = path.split("/").pop()!;
+        const indent = "  ".repeat(depth);
+        return `${indent}📁 ${name}`;
+      })
+      .join("\n");
+
+    console.log(`✅ Folder structure:\n${tree}`);
+    return tree;
+  } catch (error) {
+    console.error(
+      `❌ Error fetching folder structure for ${owner}/${repo}:`,
+      error,
+    );
+    return "";
   }
 };
