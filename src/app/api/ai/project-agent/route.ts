@@ -31,11 +31,6 @@ export async function POST(req: Request) {
       projectId: projectId as Id<"projects">,
     });
 
-    // This dosent work !
-    // console.log("PROJECT DETAILS AT ROUTE:", project);
-    //     PROJECT DETAILS AT ROUTE: null
-    // PROJECT DETAILS NOT FOUND
-
     if (!project) {
       // return new Response("Project not found", { status: 404 });
       console.log("PROJECT DETAILS NOT FOUND");
@@ -107,46 +102,46 @@ export async function POST(req: Request) {
         },
       }),
 
-      // getRepoStructure: tool({
-      //   description:
-      //     "Get the repository folder structure and README content to understand the project.",
-      //   parameters: z.object({}),
-      //   // @ts-ignore
-      //   execute: async (_args) => {
-      //     try {
-      //       console.log(
-      //         "📁 Fetching repo structure for:",
-      //         "j97bs9tx86hcq60e5yr5h0paz981bnpa",
-      //       );
+      getRepoStructure: tool({
+        description:
+          "Get the repository folder structure and README content to understand the project.",
+        parameters: z.object({}),
+        // @ts-ignore
+        execute: async (_args) => {
+          try {
+            console.log(
+              "📁 Fetching repo structure for:",
+              "j97bs9tx86hcq60e5yr5h0paz981bnpa",
+            );
 
-      //       const repo = await convex.query(api.repos.getRepoById, {
-      //         repoId: "j97bs9tx86hcq60e5yr5h0paz981bnpa" as Id<"repositories">,
-      //       });
+            const repo = await convex.query(api.repos.getRepoById, {
+              repoId: "j97bs9tx86hcq60e5yr5h0paz981bnpa" as Id<"repositories">,
+            });
 
-      //       if (!repo)
-      //         return {
-      //           success: false,
-      //           error: `Repository not found for id: ${"j97bs9tx86hcq60e5yr5h0paz981bnpa"}`,
-      //         };
+            if (!repo)
+              return {
+                success: false,
+                error: `Repository not found for id: ${"j97bs9tx86hcq60e5yr5h0paz981bnpa"}`,
+              };
 
-      //       const [structure, readme] = await Promise.all([
-      //         getRepoFolderStructure(repo.owner, repo.name),
-      //         getReadme(repo.owner, repo.name),
-      //       ]);
+            const [structure, readme] = await Promise.all([
+              getRepoFolderStructure(repo.owner, repo.name),
+              getReadme(repo.owner, repo.name),
+            ]);
 
-      //       return {
-      //         success: true,
-      //         folderStructure: structure,
-      //         readme: readme ? readme.slice(0, 1500) : "No README found",
-      //       };
-      //     } catch (error) {
-      //       const message =
-      //         error instanceof Error ? error.message : String(error);
-      //       console.error("❌ getRepoStructure failed:", message);
-      //       return { success: false, error: message };
-      //     }
-      //   },
-      // }),
+            return {
+              success: true,
+              folderStructure: structure,
+              readme: readme ? readme.slice(0, 1500) : "No README found",
+            };
+          } catch (error) {
+            const message =
+              error instanceof Error ? error.message : String(error);
+            console.error("❌ getRepoStructure failed:", message);
+            return { success: false, error: message };
+          }
+        },
+      }),
     } satisfies ToolSet;
 
     const systemPrompt = `You are a professional onboarding AI agent helping users plan their project. Talk like a concise project manager.
@@ -156,31 +151,22 @@ export async function POST(req: Request) {
 - Repo ID: j97bs9tx86hcq60e5yr5h0paz981bnpa
 - project Name: ${projectName}
 
-## YOUR RESPONSE FORMAT RULES:
-- Important to include exact Tag  <action type="confirm" /> for confirmation from user.
-- When you need user input, add <action> tags specifying what you need
-- otherwise rest all in markdown formats.
-
 ## TASKS:
-Task 1: Welcome user and ask for project timeline.
+Task 1: Welcome user and ask for their project details and timeline.
 Task 2: Use tools to fetch repo structure. Ask user what additional features they want.
 Task 3: Fetch team member skills. Ask if they want features matched to team skills.
-Task 4: Generate structured project features. MUST use <features> format and wait for confirmation <action>.
-Task 5: On confirmation, update database using tools. Respond with <complete>.
-
-## RESPONSE FORMATS:
-
-### Proposing features (Task 4):
-
-  Based on your repo and team skills, here's your project plan:
-  all Features with at the end add <action> tag to let User confirm it.
-  <action type="confirmation" />
+Task 4: Generate structured project features in proper markdown format.
+Task 5: On confirmation, update database. with  projectTimeline, projectOverview, projectFeaturesList,
 
 ## RULES:
 - Never call updateProject tool before user confirms features
 - If user says regenerate, redo Task 4 with a fresh features list.
 - Keep messages short — you are a PM, not an essay writer, Act like a senior dev and talk naturally like humans.
-- if any tool failed or error try again.`;
+- if any tool failed or error try again.
+- projectOverview should be well written description of the project.
+- projectFeaturesList should be well written list of features.
+- never ask all details at once to users. Always ask one detail at a time.
+- Talk with energy and confidence.`;
 
     const result = streamText({
       model: google("gemini-3-flash-preview"),
