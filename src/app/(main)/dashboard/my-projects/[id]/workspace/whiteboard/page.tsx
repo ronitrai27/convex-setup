@@ -10,21 +10,35 @@ import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { Id } from "../../../../../../../../convex/_generated/dataModel";
 import Canvas from "./canvas";
+import { Typewriter } from "react-simple-typewriter";
+
+const placeholders = [
+  "Preparing your workspace...",
+  "Calibrating intelligence...",
+  "Loading collaborative engine...",
+  "Activating smart canvas...",
+];
 
 const ProjectCanvas = () => {
-    const { user, isLoaded } = useUser();
+  const { user, isLoaded } = useUser();
   const params = useParams();
   const projectId = params.id as Id<"projects">;
 
-
-
   if (!isLoaded) {
     return (
-      <div className="h-full w-full flex flex-col items-center justify-center">
+      <div className="h-[calc(100vh-70px)] w-full flex flex-col gap-4 items-center justify-center">
         <Spinner className="size-10" />
-        <p className="text-sm text-muted-foreground mt-2">
-          Loading Amazing Experience With Looma...
-        </p>
+        <div className="text-lg flex items-center">
+          <Typewriter
+            words={placeholders}
+            loop
+            cursor
+            cursorStyle="|"
+            typeSpeed={60}
+            deleteSpeed={40}
+            delaySpeed={2000}
+          />
+        </div>
       </div>
     );
   }
@@ -37,7 +51,7 @@ const ProjectCanvas = () => {
     );
   }
 
-   return (
+  return (
     <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
       <RoomProvider
         id={projectId}
@@ -50,11 +64,19 @@ const ProjectCanvas = () => {
       >
         <ClientSideSuspense
           fallback={
-            <div className="h-full w-full flex flex-col items-center justify-center">
+            <div className="h-[calc(100vh-70px)] w-full flex flex-col gap-4 items-center justify-center">
               <Spinner className="size-10" />
-              <p className="text-sm text-muted-foreground mt-2">
-                Loading Amazing Experience With Looma...
-              </p>
+              <div className="text-lg flex items-center">
+                <Typewriter
+                  words={placeholders}
+                  loop
+                  cursor
+                  cursorStyle="|"
+                  typeSpeed={60}
+                  deleteSpeed={40}
+                  delaySpeed={2000}
+                />
+              </div>
             </div>
           }
         >
@@ -65,4 +87,4 @@ const ProjectCanvas = () => {
   );
 };
 
-export default ProjectCanvas
+export default ProjectCanvas;

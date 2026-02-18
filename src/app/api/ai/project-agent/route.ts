@@ -118,11 +118,11 @@ export async function POST(req: Request) {
           try {
             console.log(
               "📁 Fetching repo structure for:",
-              "j97bs9tx86hcq60e5yr5h0paz981bnpa",
+              "j979h974qxn7ca5113fxy6h5j581cs0e",
             );
 
             const repo = await convex.query(api.repos.getRepoById, {
-              repoId: "j97bs9tx86hcq60e5yr5h0paz981bnpa" as Id<"repositories">,
+              repoId: "j979h974qxn7ca5113fxy6h5j581cs0e" as Id<"repositories">,
             });
 
             if (!repo)
@@ -155,7 +155,7 @@ export async function POST(req: Request) {
 
 ## CONTEXT:
 - Project ID: ${projectId}
-- Repo ID: j97bs9tx86hcq60e5yr5h0paz981bnpa
+- Repo ID: j979h974qxn7ca5113fxy6h5j581cs0e
 - project Name: ${projectName}
 
 ## TASKS:
