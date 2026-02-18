@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { api } from "../../../../../convex/_generated/api";
 import { useStoreUser } from "@/hooks/use-user-store";
 import { Loader2 } from "lucide-react";
-import { getGithubAccessToken } from "@/modules/github/action";
+import { getGithubAccessToken, getUserTopLanguages } from "@/modules/github/action";
 import { toast } from "sonner";
 
 // Here's a summary of the approach:
@@ -27,7 +27,8 @@ const AuthCallback = () => {
   const router = useRouter();
   const user = useQuery(api.users.getCurrentUser);
 
-  const setGithubToken = useMutation(api.users.setGithubToken);
+  // const setGithubToken = useMutation(api.users.setGithubToken);
+  const updateUserSkills = useMutation(api.users.updateUserSkills);
 
   useEffect(() => {
     // 1. Wait for syncing to finish
@@ -45,22 +46,25 @@ const AuthCallback = () => {
 
     // 4. GET AND SAVE GITHUB TOKEN
     // We do this concurrently or before redirect
-    const syncGithubToken = async () => {
-      try {
-        const token = await getGithubAccessToken();
-        if (token) {
-          await setGithubToken({ token });
-          console.log("✅ GitHub Access Token stored securely.");
-          toast.info("Access To Github Granted Successfully.")
-        } else {
-          console.warn("⚠️ No GitHub Access Token found.");
-          toast.error("No GitHub Access Token found.");
-        }
-      } catch (error) {
-        console.error("❌ Failed to sync GitHub token", error);
-        toast.error("Failed to sync GitHub token");
-      }
-    };
+    // const syncGithubToken = async () => {
+    //   try {
+    //     const token = await getGithubAccessToken();
+    //     if (token) {
+    //       await setGithubToken({ token });
+    //       console.log("✅ GitHub Access Token stored securely.");
+    //       toast.info("Access To Github Granted Successfully.")
+    //     } else {
+    //       console.warn("⚠️ No GitHub Access Token found.");
+    //       toast.error("No GitHub Access Token found.");
+    //     }
+    //   } catch (error) {
+    //     console.error("❌ Failed to sync GitHub token", error);
+    //     toast.error("Failed to sync GitHub token");
+    //   }
+    // };
+
+    // Now we will fire getUserTopLanguages !
+    // getUserTopLanguages()
 
     // Run this async without blocking (or await it if critical)
     // We'll let it run and then redirect. 
@@ -70,7 +74,34 @@ const AuthCallback = () => {
     // we should wait for it.
     
     const handleRedirect = async () => {
-      await syncGithubToken(); 
+      // await syncGithubToken(); 
+
+      // IF USER SKILLS ARE ALREADY PRESENT, JUST REDIRECT
+      if (user && user.skills && user.skills.length > 0) {
+        console.log("✅ User skills already present, redirecting...");
+        if (user.hasCompletedOnboarding) {
+          router.push("/dashboard");
+        } else {
+          router.push(`/onboard/${user._id}`);
+        }
+        return;
+      }
+
+      // OTHERWISE, FETCH TOP LANGUAGES AND UPDATE
+      try {
+        if (user && user.githubUsername) {
+          console.log("🔍 Fetching top languages for user...");
+          const topLanguages = await getUserTopLanguages(user.githubUsername);
+          if (topLanguages && topLanguages.length > 0) {
+            await updateUserSkills({ skills: topLanguages });
+            console.log("✅ Top languages updated as skills.");
+            toast.success("Github User Profile Synced Successfully.");
+          }
+        }
+      } catch (error) {
+        console.error("❌ Failed to update user skills:", error);
+        toast.error("Failed to update user skills");
+      }
 
       if (user && user.hasCompletedOnboarding) {
         router.push("/dashboard");
@@ -81,7 +112,7 @@ const AuthCallback = () => {
 
     handleRedirect();
 
-  }, [isAuthenticated, isStoreLoading, user, router, setGithubToken]);
+  }, [isAuthenticated, isStoreLoading, user, router, updateUserSkills]);
 
   return (
     <div className="flex h-screen w-full items-center justify-center">

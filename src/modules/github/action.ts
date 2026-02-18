@@ -948,24 +948,6 @@ export async function handlePushEvent(payload: any) {
 //  GITHUB TREE VISUALIZER
 // =========================================================
 
-// export async function getRepoTree(
-//   token: string,
-//   owner: string,
-//   repo: string,
-//   latestCommitSHA: string,
-// ) {
-//   const octokit = new Octokit({ auth: token });
-
-//   const { data: treeData } = await octokit.rest.git.getTree({
-//     owner,
-//     repo,
-//     tree_sha: latestCommitSHA,
-//     recursive: "true",
-//   });
-
-//   return treeData;
-// )}
-
 interface FolderRisk {
   path: string;
   name: string;
@@ -1044,7 +1026,7 @@ export async function getFolderRiskHeatmap(
   owner: string,
   repo: string,
   branch: string = "main",
-  commitLimit: number = 30,
+  commitLimit: number = 10,
 ): Promise<FolderRisk[]> {
   const octokit = new Octokit({ auth: token });
   const limit = pLimit(5);
@@ -1160,3 +1142,105 @@ export async function getFolderRiskHeatmap(
 
   return folderRisks;
 }
+
+// ===================================================
+// GET USER LANGUAGES FOR SKIILS
+// ===================================================
+export const getUserTopLanguages = async (
+  username: string,
+): Promise<string[]> => {
+  console.log(`🔍 Fetching top languages for: ${username}`);
+
+  const token = await getGithubAccessToken();
+  const octokit = new Octokit({ auth: token });
+
+  try {
+    const { data: repos } = await octokit.rest.repos.listForUser({
+      username,
+      per_page: 30,
+      sort: "pushed",
+      direction: "desc",
+      type: "owner",
+    });
+
+    console.log(`📦 Got ${repos.length} repos — counting languages...`);
+
+    // count how many repos each language appears in
+    const counts: Record<string, number> = {};
+    for (const repo of repos) {
+      if (!repo.language) continue;
+      counts[repo.language] = (counts[repo.language] ?? 0) + 1;
+    }
+
+    console.log(`📊 Raw language counts:`, counts);
+
+    const threshold = repos.length * 0.1; // 30 * 0.1 = 3 repos minimum
+    const topLanguages = Object.entries(counts)
+      .filter(([, count]) => count >= threshold)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 4)
+      .map(([lang]) => lang);
+
+    console.log(`✅ Top languages for ${username}:`, topLanguages);
+    return topLanguages;
+  } catch (error) {
+    console.error(`❌ Error fetching languages for ${username}:`, error);
+    return [];
+  }
+};
+
+// ==================================================
+// GET REPO FOLDER STRUCTURE
+// =================================================
+export const getRepoFolderStructure = async (
+  owner: string,
+  repo: string,
+): Promise<string> => {
+  console.log(`📁 Fetching folder structure for: ${owner}/${repo}`);
+
+  const token = await getGithubAccessToken();
+  const octokit = new Octokit({ auth: token });
+
+  try {
+    const { data } = await octokit.rest.git.getTree({
+      owner,
+      repo,
+      tree_sha: "HEAD",
+      recursive: "true", // single call — gets everything flat
+    });
+
+    console.log(
+      `🌳 Got ${data.tree.length} total items — filtering folders...`,
+    );
+
+    // only keep folders (blobs are files, trees are folders)
+    const folders = data.tree
+      .filter((item) => item.type === "tree")
+      .map((item) => item.path!)
+      .filter((path) => {
+        const depth = path.split("/").length;
+        return depth <= 3; // max 3 levels deep — enough signal, no noise
+      });
+
+    console.log(`📂 Found ${folders.length} folders (max depth 3)`);
+
+    // build a readable tree string
+    const tree = folders
+      .map((path) => {
+        const depth = path.split("/").length - 1;
+        const name = path.split("/").pop()!;
+        const indent = "  ".repeat(depth);
+        return `${indent}📁 ${name}`;
+      })
+      .join("\n");
+
+    console.log(`✅ Folder structure:\n${tree}`);
+    return tree;
+  } catch (error) {
+    console.error(
+      `❌ Error fetching folder structure for ${owner}/${repo}:`,
+      error,
+    );
+    return "";
+  }
+};

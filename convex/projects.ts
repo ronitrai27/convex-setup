@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 
 export const create = mutation({
   args: {
@@ -122,10 +123,10 @@ export const getProjectById = query({
     projectId: v.id("projects"),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return null;
-    }
+    // const identity = await ctx.auth.getUserIdentity();
+    // if (!identity) {
+    //   return null;
+    // }
 
     const project = await ctx.db.get(args.projectId);
 
@@ -771,5 +772,89 @@ export const createIssue = mutation({
       issueCreatedAt: Date.now(),
       issueUpdatedAt: Date.now(),
     });
+  },
+});
+
+// -------------------------
+// PojectDetails
+// --------------------------
+export const getProject_Details = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, args) => {
+    const project = await ctx.db
+    .query("projectDetails")
+    .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+    .first();
+    return project;
+  },
+})
+
+// -----------------------------
+// UPDATE PROJECT DETAILS
+// -----------------------------
+export const updateProjectDetails = mutation({
+  args: {
+    projectId: v.id("projects"),
+    repoId: v.optional(v.id("repositories")),
+    projectTimeline: v.optional(v.string()),
+    projectFeaturesList: v.optional(v.any()), // Array of features
+    projectOverview: v.optional(v.string()),
+    projectStatus: v.optional(
+      v.union(v.literal("completed"), v.literal("incomplete")),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("projectDetails")
+      .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+      .first();
+
+    const data = {
+      projectId: args.projectId,
+      repoId: args.repoId,
+      projectTimeline: args.projectTimeline,
+      projectFeaturesList: args.projectFeaturesList,
+      projectOverview: args.projectOverview,
+      projectStatus: args.projectStatus || "completed",
+    };
+
+    if (existing) {
+      await ctx.db.patch(existing._id, data);
+    } else {
+      await ctx.db.insert("projectDetails", data);
+    }
+  },
+});
+
+// -----------------------------
+// GET TEAM SKILLS
+// -----------------------------
+export const getProjectTeamSkills = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+    if (!project) return [];
+
+    const members = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+      .collect();
+
+    // Include owner and all members
+    const userIds = new Set<string>();
+    userIds.add(project.ownerId);
+    members.forEach((m) => userIds.add(m.userId));
+
+    const teamSkills = [];
+    for (const userId of Array.from(userIds)) {
+      const user = await ctx.db.get(userId as Id<"users">);
+      if (user) {
+        teamSkills.push({
+          userName: user.name,
+          skills: user.skills || [],
+        });
+      }
+    }
+    return teamSkills;
   },
 });

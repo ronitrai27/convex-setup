@@ -122,3 +122,9 @@ export const getRepoByName = query({
       .first();
   },
 });
+export const getRepoById = query({
+  args: { repoId: v.id("repositories") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.repoId);
+  },
+});
