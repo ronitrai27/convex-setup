@@ -4,6 +4,7 @@ import {
   AlertCircle,
   ChevronLeft,
   Copy,
+  GitCompareArrows,
   MessageSquare,
   RefreshCw,
 } from "lucide-react";
@@ -59,7 +60,12 @@ import {
 } from "ai";
 import { Textarea } from "@/components/ui/textarea";
 import LoaderPage from "@/modules/workspace/Loader";
-import { LuActivity, LuCircleFadingPlus, LuCrosshair } from "react-icons/lu";
+import {
+  LuActivity,
+  LuCircleFadingPlus,
+  LuCrosshair,
+  LuLayers2,
+} from "react-icons/lu";
 
 const ProjectWorkspace = () => {
   const params = useParams();
@@ -67,7 +73,7 @@ const ProjectWorkspace = () => {
   const [isOrbOpen, setIsOrbOpen] = useState(false);
   const [input, setInput] = useState("");
   const [isStartProject, setIsStartProject] = useState(false);
-  const [isCompletedOpen, setIsCompletedOpen] = useState(false);
+  const [isCompletedOpen, setIsCompletedOpen] = useState(true);
   const [hasTriggeredCompletion, setHasTriggeredCompletion] = useState(false);
 
   // Fetch project to get the repositoryId
@@ -147,12 +153,18 @@ const ProjectWorkspace = () => {
 
   return (
     <div className="h-[calc(100vh-80px)] w-full p-6 relative ">
-      <Link href={`/dashboard/my-projects/${projectId}`}>
-        <Button className="text-xs cursor-pointer" variant="outline" size="sm">
-          <ChevronLeft />
-          Back to Home
-        </Button>
-      </Link>
+      {!isStartProject && (
+        <Link href={`/dashboard/my-projects/${projectId}`}>
+          <Button
+            className="text-xs cursor-pointer"
+            variant="outline"
+            size="sm"
+          >
+            <ChevronLeft />
+            Back to Home
+          </Button>
+        </Link>
+      )}
 
       <AnimatePresence mode="wait">
         {project_details && project_details.projectStatus === "completed" ? (
@@ -164,6 +176,10 @@ const ProjectWorkspace = () => {
             transition={{ duration: 0.3 }}
           >
             its completed
+            <br />
+            timeline chart
+            <br />
+            velocity (how much each task is been completed in time)
           </motion.div>
         ) : (
           <motion.main
@@ -184,11 +200,12 @@ const ProjectWorkspace = () => {
                   transition={{ duration: 0.3 }}
                   className="flex flex-col h-full w-full"
                 >
-                  <h1 className="text-2xl font-bold text-center">
-                    Project Initialization.
+                  <h1 className="text-2xl font-bold text-center my-2">
+                    Project Initialization Details
+                    <GitCompareArrows className="inline size-7 ml-2" />
                   </h1>
-                  <p className="text-center text-sm text-muted-foreground">
-                    Complete your project details to launch your project.
+                  <p className="text-center text-lg text-muted-foreground mb-4">
+                    Answer the following questions to initialize your project.
                   </p>
 
                   <Conversation>
@@ -387,21 +404,36 @@ const ProjectWorkspace = () => {
       </AnimatePresence>
 
       <Dialog open={isCompletedOpen} onOpenChange={setIsCompletedOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg border-t-8 border-t-blue-600/40 dark:bg-gray-950">
           <DialogHeader>
-            <DialogTitle>Project Initialized! 🎉</DialogTitle>
-            <DialogDescription>
-              Your project has been successfully planned and initialized. You
-              can now view the detailed overview, features, and timeline in your
-              project dashboard.
+            <DialogTitle className="text-2xl font-semibold">
+              <LuLayers2 className="inline mr-2" />
+              Project Initialized!
+            </DialogTitle>
+            <DialogDescription className="text-base my-3 italic">
+              Your project has been successfully planned and initialized by the
+              Agent. You can now start working on your project or
+              collaborating...
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-4">
-            <div className="rounded-lg border bg-muted/50 p-4">
-              <h4 className="font-medium mb-1">Timeline</h4>
-              <p className="text-sm text-muted-foreground">
-                {project_details?.projectTimeline || "Not specified"}
-              </p>
+            <div className="flex w-full items-center gap-5 justify-center">
+              <div className="rounded-lg border bg-muted/50 p-4 w-full">
+                <h4 className="font-medium mb-1">Timeline</h4>
+                <p className="text-sm text-muted-foreground">
+                  {project_details?.projectTimeline || "Not specified"}
+                </p>
+              </div>
+              <div className="rounded-lg border bg-muted/50 p-4 w-full">
+                <h4 className="font-medium mb-1">Staus</h4>
+                <p className="text-sm text-muted-foreground">
+                 Planned
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <p>{project_details?.projectOverview}</p>
             </div>
           </div>
           <DialogFooter showCloseButton>
