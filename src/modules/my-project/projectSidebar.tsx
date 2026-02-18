@@ -43,6 +43,7 @@ import {
   Bot,
   Link2,
   Mic,
+  Code,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -97,6 +98,11 @@ const workspaceMenu = [
     label: "Repo Agent",
     path: "workspace/repo-agent",
     icon: Network,
+  },
+  {
+    label: "Codespace",
+    path: "workspace/codespace",
+    icon: Code,
   },
 ];
 

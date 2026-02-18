@@ -210,6 +210,15 @@
     scrollbar-color: rgba(100, 100, 100, 0.4) transparent;
   }
 
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+
   /* Markdown Styles */
   .prose-sm {
     font-size: 0.875rem;

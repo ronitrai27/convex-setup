@@ -32,16 +32,11 @@ export async function POST(req: Request) {
     });
 
     if (!project) {
-      // return new Response("Project not found", { status: 404 });
       console.log("PROJECT DETAILS NOT FOUND");
     }
 
-    // const repoId = project.repositoryId;
+    const repoId = project?.repositoryId;
     const projectName = project?.projectName;
-
-    // console.log("✅ REPO ID AT ROUTE:", repoId);
-    // console.log("✅ PROJECT ID AT ROUTE:", projectId);
-    // console.log("✅ PROJECT NAME AT ROUTE:", projectName);
 
     const LocalTools = {
       updateProjectDetails: tool({
@@ -70,7 +65,7 @@ export async function POST(req: Request) {
           if (projectTimeline || projectOverview || projectFeaturesList) {
             await convex.mutation(api.projects.updateProjectDetails, {
               projectId: projectId as Id<"projects">,
-              repoId: "j97bs9tx86hcq60e5yr5h0paz981bnpa" as Id<"repositories">,
+              repoId: repoId,
               projectTimeline,
               projectOverview,
               projectFeaturesList,
@@ -116,19 +111,17 @@ export async function POST(req: Request) {
         // @ts-ignore
         execute: async (_args) => {
           try {
-            console.log(
-              "📁 Fetching repo structure for:",
-              "j97bs9tx86hcq60e5yr5h0paz981bnpa",
-            );
+            if (!repoId) return { success: false, error: "No repository connected" };
+            console.log("📁 Fetching repo structure for:", repoId);
 
             const repo = await convex.query(api.repos.getRepoById, {
-              repoId: "j97bs9tx86hcq60e5yr5h0paz981bnpa" as Id<"repositories">,
+              repoId: repoId,
             });
 
             if (!repo)
               return {
                 success: false,
-                error: `Repository not found for id: ${"j97bs9tx86hcq60e5yr5h0paz981bnpa"}`,
+                error: `Repository not found for id: ${repoId}`,
               };
 
             const [structure, readme] = await Promise.all([
@@ -149,13 +142,36 @@ export async function POST(req: Request) {
           }
         },
       }),
+
+      projectDetails: tool({
+        description: "Get the existing project details (overview, timeline, features).",
+        parameters: z.object({}),
+        // @ts-ignore
+        execute: async () => {
+          try {
+            console.log("Fetching current project details for:", projectId);
+            const details = await convex.query(
+              api.projects.getProject_detailTool,
+              {
+                projectId: projectId as Id<"projects">,
+              },
+            );
+            return { success: true, details };
+          } catch (error) {
+            const message =
+              error instanceof Error ? error.message : String(error);
+            console.error("❌ Failed to fetch project details:", message);
+            return { success: false, error: message };
+          }
+        },
+      }),
     } satisfies ToolSet;
 
     const systemPrompt = `You are a professional onboarding AI agent helping users plan their project. Talk like a concise project manager.
 
 ## CONTEXT:
 - Project ID: ${projectId}
-- Repo ID: j97bs9tx86hcq60e5yr5h0paz981bnpa
+- Repo ID: ${repoId}
 - project Name: ${projectName}
 
 ## TASKS:
