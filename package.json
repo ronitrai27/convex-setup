@@ -15,6 +15,7 @@
     "@ai-sdk/google": "^3.0.2",
     "@ai-sdk/openai": "^3.0.2",
     "@ai-sdk/react": "^3.0.6",
+    "@arcadeai/arcadejs": "^2.2.0",
     "@aws-sdk/client-s3": "^3.962.0",
     "@base-ui/react": "^1.0.0",
     "@clerk/backend": "^2.29.0",

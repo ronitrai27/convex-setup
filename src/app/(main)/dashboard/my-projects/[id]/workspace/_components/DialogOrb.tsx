@@ -60,6 +60,8 @@ interface DialogOrbProps {
 }
 
 const DialogOrb = ({ isOrbOpen, setIsOrbOpen, repoId }: DialogOrbProps) => {
+  const params = useParams();
+  const projectId = params.id as Id<"projects">;
   const [input, setInput] = useState("");
   const [voiceState, setVoiceState] = useState<
     "idle" | "recording" | "processing" | "success" | "error"
@@ -82,9 +84,10 @@ const DialogOrb = ({ isOrbOpen, setIsOrbOpen, repoId }: DialogOrbProps) => {
     addToolApprovalResponse,
   } = useChat({
     transport: new DefaultChatTransport({
-      api: "/api/ai/voice-chat",
+      api: "/api/agent/chat",
       body: {
         repoId,
+        projectId,
       },
     }),
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,

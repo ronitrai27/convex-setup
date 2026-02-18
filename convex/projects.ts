@@ -858,3 +858,23 @@ export const getProjectTeamSkills = query({
     return teamSkills;
   },
 });
+
+// =======================================
+// PROJECT_DETAILS TOOL
+export const getProject_detailTool = query({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const projectDetails = await ctx.db
+      .query("projectDetails")
+      .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
+      .first();
+
+    return {
+      projectOverview: projectDetails?.projectOverview,
+      projectTimeline: projectDetails?.projectTimeline,
+      projectFeaturesList: projectDetails?.projectFeaturesList,
+    };
+  }
+})

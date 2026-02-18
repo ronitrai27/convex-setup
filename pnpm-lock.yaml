@@ -17,6 +17,9 @@ importers:
       '@ai-sdk/react':
         specifier: ^3.0.6
         version: 3.0.66(react@19.2.3)(zod@4.3.6)
+      '@arcadeai/arcadejs':
+        specifier: ^2.2.0
+        version: 2.2.0
       '@aws-sdk/client-s3':
         specifier: ^3.962.0
         version: 3.980.0
@@ -337,6 +340,10 @@ packages:
 
   '@antfu/ni@25.0.0':
     resolution: {integrity: sha512-9q/yCljni37pkMr4sPrI3G4jqdIk074+iukc5aFJl7kmDCCsiJrbZ6zKxnES1Gwg+i9RcDZwvktl23puGslmvA==}
+    hasBin: true
+
+  '@arcadeai/arcadejs@2.2.0':
+    resolution: {integrity: sha512-UHtOAdioiO7nGAOcFZo9sSiiFPCBjZcJDWcnyOq6z4lvZX7jqpCEHBDOfp/KHkLGwCEedycUAsRbYp+9McQtpA==}
     hasBin: true
 
   '@aws-crypto/crc32@5.2.0':
@@ -6998,6 +7005,8 @@ snapshots:
       fzf: 0.5.2
       package-manager-detector: 1.6.0
       tinyexec: 1.0.2
+
+  '@arcadeai/arcadejs@2.2.0': {}
 
   '@aws-crypto/crc32@5.2.0':
     dependencies:
