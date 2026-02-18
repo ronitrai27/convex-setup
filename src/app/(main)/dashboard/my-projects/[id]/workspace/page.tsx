@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   Copy,
   GitCompareArrows,
+  LucideCheckCircle2,
   MessageSquare,
   RefreshCw,
 } from "lucide-react";
@@ -63,6 +64,7 @@ import LoaderPage from "@/modules/workspace/Loader";
 import {
   LuActivity,
   LuCircleFadingPlus,
+  LuClock3,
   LuCrosshair,
   LuLayers2,
 } from "react-icons/lu";
@@ -73,7 +75,7 @@ const ProjectWorkspace = () => {
   const [isOrbOpen, setIsOrbOpen] = useState(false);
   const [input, setInput] = useState("");
   const [isStartProject, setIsStartProject] = useState(false);
-  const [isCompletedOpen, setIsCompletedOpen] = useState(true);
+  const [isCompletedOpen, setIsCompletedOpen] = useState(false);
   const [hasTriggeredCompletion, setHasTriggeredCompletion] = useState(false);
 
   // Fetch project to get the repositoryId
@@ -406,40 +408,57 @@ const ProjectWorkspace = () => {
       <Dialog open={isCompletedOpen} onOpenChange={setIsCompletedOpen}>
         <DialogContent className="sm:max-w-lg border-t-8 border-t-blue-600/40 dark:bg-gray-950">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-semibold">
-              <LuLayers2 className="inline mr-2" />
+            <DialogTitle className="text-2xl font-semibold flex items-center gap-2">
+              <span className="p-2 rounded-md bg-blue-600/20 text-blue-600">
+                <LuLayers2 className="h-5 w-5" />
+              </span>
               Project Initialized!
             </DialogTitle>
+
             <DialogDescription className="text-base my-3 italic">
               Your project has been successfully planned and initialized by the
               Agent. You can now start working on your project or
               collaborating...
             </DialogDescription>
           </DialogHeader>
+
           <div className="flex flex-col gap-4 py-4">
             <div className="flex w-full items-center gap-5 justify-center">
-              <div className="rounded-lg border bg-muted/50 p-4 w-full">
-                <h4 className="font-medium mb-1">Timeline</h4>
+              {/* Timeline Card */}
+              <div className="rounded-lg border bg-muted/50 p-4 w-full transition hover:shadow-sm">
+                <h4 className="font-medium mb-1 flex items-center gap-2 text-sm">
+                  <LuClock3 className="h-4 w-4 text-blue-500" />
+                  Timeline
+                </h4>
                 <p className="text-sm text-muted-foreground">
                   {project_details?.projectTimeline || "Not specified"}
                 </p>
               </div>
-              <div className="rounded-lg border bg-muted/50 p-4 w-full">
-                <h4 className="font-medium mb-1">Staus</h4>
-                <p className="text-sm text-muted-foreground">
-                 Planned
+
+              {/* Status Card */}
+              <div className="rounded-lg border bg-muted/50 p-4 w-full transition hover:shadow-sm">
+                <h4 className="font-medium mb-1 flex items-center gap-2 text-sm">
+                  <LucideCheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  Status
+                </h4>
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  Planned
                 </p>
               </div>
             </div>
 
-            <div>
-              <p>{project_details?.projectOverview}</p>
+            {/* Overview */}
+            <div className="bg-accent/40 p-4 rounded-lg border-dashed border-2 text-sm tracking-tight leading-relaxed transition hover:bg-accent/60">
+              <p className="text-muted-foreground">
+                {project_details?.projectOverview}
+              </p>
             </div>
           </div>
+
           <DialogFooter showCloseButton>
             <Button
               onClick={() => setIsCompletedOpen(false)}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto transition hover:scale-[1.02]"
             >
               Let&apos;s Go
             </Button>
