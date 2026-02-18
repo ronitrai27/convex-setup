@@ -243,6 +243,35 @@ const Canvas = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Tldraw
+        licenseKey={process.env.NEXT_PUBLIC_TLDRAW_LICENSE_KEY}
+        store={store}
+        components={openConvert ? components : undefined}
+        onMount={(editor) => {
+          setEditor(editor);
+          // Set initial user preferences locally
+          if (userInfo) {
+            editor.user.updateUserPreferences({
+              name: userInfo.name,
+              color: userInfo.color,
+              id: userInfo.id,
+            });
+          }
+
+          // Broadcast cursor presence
+          editor.on("event", (e) => {
+            if (e.name === "pointer_move") {
+              const { x, y } = editor.inputs.currentPagePoint;
+              updateMyPresence({ cursor: { x, y } });
+            }
+          });
+        }}
+      >
+        <LiveCursors />
+      </Tldraw>
     </div>
   );
 };
+
+export default Canvas;
