@@ -41,9 +41,10 @@ import {
 } from "@/components/ai-elements/confirmation";
 import { CheckIcon, XIcon } from "lucide-react";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { type ToolApprovalResponse } from "ai";
+import { useSearchParams, useRouter } from "next/navigation";
 
 type Props = {
   onCodeChange?: (code: string) => void;
@@ -87,6 +88,28 @@ const ChatSection = ({
     }),
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
   });
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const hasSentInitialMessage = useRef(false);
+
+  // AUTOMATIC MESSAGE SENDING FROM URL PROMPT---------------------------
+  useEffect(() => {
+    const prompt = searchParams.get("prompt");
+    if (prompt && !hasSentInitialMessage.current && status === "ready") {
+      sendMessage({
+        parts: [{ type: "text", text: prompt }],
+      });
+      hasSentInitialMessage.current = true;
+
+      // Clear the prompt from URL to prevent re-sending on refresh
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.delete("prompt");
+      const queryString = newParams.toString();
+      const newUrl = `${window.location.pathname}${queryString ? `?${queryString}` : ""}`;
+      router.replace(newUrl);
+    }
+  }, [searchParams, status, sendMessage, router]);
 
   // NOTIFY PARENT ABOUT MESSAGES---------------------------
   useEffect(() => {

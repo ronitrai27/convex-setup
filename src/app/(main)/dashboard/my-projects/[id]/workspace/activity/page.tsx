@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, LucideCross, LucideUser2 } from "lucide-react";
 import { Doc, Id } from "../../../../../../../../convex/_generated/dataModel";
 import { api } from "../../../../../../../../convex/_generated/api";
+import { LuActivity } from "react-icons/lu";
 
 type Review = Doc<"reviews">;
 type Issue = Doc<"issues">;
@@ -51,25 +52,54 @@ const ActivityFeed = () => {
 
   return (
     <div className="p-8 w-full h-full">
-      {project?.projectName}
-
-      <div className="max-w-3xl">
-        <h2>Reviews</h2>
-        {reviews?.map((review) => (
-          <div className="bg-muted p-4">
-            <p>review by {review?.authorUserName}</p>
-            {review?.authorAvatar && <img src={review?.authorAvatar} alt="" className="w-20 h-20 rounded-full"/>}
-            <p>{review.reviewStatus}</p>
-            <Message key={review._id} from="assistant">
-              <MessageContent>
-                <MessageResponse>{review.review}</MessageResponse>
-              </MessageContent>
-            </Message>
-          </div>
-        ))}
+      <div className="flex items-center gap-2">
+        <h1 className="text-2xl font-bold">Activity Feed</h1>
+        <div className="w-8 h-8 flex items-center justify-center rounded bg-blue-600/30">
+          <LuActivity />
+        </div>
       </div>
+      <p className="text-muted-foreground text-lg italic">
+        Get every commit detail for your peoject {project?.projectName}
+      </p>
 
-      <div className="max-w-3xl border-t my-5">
+      {/* PARENT WITH FLEX , LEFT SIDE REVIEWS , RIGHT SIDE ISSUES ! */}
+      <div className="mt-6">
+        {/* LEFT SIDE REVIEW */}
+        <div className="flex flex-col">
+          <h2 className="text-xl font-bold">Reviews</h2>
+
+          {reviews?.map((review) => (
+            <div className="bg-muted p-4">
+              <p>review by {review?.authorUserName}</p>
+              {review?.authorAvatar && (
+                <img
+                  src={review?.authorAvatar}
+                  alt=""
+                  className="w-20 h-20 rounded-full"
+                />
+              )}
+              <p>{review.reviewStatus}</p>
+              <Message key={review._id} from="assistant">
+                <MessageContent>
+                  <MessageResponse>{review.review}</MessageResponse>
+                </MessageContent>
+              </Message>
+            </div>
+          ))}
+        </div>
+
+        
+
+        {/*  */}
+      </div>
+    </div>
+  );
+};
+
+export default ActivityFeed;
+
+{
+  /* <div className="max-w-3xl border-t my-5">
         <h2 className="text-xl font-bold">Issues</h2>
         {issues?.map((issue) => (
           <div className="bg-muted p-4">
@@ -86,10 +116,5 @@ const ActivityFeed = () => {
             </Message>
           </div>
         ))}
-      </div>
-    </div>
-
-  );
-};
-
-export default ActivityFeed;
+      </div> */
+}

@@ -147,7 +147,7 @@ const Canvas = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/vision-prompt", {
+      const res = await fetch("/api/ai/vision-prompt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -166,7 +166,7 @@ const Canvas = () => {
       }
 
       console.log("Generated Prompt received:", data.prompt);
-      router.push(`/dashboard/projects/${projectId}/codespace`);
+      router.push(`/dashboard/my-projects/${projectId}/workspace/codespace/generate?prompt=${encodeURIComponent(data.prompt)}`);
     } catch (error: any) {
       console.error("Submission error:", error);
       alert(`Error: ${error.message}`);

@@ -15,12 +15,6 @@ import { getArcadeTools } from "@/lib/ArcadeTools";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
-// Redundant localTools removed and moved inside POST for context awareness.
-
-
-// Types are now defined inside POST to satisfy dependencies on localTools.
-
-
 export async function POST(req: Request) {
   try {
     const {
