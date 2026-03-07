@@ -275,7 +275,7 @@ export const AppSidebar = () => {
                 data-active={isActive("/dashboard/ai")}
                 className="group relative overflow-hidden"
               >
-                <div className="relative z-10 flex items-center gap-3 px-1  w-full text-base text-muted-foreground">
+                <div className="relative z-10 flex items-center gap-3 pr-3  w-full text-base text-muted-foreground">
                   <Bot className="h-4 w-4" />
                   <span>AI Assistant</span>
                   <ChevronRight className="h-4 w-4 ml-auto" />
@@ -292,7 +292,7 @@ export const AppSidebar = () => {
               </SidebarMenuButton>
             </PopoverTrigger>
 
-            <PopoverContent side="right" className="w-64 p-2">
+            <PopoverContent side="right" className="w-56 p-2">
               <div className="flex flex-col gap-1">
                 <Link
                   href="/dashboard/ai/notion"
